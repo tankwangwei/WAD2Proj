@@ -3,9 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="module" src="login.js" defer></script>
     <title>Travel</title>
 </head>
 <body>
-    <h1>Login</h1>
+    <h3>Login</h3>
+
+    <label>Username</label>
+    <input type="email" placeholder="Email" id="email" required>
+    <label>Password</label>
+    <input type="password" placeholder="Password" id="password" required>
+
+    <button type="submit" id="login">Login</button>
+
+    <div id="error-message" style="color: red;"></div>
+
 </body>
 </html>
