@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -13,8 +13,33 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
+const provider = new GoogleAuthProvider()
+const googleLogin = document.getElementById("google")
+googleLogin.addEventListener("click", function () {
+    signInWithPopup(auth, provider)
+        .then((result) => {
+            // This gives you a Google Access Token. You can use it to access the Google API.
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            const token = credential.accessToken;
+            // The signed-in user info.
+            const user = result.user;
+            console.log(user);
+            window.location.href = "home.html";
+            // IdP data available using getAdditionalUserInfo(result)
+            // ...
+        }).catch((error) => {
+            // Handle Errors here.
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            // The email of the user's account used.
+            const email = error.customData.email;
+            // The AuthCredential type that was used.
+            const credential = GoogleAuthProvider.credentialFromError(error);
+            // ...
+        });
+})
 
 // Function to validate email format using regex
 function validateEmail(email) {
@@ -37,15 +62,15 @@ login.addEventListener("click", function (event) {
 
     // Clear previous error messages
     const errorMessageDisplay = document.getElementById("error-message");
-    errorMessageDisplay.textContent = "";
+    errorMessageDisplay.innerText = "";
 
     if (!validateEmail(email)) {
-        errorMessageDisplay.textContent = "Invalid email format.";
+        errorMessageDisplay.innerText = "Invalid email format.";
         return;
     }
 
     if (!validatePassword(password)) {
-        errorMessageDisplay.textContent = "Password must be at least 6 characters.";
+        errorMessageDisplay.innerText = "Password must be at least 6 characters.";
         return;
     }
 
@@ -60,10 +85,10 @@ login.addEventListener("click", function (event) {
             const errorCode = error.code;
             const errorMessage = error.message;
             if (errorCode === 'auth/invalid-credential') {
-                errorMessageDisplay.textContent = "Invalid username or password. Please try again.";
-            }            
+                errorMessageDisplay.innerText = "Invalid username or password. Please try again.";
+            }
             else {
-                errorMessageDisplay.textContent = errorMessage;
+                errorMessageDisplay.innerText = errorMessage;
             }
         });
 });

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <title>TripPal Weather</title>
+</head>
+
+<body>
+
+    City: <input type="text" id="city">
+    <button id="get">Get weather</button>
+
+    <p id="weather"></p>
+    <p id="temperature"></p>
+
+    <script>
+
+        let cityEle = document.getElementById("city") //to get value
+        let btnEle = document.getElementById("get") //for onclick event
+
+        btnEle.addEventListener("click", getWeatherOrig)
+        // btnEle.addEventListener("click", getGeo)
+
+
+        //if the user presses enter key, getWeather
+        cityEle.addEventListener("keyup", checkEnter);
+
+        function checkEnter() {
+            if (event.key == 'Enter') {
+                getWeatherOrig();
+            }
+        }
+
+        var latValue
+        var lonValue
+
+        // function getGeo(){
+        //     let city = cityEle.value
+        //     let url = "http://api.openweathermap.org/geo/1.0/direct"
+        //     let key = "4e1a69304c74566a0ebcf18acbafbc18"
+
+        //     axios.get(url,{
+        //         params: {
+        //             q: city,
+        //             appid: key
+
+        //         }
+        //     })
+
+        //     .then(
+        //         response => {   
+        //             console.log(response.data)
+        //             let data = response.data
+        //             latValue = data[0].lat
+        //             lonValue = data[0].lon
+        //             getWeather()
+        //         }
+        //     )
+
+        //     .catch(
+        //         error => {
+        //             console.log(error.message)
+        //         }
+        //     )
+        // }
+
+
+        // function getWeather(){
+
+        //     console.log(latValue)
+        //     console.log(lonValue)
+
+        //     let city = cityEle.value
+        //     let url = "https://api.openweathermap.org/data/3.0/onecall"
+        //     let key = "4e1a69304c74566a0ebcf18acbafbc18"
+
+        //     axios.get(url,{
+        //         params: {
+        //             lat: latValue,
+        //             lon: lonValue,
+        //             appid: key
+
+        //         }
+        //     })
+
+        //     .then(
+        //         response => {   
+        //             console.log(response.data)
+
+
+        //             let pWeatherEle = document.getElementById("weather")
+        //             let pTemperatureEle = document.getElementById("temperature")
+
+        //             let data = response.data
+        //             // pWeatherEle.innerText = data.weather[0].description
+        //             // let fahrenheit = data.main.temp
+        //             // let degreeCelcius = (fahrenheit - 32) * 5 / 9
+        //             // pTemperatureEle.innerText = degreeCelcius.toFixed(2) + "°C"
+
+        //         }
+        //     )
+
+        //     .catch(
+        //         error => {
+        //             console.log(error.message)
+        //         }
+        //     )
+        // }
+
+        function getWeatherOrig() {
+
+            let city = cityEle.value;
+            let url = "https://api.openweathermap.org/data/2.5/weather" //remove the query part
+            let key = "8d6f21e5351582a8051551f99ef3fa88"
+
+            axios.get(url, {
+                params: {
+                    q: city,
+                    appid: key
+
+                }
+            })
+
+                .then(
+                    response => {
+                        console.log(response.data)
+
+                        let pWeatherEle = document.getElementById("weather")
+                        let pTemperatureEle = document.getElementById("temperature")
+
+                        let data = response.data
+                        pWeatherEle.innerText = data.weather[0].description
+                        let fahrenheit = data.main.temp
+                        let degreeCelcius = (fahrenheit - 32) * 5 / 9
+                        pTemperatureEle.innerText = degreeCelcius.toFixed(2) + "°C"
+                    }
+                )
+
+                .catch(
+                    error => {
+                        console.log(error.message)
+                    }
+                )
+        }
+    </script>
+
+</body>
+
+</html>
