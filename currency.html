@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <title>TripPal Currency</title>
+</head>
+
+<body>
+    <h3>Currency</h3>
+
+    <select id="country"></select>
+    <p id="rates"></p>
+
+    <script>
+        getCurrency()
+
+        var ratesElem = document.getElementById("rates")
+        var selectElem = document.getElementById("country")
+        var currencyRates = {}
+
+        function getCurrency() {
+            let url = "http://data.fixer.io/api/latest"
+            let key = "fa547db62faec4cea616d5965bda6315"
+
+            axios.get(url, {
+                params: {
+                    access_key: key,
+                }
+            })
+                .then(
+                    response => {
+                        let data = response.data
+                        currencyRates = data.rates
+                        selectElem.innerHTML = "<option>Select a currency</option>"
+
+
+                        for (let key in currencyRates) {
+                            let optionElem = document.createElement("option")
+                            optionElem.value = key
+                            optionElem.innerText = key
+                            selectElem.appendChild(optionElem)
+                        }
+                    }
+                )
+                .catch(
+                    error => {
+                        console.log(error.message)
+                    }
+                )
+        }
+
+        selectElem.addEventListener("change", function () {
+            let selectedCurrency = selectElem.value
+
+            if (currencyRates[selectedCurrency]) {
+                ratesElem.innerText = selectedCurrency + ": " + currencyRates[selectedCurrency]
+            } 
+            else {
+                ratesElem.innerText = ""
+            }
+        })
+    </script>
+</body>
+
+</html>
