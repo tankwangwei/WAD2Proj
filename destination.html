@@ -68,74 +68,7 @@
     </div>
 
     <script>
-
-        document.getElementById('searchForm').addEventListener('submit', async function (event) {
-            event.preventDefault(); // Prevent the default form submission
-
-            // Get the value from the input field
-            const location = document.getElementById('location').value;
-
-            // Your PredictHQ API key
-            const API_KEY = 'vh1H3HVBw6Pzlb7n41CJm9YfEG-5J-sa0iuetJYz';
-
-            // Function to search for events
-            const searchEvents = async () => {
-                try {
-                    // Endpoint for searching events
-                    const url = 'https://api.predicthq.com/v1/events/';
-
-                    // Parameters for the search
-                    const params = {
-                        country: location,  // Search for events in the United States
-                        limit: 10,      // Limit the number of results
-                        category: category  // Filter by category (optional)
-                    };
-
-                    // Set the headers with your API key
-                    const headers = {
-                        Authorization: `Bearer ${API_KEY}`
-                    };
-
-                    // Make the request
-                    const response = await axios.get(url, { headers, params });
-
-                    // Process the event data
-                    console.log(response.data);  // Output the event data
-                } catch (error) {
-                    // Handle errors
-                    console.error(`Error: ${error.response.status} - ${error.response.data}`);
-                }
-            };
-
-            // Call the function
-            searchEvents();
-
-
-        });
-
-
-        function displayEvents(events) {
-            const eventsContainer = document.getElementById('eventsContainer');
-            eventsContainer.innerHTML = ''; // Clear any previous results
-
-            events.forEach(event => {
-                const card = document.createElement('div');
-                card.className = 'col-md-4'; // Bootstrap column class for responsive layout
-                card.innerHTML = `
-                    <div class="card event-card">
-                        <img src="${event.image || event.thumbnail}" class="card-img-top" alt="${event.title}">
-                        <div class="card-body">
-                            <h5 class="card-title">${event.title}</h5>
-                            <p class="card-text">${event.description || 'No description available.'}</p>
-                            <p class="card-text"><strong>Date:</strong> ${event.date.startDate || 'N/A'}</p>
-                            <p class="card-text"><strong>Location:</strong> ${event.venue?.name || 'N/A'}</p>
-                            <a href="${event.link || '#'}" class="btn btn-primary" target="_blank">More Info</a>
-                        </div>
-                    </div>
-                `;
-                eventsContainer.appendChild(card);
-            });
-        }
+// tbc
 
     </script>
 </body>
