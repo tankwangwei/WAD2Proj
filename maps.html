@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Google Maps Demo with Tourist Destinations</title>
+    <script>
+      (g => {
+        var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window;
+        b = b[c] || (b[c] = {});
+        var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams, u = () => h || (h = new Promise(async (f, n) => {
+          await (a = m.createElement("script"));
+          e.set("libraries", [...r] + "");
+          for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]);
+          e.set("callback", c + ".maps." + q);
+          a.src = `https://maps.${c}apis.com/maps/api/js?` + e;
+          d[q] = f;
+          a.onerror = () => h = n(Error(p + " could not load."));
+          a.nonce = m.querySelector("script[nonce]")?.nonce || "";
+          m.head.append(a);
+        }));
+        d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n));
+      })({ key: "AIzaSyDGu5hpR4Dq74dKo4999P_hC7DZfANagRI", v: "weekly" });
+    </script>
+  </head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bootstrap demo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <body>
+    <h3>DAY 1 PLAN</h3>
+    <div class="container text-center">
+      <div class="row align-items-start">
+        <div class="col-lg-2">Time</div>
+        <div class="col-lg-6">
+          <ul>
+            Destinations:
+            <li>Marina Bay Sands</li>
+            <li>Gardens by the Bay</li>
+            <li>Sentosa Island</li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <div id="map" style="height: 400px; width: 400px;" class="row justify-content-end"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- The div element for the map -->
+    <script>
+      let map;
+
+      async function initMap() {
+        // Default location: Singapore (zoomed out)
+        const singaporeCenter = { lat: 1.3521, lng: 103.8198 };
+
+        // Request needed libraries.
+        const { Map } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
+        // Create a LatLngBounds object to fit all markers
+        const bounds = new google.maps.LatLngBounds();
+
+        // Tourist destinations in Singapore
+        const destinations = [
+          { lat: 1.2834, lng: 103.8607, title: "Marina Bay Sands" },
+          { lat: 1.2816, lng: 103.8636, title: "Gardens by the Bay" },
+          { lat: 1.2494, lng: 103.8303, title: "Sentosa Island" },
+        ];
+
+        // Initialize the map centered at Singapore
+        map = new Map(document.getElementById("map"), {
+          zoom: 14,
+          center: singaporeCenter,
+          mapId: "DEMO_MAP_ID",
+        });
+
+        // Add tourist destinations to the map and extend the bounds to fit all
+        destinations.forEach(destination => {
+          new AdvancedMarkerElement({
+            map: map,
+            position: { lat: destination.lat, lng: destination.lng },
+            title: destination.title,
+          });
+
+          bounds.extend({ lat: destination.lat, lng: destination.lng });
+        });
+
+        // Adjust the map to fit all markers
+        map.fitBounds(bounds);
+      }
+
+      initMap();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  </body>
+</html>
