@@ -7,31 +7,155 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <link rel="icon" type="image/x-icon" href="./imgs/favicon.ico">
     <title>Welcome to TripPal</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        #main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: 100vh;
+            color: black;
+            padding-top: 120px;
+        }
+
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.8);
+            height: 100px;
+            padding: 10px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        #logo {
+            height: 80px;
+            max-height: 100%;
+            width: auto;
+            transition: all 0.3s ease;
+        }
+
+        .btns a {
+            margin: 10px;
+            padding: 12px 30px;
+            border-radius: 30px;
+            background-color: #007bff;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btns a:hover {
+            background-color: #0056b3;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-bar {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            color: white;
+        }
+
+        table, th, td {
+            border: 1px solid white;
+            text-align: center;
+        }
+
+        th, td {
+            padding: 10px;
+        }
+
+        #errorMessage {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 
 <body>
+    <nav class="navbar fixed-top">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <a class="navbar-brand" href="home.html">
+                <img src="./imgs/TripPal Transparent Logo.png" id="logo">
+            </a>
+            <ul class="nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="weather.html">Weather</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="currency.html">Currency</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="itinerary.html">Itinerary Builder</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="destination.html">Destination Planning</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="budget.html">Budgeting</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
 
-    City: <input type="text" id="city">
-    <button id="get">Get weather</button>
+    <div id="main">
+        <div class="container">
+            <h1>Weather Forecast</h1>
 
-    <p id="temperature"></p>
-    <p id="dailyPredict"></p>
+            <div class="input-group search-bar">
+                <input type="text" class="form-control" id="city" placeholder="Enter city name">
+                <button class="btn btn-primary" id="get">Get Weather</button>
+            </div>
+
+            <p id="errorMessage"></p>
+
+            <p id="temperature"></p>
+
+            <div id="weatherResults">
+                <table class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Lowest Temperature (°C)</th>
+                            <th>Highest Temperature (°C)</th>
+                            <th>Summary</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dailyPredict"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <script>
+        let cityEle = document.getElementById("city")
+        let btnEle = document.getElementById("get")
+        let errorMessageEle = document.getElementById("errorMessage")
+        let dailyPredictEle = document.getElementById("dailyPredict")
+        let temperatureEle = document.getElementById("temperature")
 
-        let cityEle = document.getElementById("city") //to get value
-        let btnEle = document.getElementById("get") //for onclick event
-
-        // btnEle.addEventListener("click", getWeatherOrig)
         btnEle.addEventListener("click", getGeo)
+        cityEle.addEventListener("keyup", checkEnter)
 
-
-        //if the user presses enter key, getWeather
-        cityEle.addEventListener("keyup", checkEnter);
-
-        function checkEnter() {
-            if (event.key == 'Enter') {
+        function checkEnter(event) {
+            if (event.key === 'Enter') {
                 getGeo();
             }
         }
@@ -48,34 +172,30 @@
                 params: {
                     q: city,
                     appid: key
-
                 }
             })
+            .then(response => {
+                let data = response.data
 
-                .then(
-                    response => {
-                        console.log(response.data)
-                        let data = response.data
-                        latValue = data[0].lat
-                        lonValue = data[0].lon
-                        getWeather()
-                    }
-                )
+                if (data.length === 0) {
+                    errorMessageEle.innerText = "Invalid city or country. Please try again.";
+                    dailyPredictEle.innerText = "";
+                    temperatureEle.innerText = "";
+                    return;
+                }
 
-                .catch(
-                    error => {
-                        console.log(error.message)
-                    }
-                )
+                latValue = data[0].lat
+                lonValue = data[0].lon
+                errorMessageEle.innerText = "";
+                getWeather()
+            })
+            .catch(error => {
+                console.log(error.message)
+                errorMessageEle.innerText = "Please enter a city or country";
+            })
         }
 
-
         function getWeather() {
-
-            console.log(latValue)
-            console.log(lonValue)
-
-            let city = cityEle.value
             let url = "https://api.openweathermap.org/data/3.0/onecall"
             let key = "4e1a69304c74566a0ebcf18acbafbc18"
 
@@ -84,98 +204,45 @@
                     lat: latValue,
                     lon: lonValue,
                     appid: key
-
                 }
             })
+            .then(response => {
+                let data = response.data
 
-                .then(
-                    response => {
-                        console.log(response.data)
+                let kelvin = data.current.temp
+                let degreeCelcius = kelvin - 273.15
+                temperatureEle.innerText = "Current Temperature: " + degreeCelcius.toFixed(2) + "°C"
 
+                dailyPredictEle.innerText = ""
+                data.daily.forEach((day, index) => {
+                    let row = document.createElement("tr")
 
-                        let pPredictEle = document.getElementById("dailyPredict")
-                        let pTemperatureEle = document.getElementById("temperature")
+                    let dayCell = document.createElement("td")
+                    dayCell.innerText = "Day " + (index + 1)
+                    row.appendChild(dayCell)
 
-                        let data = response.data
-                        let kelvin = data.current.temp
-                        let degreeCelcius = kelvin - 273.15 //formula to convert kelvin to degree celcius
-                        pTemperatureEle.innerText = degreeCelcius.toFixed(2) + "°C"
+                    let minTempCell = document.createElement("td")
+                    minTempCell.innerText = (day.temp.min - 273.15).toFixed(2) + "°C"
+                    row.appendChild(minTempCell)
 
-                        let predictDaily = data.daily
-                        let ulElem = document.createElement("ul")
+                    let maxTempCell = document.createElement("td")
+                    maxTempCell.innerText = (day.temp.max - 273.15).toFixed(2) + "°C"
+                    row.appendChild(maxTempCell)
 
-                        for (key in predictDaily) {
-                            let liElem = document.createElement("li")
-                            liElem.innerText = "Day " + key
+                    let summaryCell = document.createElement("td")
+                    let summary = day.weather[0].description
+                    summaryCell.innerText = summary.charAt(0).toUpperCase() + summary.slice(1)
+                    row.appendChild(summaryCell)
 
-                            let minTemp = data.daily[key].temp["min"]
-                            minTemp = minTemp - 273.15
-                            let maxTemp = data.daily[key].temp["max"]
-                            maxTemp = maxTemp - 273.15
-                            let summary = data.daily[key].summary
+                    dailyPredictEle.appendChild(row)
+                })
 
-                            let liTempElem = document.createElement("li")
-                            liTempElem.innerText = "Lowest Temperature: " + minTemp.toFixed(2) + "°C, Highest Temperature: " + maxTemp.toFixed(2) + "°C, " + summary
-
-                            // Create a sublist (ul) for temperatures
-                            let tempSubList = document.createElement("ul")
-                            tempSubList.appendChild(liTempElem)
-
-                            // Append the sublist to the main list item
-                            liElem.appendChild(tempSubList)
-
-                            // Append the main list item to the ulElem
-                            ulElem.appendChild(liElem)
-                        }
-
-                        pPredictEle.innerText = "";
-                        pPredictEle.appendChild(ulElem)
-
-                    }
-                )
-
-                .catch(
-                    error => {
-                        console.log(error.message)
-                    }
-                )
+            })
+            .catch(error => {
+                console.log(error.message)
+                errorMessageEle.innerText = "Failed to retrieve weather data. Please try again.";
+            })
         }
-
-        // function getWeatherOrig() {
-
-        //     let city = cityEle.value;
-        //     let url = "https://api.openweathermap.org/data/2.5/weather" //remove the query part
-        //     let key = "8d6f21e5351582a8051551f99ef3fa88"
-
-        //     axios.get(url, {
-        //         params: {
-        //             q: city,
-        //             appid: key
-
-        //         }
-        //     })
-
-        //         .then(
-        //             response => {
-        //                 console.log(response.data)
-
-        //                 let pWeatherEle = document.getElementById("weather")
-        //                 let pTemperatureEle = document.getElementById("temperature")
-
-        //                 let data = response.data
-        //                 pWeatherEle.innerText = data.weather[0].description
-        //                 let fahrenheit = data.main.temp
-        //                 let degreeCelcius = (fahrenheit - 32) * 5 / 9
-        //                 pTemperatureEle.innerText = degreeCelcius.toFixed(2) + "°C"
-        //             }
-        //         )
-
-        //         .catch(
-        //             error => {
-        //                 console.log(error.message)
-        //             }
-        //         )
-        // }
     </script>
 
 </body>
