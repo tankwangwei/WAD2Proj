@@ -12,7 +12,6 @@ const firebaseConfig = {
     appId: "1:191549341083:web:ad67ea6030d29c8700353e"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const provider = new GoogleAuthProvider()
@@ -41,18 +40,15 @@ googleLogin.addEventListener("click", function () {
         });
 })
 
-// Function to validate email format using regex
 function validateEmail(email) {
     const re = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
     return re.test(String(email).toLowerCase());
 }
 
-// Function to validate password (you can modify this according to your password requirements)
 function validatePassword(password) {
     return password.length >= 6;
 }
 
-//submit button
 const login = document.getElementById("login");
 login.addEventListener("click", function (event) {
     event.preventDefault();
@@ -60,7 +56,6 @@ login.addEventListener("click", function (event) {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    // Clear previous error messages
     const errorMessageDisplay = document.getElementById("error-message");
     errorMessageDisplay.innerText = "";
 
@@ -74,10 +69,8 @@ login.addEventListener("click", function (event) {
         return;
     }
 
-    // Sign in using Firebase Auth
     signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-            // Signed in 
             const user = userCredential.user;
             window.location.href = "home.html";
         })
