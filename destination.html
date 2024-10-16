@@ -78,16 +78,16 @@
         function searchEvents() {
             const location = document.getElementById('location').value; //get location from searchform
             const apiKey = '50sZqUB4xSdbocAAlDDjvSGmtZ8G4MJa';
-            const baseURL = `https://app.ticketmaster.com/discovery/v2/events.json?city=${location}&apikey=${apiKey}`;
+            const baseURL = `https://app.ticketmaster.com/discovery/v2/events.json?countryCode=US&apikey=${apiKey}`;
 
             axios.get(baseURL, {
                 params: {
-                    city : location
+                    city : city
                 }
             
             })
             .then(response=> {
-                const events = response.data._embedded.events; //get response
+                const events = response.data //get response
                 console.log(events)
 
             })
