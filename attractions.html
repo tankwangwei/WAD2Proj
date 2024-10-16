@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attractions Search</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDK3MEA8WqPihQ2SUBndsYyRldsR9am2rI&libraries=places"></script> 
+    <style>
+        #logo {
+            max-width: 160px;
+            height: auto;
+            margin-left: 10px;
+            margin-top: -15px;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        .containermain {
+            margin-top: 165px;
+            background-color: rgb(196, 214, 248);
+            padding: 20px;
+            width: 100%;
+        }
+
+        .attraction-card {
+            margin: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-light bg-light fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="./imgs/TripPal Transparent Logo.png" alt="TripPal Logo" id="logo">
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="containermain">
+        <h1 class="mt-4">Find Attractions</h1>
+        <h3>Search for attractions by location</h3>
+
+        <!-- Search Form -->
+        <form id="searchForm" class="my-4">
+            <div class="form-group">
+                <label for="location">Enter location (city, state, or country):</label>
+                <input type="text" class="form-control" id="location" placeholder="e.g., New York, Japan" required>
+                <div id="autocompleteSuggestions"></div> 
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+        <!-- Attractions Results Section -->
+        <div class="attraction mt-5">
+            <h3>Attractions</h3>
+            <div id="attractionsContainer" class="row"></div>
+        </div>
+    </div>
+
+    <script>
+        let autocomplete;
+
+        function initAutocomplete() {
+            const input = document.getElementById('location');
+            autocomplete = new google.maps.places.Autocomplete(input, {
+                types: ['(cities)'] // Autocomplete limited to cities, can modify to states or countries if needed
+            });
+
+            // Listener to handle place selection, Google Maps Javascript API method
+            autocomplete.addListener('place_changed', onPlaceChanged);
+        }
+
+
+        function onPlaceChanged() {
+            const place = autocomplete.getPlace();
+            if (!place.geometry) {
+                console.log("No details available for the selected location.");
+                return;
+            }
+            
+            searchAttractions(place.geometry.location);
+        }
+
+        
+        document.getElementById('searchForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent page refresh
+            const locationInput = document.getElementById('location').value;
+            searchAttractionsByText(locationInput); 
+        });
+
+        // Search for attractions based on location coordinates using Google Places API
+        function searchAttractions(location) {
+            const service = new google.maps.places.PlacesService(document.createElement('div'));
+            const request = {
+                location: location,
+                radius: '50000', // Search within a 50km radius
+                type: ['tourist_attraction'] 
+            };
+
+            service.nearbySearch(request, function (results, status) {
+                if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
+                    displayAttractions(results);
+                } else {
+                    displayNoAttractionsMessage();
+                }
+            });
+        }
+
+        // Search for attractions by location name using Google Places Text Search API
+        function searchAttractionsByText(location) {
+            const service = new google.maps.places.PlacesService(document.createElement('div'));
+            const request = {
+                query: location, // Use the input text as the search query
+                type: ['locality'] // Search for cities, towns, or other locations
+            };
+
+            service.textSearch(request, function (results, status) {
+                if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
+
+                    // Get coordinates of the first result
+                    const locationCoords = results[0].geometry.location;
+
+                    // Use Nearby Search
+                    searchAttractions(locationCoords);
+
+                    // This is to ensure consistent results whether the user clicks on suggestions or presses the search button
+
+                } else {
+                    displayNoAttractionsMessage();
+                }
+            });
+        }
+
+        // Display attractions in cards
+        function displayAttractions(attractions) {
+            const attractionContainer = document.getElementById('attractionsContainer');
+            attractionContainer.innerHTML = ''; // Clear previous results
+
+            attractions.forEach(attraction => {
+                const attractionCard = document.createElement('div');
+                attractionCard.classList.add('col-md-4', 'mb-4'); // 3 per row
+
+                const imageUrl = attraction.photos && attraction.photos.length > 0
+                    ? attraction.photos[0].getUrl({ maxWidth: 400 })
+                    : 'https://via.placeholder.com/400'; 
+
+                attractionCard.innerHTML = `
+                    <div class="card h-100">
+                        <img src="${imageUrl}" class="card-img-top" alt="${attraction.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${attraction.name}</h5>
+                            <p class="card-text">Rating: ${attraction.rating}</p>
+                            <p class="card-text">Address: ${attraction.formatted_address || attraction.vicinity}</p>
+                        </div>
+                    </div>
+                `;
+                attractionContainer.appendChild(attractionCard);
+            });
+        }
+
+        // Display a message when no attractions are found
+        function displayNoAttractionsMessage() {
+            const attractionContainer = document.getElementById('attractionsContainer');
+            attractionContainer.innerHTML = ''; // Clear previous results
+            attractionContainer.innerHTML = '<h2>No attractions found.</h2>'; // Show message if no attractions
+        }
+
+        // Initialize the Google Places Autocomplete
+        initAutocomplete();
+    </script>
+</body>
+
+</html>
