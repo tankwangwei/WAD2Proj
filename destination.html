@@ -57,7 +57,7 @@
                 <label for="location">Enter location:</label>
                 <input type="text" class="form-control" id="location" placeholder="e.g., New York, Japan" required>
             </div>
-            <button type="submit" class="btn btn-primary">Search</button>
+            <button type="submit" btn btn-primary>Search</button>
         </form>
 
         <!-- Events Results Section -->
@@ -68,7 +68,38 @@
     </div>
 
     <script>
-// tbc
+        // tbc
+
+        document.getElementById('searchForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent page refresh
+            searchEvents(); // Call your search function
+        });
+
+        function searchEvents() {
+            const location = document.getElementById('location').value; //get location from searchform
+            const apiKey = 'Y50sZqUB4xSdbocAAlDDjvSGmtZ8G4MJa';
+            const baseURL = `https://app.ticketmaster.com/discovery/v2/events.json?city=${location}&apikey=${apiKey}`;
+
+            axios.get(baseURL, {
+                params: {
+                    city : location
+                }
+            
+            })
+            .then(response=> {
+                const events = response.data._embedded.events; //get response
+                console.log(events)
+
+            })
+
+            
+
+
+
+        };
+
+
+
 
     </script>
 </body>
