@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="./imgs/favicon.ico">
+    <title>Features - TripPal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        #main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: blue;
+            background-image: url('./imgs/changibackground.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding-top: 180px;
+            box-sizing: border-box;
+        }
+
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.8);
+            height: 100px;
+            padding: 10px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        #logo {
+            height: 80px;
+            max-height: 100%;
+            width: auto;
+            transition: all 0.3s ease;
+        }
+
+        .features-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1200px;
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .features-container h1 {
+            width: 100%;
+            font-size: 30px;
+            color: #007bff;
+        }
+
+        .feature-card {
+            background-color: white;
+            width: 280px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            color: #007bff;
+        }
+
+        .feature-card p {
+            font-size: 1rem;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar fixed-top">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <a class="navbar-brand" href="WelcomePage.html">
+                <img src="./imgs/TripPal Transparent Logo.png" id="logo">
+            </a>
+            <ul class="nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="about.html">About Us</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="features.html">Features</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="contact.html">Contact</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div id="main">
+        <div class="features-container">
+            <h1>Our Features</h1>
+
+            <div class="feature-card">
+                <h3>Budget</h3>
+                <p>Plan your expenses and keep track of your spending throughout your trip with our budget management tool.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Currency</h3>
+                <p>Stay updated with live currency exchange rates and make sure you’re prepared for your travels.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Destination Events</h3>
+                <p>Discover exciting events happening at your destination so you can plan your trip around them.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Itinerary Builder</h3>
+                <p>Create your custom itinerary and easily plan each day of your trip with TripPal’s itinerary builder.</p>
+            </div>
+
+            <div class="feature-card">
+                <h3>Weather</h3>
+                <p>Get real-time weather updates to ensure you're always prepared for the conditions at your destination.</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
