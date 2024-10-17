@@ -38,7 +38,6 @@
 
     #logo {
         width: 150px;
-        margin-bottom: 20px;
     }
 
     input.form-control {
@@ -103,6 +102,7 @@
 
     #sign-up {
         margin-top: 20px;
+        margin-bottom: -24px;
     }
 
     #sign-up a {
@@ -139,14 +139,14 @@
                     <input type="password" class="form-control" placeholder="Enter your password" id="password" required>
                 </div>
 
+                <div id="error-message" class="text-danger text-center"></div>
+
                 <button type="submit" id="login" class="btn btn-primary btn-block">Login</button>
 
                 <a id="google" class="btn mt-3">
                     <img src="https://developers.google.com/identity/images/g-logo.png" id="google-logo" alt="Google Logo">
                     <span>Login with Google</span>
                 </a>
-
-                <div id="error-message" class="text-danger text-center"></div>
 
                 <div id="sign-up">
                     <p>Don't have an account? <a href="registration.html">Sign Up</a></p>

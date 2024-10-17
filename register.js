@@ -2,9 +2,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAb7M3MiQ3tGYMT1PCFRam-Z0S6rXqwVcQ",
@@ -17,28 +14,73 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app)
+const auth = getAuth(app);
 
-//inputs
-const email = document.getElementById("email").value
-const password = document.getElementById("password").value
+// Function to validate email format
+function validateEmail(email) {
+  const re = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+  return re.test(String(email).toLowerCase());
+}
 
-//submit button
-const submit = document.getElementById("submit")
-submit.addEventListener("click", function (event) {
-  event.preventDefault()
+// Function to validate password (minimum 6 characters)
+function validatePassword(password) {
+  return password.length >= 6;
+}
 
-  const email = document.getElementById("email").value
-  const password = document.getElementById("password").value
+// Ensure DOM is ready before attaching event listeners
+document.addEventListener("DOMContentLoaded", function() {
+  // Get the submit button and error message container
+  const submit = document.getElementById("submit");
+  const errorMessageDisplay = document.getElementById("error-message");
 
-  createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      // Signed up 
-      const user = userCredential.user;
-      window.location.href = "login.html"
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-    });
-})
+  // Make sure these elements exist before continuing
+  if (!submit || !errorMessageDisplay) {
+    console.error("Error: Submit button or error message container not found.");
+    return;
+  }
+
+
+  // Submit button event listener
+  submit.addEventListener("click", function(event) {
+    event.preventDefault();
+
+    // Get inputs inside the event listener to ensure they are the latest values entered by the user
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    errorMessageDisplay.innerText = ""; // Clear previous error message
+
+    if (!validateEmail(email)) {
+      errorMessageDisplay.innerText = "Invalid email format.";
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      errorMessageDisplay.innerText = "Password must be at least 6 characters.";
+      return;
+    }
+
+    // If validation passes, create the account with Firebase
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed up successfully
+        const user = userCredential.user;
+        window.location.href = "login.html"; // Redirect to login page
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+
+        // Firebase-specific error handling for registration
+        if (errorCode === 'auth/email-already-in-use') {
+          errorMessageDisplay.innerText = "This email is already in use. Please use a different one.";
+        } else if (errorCode === 'auth/invalid-email') {
+          errorMessageDisplay.innerText = "Invalid email format.";
+        } else if (errorCode === 'auth/weak-password') {
+          errorMessageDisplay.innerText = "Weak password. Please provide a stronger password.";
+        } else {
+          errorMessageDisplay.innerText = errorMessage;
+        }
+      });
+  });
+});
