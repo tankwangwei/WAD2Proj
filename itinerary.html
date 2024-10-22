@@ -1,11 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plan Your Itinerary</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
 <body>
-    
+    <div class="container mt-5">
+        <h1>Your Itinerary</h1>
+        <div id="savedActivitiesContainer" class="row"></div>
+        <div id="itineraryContainer" class="mt-5"></div>
+        <button class="btn btn-primary mt-3" onclick="generateItinerary()">Generate Itinerary</button>
+    </div>
 </body>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAb7M3MiQ3tGYMT1PCFRam-Z0S6rXqwVcQ",
+            authDomain: "wad2-32757.firebaseapp.com",
+            projectId: "wad2-32757",
+            storageBucket: "wad2-32757.appspot.com",
+            messagingSenderId: "191549341083",
+            appId: "1:191549341083:web:ad67ea6030d29c8700353e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);  
+
+    function getSavedActivities() {
+        db.collection('savedActivities').get().then((querySnapshot) => {
+            const savedContainer = document.getElementById("savedActivitiesContainer");
+            savedContainer.innerHTML = '';
+
+            querySnapshot.forEach((doc) => {
+                const activity = doc.data();
+                const activityCard = document.createElement('div');
+                activityCard.classList.add('col-md-4', 'mb-4');
+
+                activityCard.innerHTML = `
+                    <div class="card h-100">
+                        <img src="${activity.imageUrl}" class="card-img-top" alt="${activity.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${activity.name}</h5>
+                            <p class="card-text">Address: ${activity.address}</p>
+                        </div>
+                    </div>
+                `;
+                
+                savedContainer.append(activityCard);
+            })
+        })
+    }
+</script>
+
 </html>

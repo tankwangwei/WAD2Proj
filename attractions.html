@@ -7,8 +7,9 @@
     <title>Attractions Search</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDK3MEA8WqPihQ2SUBndsYyRldsR9am2rI&libraries=places"></script>
-    
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDK3MEA8WqPihQ2SUBndsYyRldsR9am2rI&libraries=places"></script>
+
     <style>
         #logo {
             height: 80px;
@@ -42,37 +43,36 @@
             padding: 10px 20px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
-        
     </style>
 </head>
 
 <body>
     <!-- Navbar -->
-        <nav class="navbar fixed-top">
-            <div class="container-fluid d-flex justify-content-between align-items-center">
-                <a class="navbar-brand" href="home.html">
-                    <img src="./imgs/TripPal Transparent Logo.png" id="logo">
-                </a>
-                <ul class="nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="weather.html">Weather</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="currency.html">Currency</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="itinerary.html">Itinerary Builder</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="attractions.html">Destination Planning</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="budget.html">Budgeting</a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-    
+    <nav class="navbar fixed-top">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <a class="navbar-brand" href="home.html">
+                <img src="./imgs/TripPal Transparent Logo.png" id="logo">
+            </a>
+            <ul class="nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="weather.html">Weather</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="currency.html">Currency</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="itinerary.html">Itinerary Builder</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="attractions.html">Destination Planning</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="budget.html">Budgeting</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
 
     <!-- Main Content -->
     <div class="containermain">
@@ -96,7 +96,40 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAb7M3MiQ3tGYMT1PCFRam-Z0S6rXqwVcQ",
+            authDomain: "wad2-32757.firebaseapp.com",
+            projectId: "wad2-32757",
+            storageBucket: "wad2-32757.appspot.com",
+            messagingSenderId: "191549341083",
+            appId: "1:191549341083:web:ad67ea6030d29c8700353e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+
+        async function saveActivity(name, address, imageUrl) {
+            try {
+                const docRef = await addDoc(collection(db, "savedActivities"), {
+                    name: name,
+                    address: address,
+                    imageUrl: imageUrl
+                });
+                console.log("Activity saved with ID: ", docRef.id);
+            } catch (error) {
+                console.log(error.message);
+            }
+        }
+
+        // Expose saveActivity to the global scope
+        window.saveActivity = saveActivity;
+
         let autocomplete;
 
         function initAutocomplete() {
@@ -151,7 +184,7 @@
                 if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
                     const topRatedPlaces = results
                         .sort((a, b) => b.rating - a.rating) // sort by descending order
-                        // .filter(place => place.rating >= 3.5 && !place.types.includes('lodging')); // idk if we want this filter.. do we?
+                    // .filter(place => place.rating >= 3.5 && !place.types.includes('lodging')); // idk if we want this filter.. do we?
                     displayAttractions(topRatedPlaces);
                 } else {
                     displayNoAttractionsMessage();
@@ -163,7 +196,7 @@
         function searchAttractionsByText(location) {
             const service = new google.maps.places.PlacesService(document.createElement('div'));
             const request = {
-                query: location, 
+                query: location,
                 type: ['locality'] // Search for cities, towns, or other locations
             };
 
@@ -205,6 +238,7 @@
                             <p class="card-text">Rating: ${attraction.rating}</p>
                             <p class="card-text">Reviews: ${attraction.user_ratings_total}</p>
                             <p class="card-text">Address: ${attraction.formatted_address || attraction.vicinity}</p>
+                            <button class="btn btn-success" onclick="saveActivity('${attraction.name}', '${attraction.formatted_address || attraction.vicinity}', '${imageUrl}')">Save Activity</button>
                         </div>
                     </div>
                 `;
