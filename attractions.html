@@ -35,18 +35,57 @@
             padding: 15px;
             background-color: #f9f9f9;
         }
+
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.8);
+            height: 100px;
+            padding: 10px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
     </style>
 </head>
 
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-light bg-light fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <img src="./imgs/TripPal Transparent Logo.png" alt="TripPal Logo" id="logo">
-            </a>
+        <nav class="navbar fixed-top">
+            <div class="container-fluid d-flex justify-content-between align-items-center">
+                <a class="navbar-brand" href="home.html">
+                    <img src="./imgs/TripPal Transparent Logo.png" id="logo">
+                </a>
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="weather.html">Weather</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="currency.html">Currency</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="itinerary.html">Itinerary Builder</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="destination.html">Destination Planning</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="budget.html">Budgeting</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    
+        <div id="main">
+            <div class="d-flex flex-column align-items-center justify-content-center">
+                <h1>Home</h1>
+    
+                <div class="btns">
+                    <a href="weather.html" class="btn btn-primary">Weather</a>
+                    <a href="currency.html" class="btn btn-primary">Currency</a>
+                    <a href="itinerary.html" class="btn btn-primary">Itinerary Builder</a>
+                    <a href="attractions.html" class="btn btn-primary">Destination Planning</a>
+                    <a href="budget.html" class="btn btn-primary">Budgeting</a>
+                </div>
+            </div>
         </div>
-    </nav>
 
     <!-- Main Content -->
     <div class="containermain">
