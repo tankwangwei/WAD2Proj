@@ -13,16 +13,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-async function saveActivity(name, address, imageUrl) {
+async function saveActivity(name, address, lat, lng, imageUrl) {
     try {
         const docRef = await addDoc(collection(db, "savedActivities"), {
             name: name,
             address: address,
+            lat: parseFloat(lat),
+            lng: parseFloat(lng),
             imageUrl: imageUrl
         });
         console.log("Activity saved with ID: ", docRef.id);
     } catch (error) {
-        console.log(error.message);
+        console.error("Error adding document: ", error);
     }
 }
 
@@ -82,7 +84,7 @@ function searchAttractions(location) {
     service.nearbySearch(request, function (results, status) {
         if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
             const topRatedPlaces = results
-                .sort((a, b) => b.rating - a.rating) // sort by descending order
+                .sort((a, b) => b.rating - a.rating) // Sort by descending order
             // .filter(place => place.rating >= 3.5 && !place.types.includes('lodging')); // idk if we want this filter.. do we?
             displayAttractions(topRatedPlaces);
         } else {
@@ -129,6 +131,9 @@ function displayAttractions(attractions) {
             ? attraction.photos[0].getUrl({ maxWidth: 400 })
             : 'https://via.placeholder.com/400';
 
+        const lat = attraction.geometry.location.lat();
+        const lng = attraction.geometry.location.lng();
+
         attractionCard.innerHTML = `
             <div class="card h-100">
                 <img src="${imageUrl}" class="card-img-top" alt="${attraction.name}">
@@ -137,7 +142,7 @@ function displayAttractions(attractions) {
                     <p class="card-text">Rating: ${attraction.rating}</p>
                     <p class="card-text">Reviews: ${attraction.user_ratings_total}</p>
                     <p class="card-text">Address: ${attraction.formatted_address || attraction.vicinity}</p>
-                    <button class="btn btn-success" onclick="saveActivity('${attraction.name}', '${attraction.formatted_address || attraction.vicinity}', '${imageUrl}')">Save Activity</button>
+                    <button class="btn btn-success" onclick="saveActivity('${attraction.name}', '${attraction.formatted_address || attraction.vicinity}','${lat}','${lng}', '${imageUrl}')">Save Activity</button>
                 </div>
             </div>
         `;
