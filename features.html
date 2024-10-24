@@ -32,14 +32,10 @@
         }
 
         .navbar {
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: transparent;
             height: 100px;
             padding: 10px 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
+            box-shadow: none;
         }
 
         #logo {
@@ -49,16 +45,54 @@
             transition: all 0.3s ease;
         }
 
+        .navbar .nav-link {
+            color: white !important;
+            font-weight: bold;
+            font-size: 1.1rem;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .navbar .nav-link:hover {
+            color: #f0f0f0 !important;
+        }
+
+        .navbar .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background-color: white;
+            left: 0;
+            bottom: -5px;
+            transition: width 0.3s ease;
+        }
+
+        .navbar .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .navbar .nav-link.active {
+            color: white !important;
+            font-weight: bold;
+        }
+
+        .navbar .nav-link.active::after {
+            background-color: white;
+            width: 100%;
+        }
+
         .features-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 20px;
-            max-width: 1200px;
-            padding: 30px;
+            max-width: 1000px;
+            padding: 20px;
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            margin-top:-60px;
         }
 
         .features-container h1 {
