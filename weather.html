@@ -4,19 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDK3MEA8WqPihQ2SUBndsYyRldsR9am2rI&libraries=places"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDK3MEA8WqPihQ2SUBndsYyRldsR9am2rI&libraries=places"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <link rel="icon" type="image/x-icon" href="./imgs/favicon.ico">
     <title>Welcome to TripPal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
-        body,
-        html {
+        body, html {
             height: 100%;
             margin: 0;
             font-family: 'Roboto', sans-serif;
+            background-image: url('./imgs/changibackground.jpg');
         }
 
         #main {
@@ -30,10 +29,10 @@
         }
 
         .navbar {
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: transparent; /* Transparent navbar */
             height: 100px;
             padding: 10px 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: none; /* Removes the shadow */
             position: fixed;
             top: 0;
             width: 100%;
@@ -45,6 +44,47 @@
             max-height: 100%;
             width: auto;
             transition: all 0.3s ease;
+        }
+
+        /* Styling for the navigation links */
+        .navbar .nav-link {
+            color: white !important; /* White text */
+            font-weight: bold; /* Bold text */
+            font-size: 1.1rem;
+            position: relative; /* Position relative to use pseudo-elements */
+            transition: color 0.3s ease;
+        }
+
+        .navbar .nav-link:hover {
+            color: #f0f0f0 !important;
+        }
+
+        /* Add the underline animation using ::after */
+        .navbar .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0; /* Start with no width */
+            height: 2px; /* Line height */
+            background-color: white; /* Line color */
+            left: 0;
+            bottom: -5px; /* Position it slightly below the text */
+            transition: width 0.3s ease; /* Smooth animation */
+        }
+
+        .navbar .nav-link:hover::after {
+            width: 100%; /* Expand the line to full width on hover */
+        }
+
+        /* Style for the active page link */
+        .navbar .nav-link.active {
+            color: rgb(22, 96, 175) !important; /* Distinct color for the active page */
+            font-weight: bold; /* Make the active link bold */
+        }
+
+        /* Add underline to the active link */
+        .navbar .nav-link.active::after {
+            background-color: rgb(22, 96, 175); /* Make the underline match the active color */
+            width: 100%; /* Show the underline for the active link */
         }
 
         .btns a {
@@ -76,8 +116,7 @@
             color: white;
         }
 
-        th,
-        td {
+        th, td {
             padding: 5px;
             text-align: center;
             vertical-align: middle;
@@ -93,7 +132,6 @@
         #weatherResults {
             min-height: 300px;
         }
-
 
         #errorMessage {
             color: red;
@@ -157,6 +195,14 @@
             </div>
         </div>
     </div>
+
+    <!-- JavaScript for Google Places and Weather API scripts -->
+    <!-- The script code from the initial page remains unchanged -->
+
+</body>
+
+</html>
+
 
     <script>
         window.onload = function () {
