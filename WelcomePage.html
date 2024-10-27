@@ -14,26 +14,20 @@
             height: 100%;
             margin: 0;
             font-family: 'Roboto', sans-serif;
-        }
-
-        #main {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            min-height: 100vh;
-            background-color: blue;
-            background-image: url('./imgs/changibackground.jpg');
-            background-size: cover;
-            background-position: center;
-            color: white;
+            scroll-padding-top: 100px;
+            /* Add padding for smooth scroll */
+            /* Add scroll snap */
         }
 
         .navbar {
-            background-color: transparent;
             height: 100px;
             padding: 10px 20px;
             box-shadow: none;
+            z-index: 1000;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            background: transparent;
         }
 
         .navbar .nav-link {
@@ -76,9 +70,28 @@
         }
 
         .text-container {
-            font-size: 1.5rem;
-            font-weight: 300;
             margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            /* Center the content horizontally */
+            align-items: center;
+            width: 100%;
+            /* Take full width of parent */
+
+
+
+        }
+
+        #changing-text {
+            font-size: 1em;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 25ch;
+            animation: typing 2s steps(25) infinite alternate;
+            margin: 0 auto;
+            /* Center the text */
+            text-align: center;
         }
 
         .btns a {
@@ -116,41 +129,415 @@
                 width: 25ch;
             }
         }
+
+        section {
+            height: 100vh;
+            /* Use fixed height */
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            /* Prevent content overflow */
+        }
+
+        .section {
+            padding: 0;
+            /* Remove default padding */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        #main {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url('./imgs/changibackground.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+
+        #about {
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            background-image: url('./imgs/travelbg5.jpg');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        #about .container.fade-in {
+            height: 100vh;
+            width: 100%;
+            margin: 0;
+            padding: 100px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        #about .row {
+            width: 100%;
+            margin: 0;
+        }
+
+        /* About content positioning */
+        #about .col-md-10 {
+            padding: 0;
+        }
+
+        #about .row.align-items-center {
+            margin: 0;
+            padding: 0;
+        }
+
+        #process {
+            margin-top: -100px;
+            /* Offset the section to remove gap */
+            background-image: url('./imgs/travelbg4.jpg');
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+
+
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Update these CSS styles */
+        #process {
+            height: 100vh;
+            margin: 0;
+            /* Remove negative margin */
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-image: url('./imgs/travelbg4.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .step-container {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+            padding: 15px;
+        }
+
+        .step-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .step {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            height: 100%;
+            transition: transform 0.3s ease;
+            min-height: 300px;
+            /* Add minimum height */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step-number {
+            background: #007bff;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .step-title {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .step-description {
+            font-size: 1rem;
+            line-height: 1.6;
+            flex-grow: 1;
+        }
+
+        /* Add stagger effect to step containers */
+        .step-container:nth-child(1) {
+            transition-delay: 0.1s;
+        }
+
+        .step-container:nth-child(2) {
+            transition-delay: 0.2s;
+        }
+
+        .step-container:nth-child(3) {
+            transition-delay: 0.3s;
+        }
+
+        .step-container:nth-child(4) {
+            transition-delay: 0.4s;
+        }
+
+        .step-container:nth-child(5) {
+            transition-delay: 0.5s;
+        }
+
+        .bg-fade-in {
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .bg-fade-in.visible {
+            opacity: 1;
+        }
+
+        .parallax {
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: relative;
+        }
+
+        .parallax::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        .parallax-content {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Update the step card styles to work better with the background */
+        .step {
+            background: rgba(255, 255, 255, 0.95);
+            /* Make cards slightly transparent */
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            height: 100%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-container {
+            position: relative;
+            min-height: 600px;
+            /* Adjust based on your needs */
+            perspective: 1000px;
+        }
+
+        .feature-card {
+            position: absolute;
+            transform-style: preserve-3d;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.6s ease-out;
+            opacity: 0;
+            width: 250px;
+            /* Fixed width for polaroid look */
+        }
+
+        .feature-card:hover {
+            transform: scale(1.05) rotateZ(0deg) !important;
+            z-index: 10;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card .card-img-top {
+            border-radius: 3px;
+            margin-bottom: 10px;
+        }
+
+        .feature-card .card-body {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .feature-card .card-title {
+            font-family: 'Permanent Marker', cursive, sans-serif;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .feature-card .card-text {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Position each card uniquely */
+        .feature-card:nth-child(1) {
+            top: 0%;
+            left: 10%;
+            transform: rotate(-3deg) translateZ(0);
+        }
+
+        .feature-card:nth-child(2) {
+            top: 10%;
+            left: 40%;
+            transform: rotate(5deg) translateZ(0);
+        }
+
+
+        .feature-card:nth-child(3) {
+            top: 25%;
+            left: 75%;
+            transform: rotate(-1deg) translateZ(0);
+        }
+
+        /* Update the visible state to maintain rotation */
+        .feature-card.visible {
+            opacity: 1;
+            /* Remove any transform override here */
+        }
+
+        /* Update hover effect to maintain rotation */
+        .feature-card:hover {
+            transform: translate(0, -10px) !important;
+            /* Use translate instead of scale */
+            z-index: 10;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Remove or update the float animation */
+        @keyframes float {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(0, -5px);
+            }
+
+            100% {
+                transform: translate(0, 0);
+            }
+        }
+
+        .feature-card:hover {
+            transform: scale(1.05) !important;
+            animation: none;
+        }
+
+        /* Add these styles to your existing CSS */
+        .contact-container {
+            font-size: 15px;
+            font-weight: 300;
+            max-width: 800px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            color: #333;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            margin: 20px auto;
+        }
+
+        .social-icons {
+            margin-top: 20px;
+        }
+
+        .social-icons a {
+            margin: 0 15px;
+            display: inline-block;
+        }
+
+        .social-icons img {
+            width: 50px;
+            height: 50px;
+            transition: transform 0.3s ease;
+        }
+
+        .social-icons img:hover {
+            transform: scale(1.2);
+        }
+
+        /* Update the contact section specific styles */
+        #contact {
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #007bff;
+        }
     </style>
 </head>
 
 <body>
-
     <nav class="navbar fixed-top">
         <div class="container-fluid d-flex justify-content-between align-items-center">
-            <a class="navbar-brand" href="WelcomePage.html">
+            <a class="navbar-brand" href="#main">
                 <img src="./imgs/TripPal Transparent Logo.png" id="logo">
             </a>
             <ul class="nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="about.html">About Us</a>
+                    <a class="nav-link" href="#about">About Us</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="features.html">Features</a>
+                    <a class="nav-link" href="#process">Features</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="contact.html">Contact</a>
+                    <a class="nav-link" href="#contact">Contact</a>
                 </li>
             </ul>
         </div>
     </nav>
 
-
-    <div id="main">
+    <div id="main" class="parallax" style="background-image: url('./imgs/changibackground.jpg');">
         <div class="d-flex flex-column align-items-center justify-content-center">
             <h1>Your new travel buddy.</h1>
-
-
             <div class="text-container">
                 <span id="changing-text">Plan your destinations.</span>
             </div>
-
-
             <div class="btns">
                 <a href="registration.html" class="btn btn-primary">Get Started</a>
                 <a href="login.html" class="btn btn-primary">Login</a>
@@ -158,24 +545,229 @@
         </div>
     </div>
 
+    <section id="about" class="section parallax bg-fade-in" style="background-image: url('./imgs/travelbg5.jpg');">
+        <div class="container fade-in parallax-content">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div
+                                style="background-color: rgba(255, 255, 255, 0.9); padding: 30px; border-radius: 10px; margin: 20px;">
+                                <h2 class="mb-4" style="color: #333; font-weight: bold;">About TripPal</h2>
+                                <p class="lead mb-4" style="color: #333;">Your ultimate travel companion that makes trip
+                                    planning a breeze.</p>
+                                <p class="mb-4" style="color: #333;">TripPal is designed to streamline your travel
+                                    planning
+                                    process, helping you create unforgettable experiences without the hassle. Whether
+                                    you're a seasoned traveler or planning
+                                    your first adventure, we've got you covered.</p>
+                                <p style="color: #333;">Our intelligent platform combines powerful planning tools with a
+                                    user-friendly interface, ensuring that your journey from dream to destination is as
+                                    enjoyable as the trip itself.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card-container">
+                                <div class="feature-card">
+                                    <img src="./imgs/travelpola1.jpg" alt="Travel Planning" class="card-img-top">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Phuket, Thailand</h5>
+                                        <p class="card-text">"TripPal saved me a lot of time on budgeting!! 😊" -Rachel
+                                            M.</p>
+                                    </div>
+                                </div>
+                                <div class="feature-card">
+                                    <img src="./imgs/travelpola2.jpg" alt="Budget Tracking" class="card-img-top">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Jakarta, Indonesia</h5>
+                                        <p class="card-text">"Beautiful city I stumbled upon when using TripPal!"" -KJ
+                                            T.</p>
+                                    </div>
+                                </div>
+                                <div class="feature-card">
+                                    <img src="./imgs/travelpola4.jpg" alt="Travel Resources" class="card-img-top">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Tokyo, Japan</h5>
+                                        <p class="card-text">"Lovely attraction we found on the app!!" -Ong PL</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="process" class="section" style="background-image: url('./imgs/travelbg4.jpg');">
+        <div class="container-fluid px-4 parallax-content">
+            <h2 class="text-center mb-5 fade-in" style="font-weight: bold; color: white; margin-top: -50px;">Features
+            </h2>
+            <div class="row justify-content-evenly">
+                <div class="col-md-2 step-container">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-title">Budget</div>
+                        <div class="step-description">
+                            Plan your expenses and keep track of your spending throughout your trip with our budget management tool.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 step-container">
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-title">Currency</div>
+                        <div class="step-description">
+                            Stay updated with live currency exchange rates and make sure you’re prepared for your travels.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 step-container">
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-title">Destination Events</div>
+                        <div class="step-description">
+                            Discover exciting events happening at your destination so you can plan your trip around them.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 step-container">
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-title">Itinerary Builder</div>
+                        <div class="step-description">
+                            Create your custom itinerary and easily plan each day of your trip with TripPal’s itinerary builder.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 step-container">
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <div class="step-title">Weather</div>
+                        <div class="step-description">
+                            Get real-time weather updates to ensure you're always prepared for the conditions at your destination.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Add this section right after your process section -->
+    <section id="contact" class="section parallax" style="background-color: #007bff;">
+        <div class="container-fluid px-4 parallax-content">
+            <div class="contact-container fade-in">
+                <h2 class="text-center mb-4" style="color: #007bff; font-weight: bold;">Contact TripPal</h2>
+                <p>
+                    Have questions, feedback, or want to collaborate? Connect with us on social media or drop us an
+                    email!
+                </p>
+
+                <div class="social-icons">
+                    <a href="https://www.instagram.com/WADTripPal" target="_blank">
+                        <img src="./imgs/Instagram_icon.png" alt="Instagram">
+                    </a>
+                    <a href="https://www.facebook.com/WADTripPal" target="_blank">
+                        <img src="./imgs/Facebook_f_logo_(2019).svg" alt="Facebook">
+                    </a>
+                    <a href="https://www.tiktok.com/@WADTripPal" target="_blank">
+                        <img src="./imgs/TikTok_logo.svg" alt="TikTok">
+                    </a>
+                    <a href="mailto:TripPal@example.com">
+                        <img src="./imgs/Gmail_Icon.png" alt="Email">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <script>
         const texts = ["Plan your destination.", "Build your itinerary.", "Set your budget."];
         let index = 0;
         const changingText = document.getElementById('changing-text');
 
         function changeText() {
-            changingText.style.opacity = 0; // Start fading out
+            changingText.style.opacity = 0;
 
             setTimeout(() => {
-                index = (index + 1) % texts.length; // Cycle through the texts
-                changingText.textContent = texts[index]; // Change the text
-                changingText.style.opacity = 1; // Fade back in
-            }, 200); // Duration to change the text
+                index = (index + 1) % texts.length;
+                changingText.textContent = texts[index];
+                changingText.style.opacity = 1;
+            }, 200);
         }
 
         setInterval(changeText, 4000);
-    </script>
 
+        // for the fade animation
+        const fadeObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    if (entry.target.classList.contains('fade-in') ||
+                        entry.target.classList.contains('bg-fade-in') ||
+                        entry.target.tagName === 'H2') {
+                        entry.target.classList.add('visible');
+                        if (entry.target.tagName === 'H2') {
+                            fadeObserver.unobserve(entry.target);
+                        }
+                    } else if (entry.target.classList.contains('step-container') ||
+                        entry.target.classList.contains('feature-card')) {
+                        entry.target.classList.add('visible');
+                        fadeObserver.unobserve(entry.target);
+                    }
+                } else {
+                    if (entry.target.classList.contains('fade-in')) {
+                        entry.target.classList.remove('visible');
+                    }
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        });
+
+
+        document.querySelectorAll('.fade-in, .step-container, h2, .bg-fade-in, .feature-card').forEach((element) => {
+            fadeObserver.observe(element);
+        });
+
+        // Replace your existing scroll JavaScript with this
+        // Replace the existing scroll JavaScript
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+
+                if (targetElement) {
+                    // Handle scrolling differently for each section
+                    if (targetId === '#main') {
+                        window.scrollTo({
+                            top: 0,
+                            behavior: 'smooth'
+                        });
+                    } else {
+                        // Calculate the exact position of the section
+                        const sectionTop = targetElement.offsetTop;
+                        window.scrollTo({
+                            top: sectionTop,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
+
+
+
+
+
+    </script>
 </body>
 
 </html>
