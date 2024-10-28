@@ -189,6 +189,8 @@
             /* Offset the section to remove gap */
             background-image: url('./imgs/travelbg4.jpg');
             background-position: center;
+            background-size: cover;
+
             min-height: 100vh;
             display: flex;
             align-items: center;
