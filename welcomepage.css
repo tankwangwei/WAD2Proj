@@ -66,8 +66,6 @@
             align-items: center;
             width: 100%;
             /* Take full width of parent */
-
-
         }
 
         #changing-text {
@@ -92,6 +90,12 @@
             font-weight: bold;
             text-decoration: none;
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #main .btns a {
+            position: relative;
+            z-index: 10;
+            pointer-events: auto;
         }
 
         .btns a:hover {
