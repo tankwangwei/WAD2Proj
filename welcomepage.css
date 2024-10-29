@@ -1,512 +1,663 @@
-
-        body,
-        html {
-            height: 100%;
-            margin: 0;
-            font-family: 'Roboto', sans-serif;
-            scroll-padding-top: 100px;
-
-        }
-
-        .navbar {
-            height: 100px;
-            padding: 10px 20px;
-            box-shadow: none;
-            z-index: 1000;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            background: transparent;
-        }
-
-        .navbar .nav-link {
-            color: white !important;
-            font-weight: bold;
-            font-size: 1.1rem;
-            position: relative;
-            transition: color 0.3s ease;
-        }
-
-        .navbar .nav-link:hover {
-            color: #f0f0f0 !important;
-        }
-
-        .navbar .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            background-color: white;
-            left: 0;
-            bottom: -5px;
-            transition: width 0.4s ease;
-        }
-
-        .navbar .nav-link:hover::after {
-            width: 100%;
-        }
-
-        #logo {
-            height: 80px;
-            max-height: 100%;
-            width: auto;
-            transition: all 0.3s ease;
-        }
-
-        h1 {
-            font-size: 3rem;
-            font-weight: bold;
-        }
-
-        .text-container {
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            /* Center the content horizontally */
-            align-items: center;
-            width: 100%;
-            /* Take full width of parent */
-        }
-
-        #changing-text {
-            font-size: 1em;
-            color: white;
-            white-space: nowrap;
-            overflow: hidden;
-            width: 25ch;
-            animation: typing 2s steps(25) infinite alternate;
-            margin: 0 auto;
-            /* Center the text */
-            text-align: center;
-        }
-
-        .btns a {
-            margin: 10px;
-            padding: 12px 30px;
-            border-radius: 30px;
-            background-color: #007bff;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            text-decoration: none;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        #main .btns a {
-            position: relative;
-            z-index: 10;
-            pointer-events: auto;
-        }
-
-        .btns a:hover {
-            background-color: #0056b3;
-            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .text-container {
-            font-size: 2em;
-            color: white;
-            white-space: nowrap;
-            overflow: hidden;
-            width: 25ch;
-            animation: typing 2s steps(25) infinite alternate;
-        }
-
-        @keyframes typing {
-            from {
-                width: 0;
-            }
-
-            to {
-                width: 25ch;
-            }
-        }
-
-        section {
-            height: 100vh;
-            /* Use fixed height */
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-            /* Prevent content overflow */
-        }
-
-        .section {
-            padding: 0;
-            /* Remove default padding */
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            position: relative;
-        }
-
-        #main {
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-image: url('./imgs/changibackground.jpg');
-            background-size: cover;
-            background-position: center;
-            color: white;
-        }
-
-        #about {
-            height: 100vh;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            background-image: url('./imgs/travelbg5.jpg');
-            background-position: center;
-            position: relative;
-        }
-
-        #about .container.fade-in {
-            height: 100vh;
-            width: 100%;
-            margin: 0;
-            padding: 100px 0;
-            display: flex;
-            align-items: center;
-        }
-
-        #about .row {
-            width: 100%;
-            margin: 0;
-        }
-
-        /* About content positioning */
-        #about .col-md-10 {
-            padding: 0;
-        }
-
-        #about .row.align-items-center {
-            margin: 0;
-            padding: 0;
-        }
-
-        #process {
-            margin-top: -100px;
-            /* Offset the section to remove gap */
-            background-image: url('./imgs/travelbg4.jpg');
-            background-position: center;
-            background-size: cover;
-
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-        }
-
-
-
-
-        .fade-in {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 1s ease, transform 1s ease;
-        }
-
-        .fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Update these CSS styles */
-        #process {
-            height: 100vh;
-            margin: 0;
-            /* Remove negative margin */
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            background-image: url('./imgs/travelbg4.jpg');
-            background-position: center;
-        }
-
-        .step-container {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease;
-            padding: 15px;
-        }
-
-        .step-container.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .step {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            height: 100%;
-            transition: transform 0.3s ease;
-            min-height: 300px;
-            /* Add minimum height */
-            display: flex;
-            flex-direction: column;
-        }
-
-        .step-icon {
-            width: 80px;
-            height: 80px;
-            background-color: #007bff;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 20px;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-        }
-        
-        .step-icon i {
-            font-size: 35px;
-            color: white;
-        }
-        
-        .step:hover .step-icon {
-            transform: scale(1.1);
-            background-color: #0056b3;
-        }
-
-        .step-title {
-            font-size: 1.4rem;
-            margin-bottom: 15px;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .step-description {
-            font-size: 1rem;
-            line-height: 1.6;
-            flex-grow: 1;
-            text-align: center;
-
-        }
-
-        /* Add stagger effect to step containers */
-        .step-container:nth-child(1) {
-            transition-delay: 0.1s;
-        }
-
-        .step-container:nth-child(2) {
-            transition-delay: 0.2s;
-        }
-
-        .step-container:nth-child(3) {
-            transition-delay: 0.3s;
-        }
-
-        .step-container:nth-child(4) {
-            transition-delay: 0.4s;
-        }
-
-        .step-container:nth-child(5) {
-            transition-delay: 0.5s;
-        }
-
-        .bg-fade-in {
-            opacity: 0;
-            transition: opacity 1s ease;
-        }
-
-        .bg-fade-in.visible {
-            opacity: 1;
-        }
-
-        .parallax {
-            background-attachment: fixed;
-            background-position: center;
-            background-repeat: no-repeat;
-            position: relative;
-        }
-
-        .parallax::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 1;
-        }
-
-        .parallax-content {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Update the step card styles to work better with the background */
-        .step {
-            background: rgba(255, 255, 255, 0.95);
-            /* Make cards slightly transparent */
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            height: 100%;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .step:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .card-container {
-            position: relative;
-            min-height: 600px;
-            /* Adjust based on your needs */
-            perspective: 1000px;
-        }
-
-        .feature-card {
-            position: absolute;
-            transform-style: preserve-3d;
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            transition: all 0.6s ease-out;
-            opacity: 0;
-            width: 250px;
-            /* Fixed width for polaroid look */
-        }
-
-        .feature-card:hover {
-            transform: scale(1.05) rotateZ(0deg) !important;
-            z-index: 10;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .feature-card .card-img-top {
-            border-radius: 3px;
-            margin-bottom: 10px;
-        }
-
-        .feature-card .card-body {
-            padding: 10px;
-            text-align: center;
-        }
-
-        .feature-card .card-title {
-            font-family: 'Permanent Marker', cursive, sans-serif;
-            margin-bottom: 5px;
-            font-size: 1.1rem;
-        }
-
-        .feature-card .card-text {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        /* Position each card uniquely */
-        .feature-card:nth-child(1) {
-            top: 0%;
-            left: 10%;
-            transform: rotate(-3deg) translateZ(0);
-        }
-
-        .feature-card:nth-child(2) {
-            top: 10%;
-            left: 40%;
-            transform: rotate(5deg) translateZ(0);
-        }
-
-
-        .feature-card:nth-child(3) {
-            top: 25%;
-            left: 75%;
-            transform: rotate(-1deg) translateZ(0);
-        }
-
-        /* Update the visible state to maintain rotation */
-        .feature-card.visible {
-            opacity: 1;
-            /* Remove any transform override here */
-        }
-
-        /* Update hover effect to maintain rotation */
-        .feature-card:hover {
-            transform: translate(0, -10px) !important;
-            /* Use translate instead of scale */
-            z-index: 10;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Remove or update the float animation */
-        @keyframes float {
-            0% {
-                transform: translate(0, 0);
-            }
-
-            50% {
-                transform: translate(0, -5px);
-            }
-
-            100% {
-                transform: translate(0, 0);
-            }
-        }
-
-        .feature-card:hover {
-            transform: scale(1.05) !important;
-            animation: none;
-        }
-
-        /* Add these styles to your existing CSS */
-        .contact-container {
-            font-size: 15px;
-            font-weight: 300;
-            max-width: 800px;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 30px;
-            border-radius: 10px;
-            color: #333;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            margin: 20px auto;
-        }
-
-        .social-icons {
-            margin-top: 20px;
-        }
-
-        .social-icons a {
-            margin: 0 15px;
-            display: inline-block;
-        }
-
-        .social-icons img {
-            width: 50px;
-            height: 50px;
-            transition: transform 0.3s ease;
-        }
-
-        .social-icons img:hover {
-            transform: scale(1.2);
-        }
-
-        /* Update the contact section specific styles */
-        #contact {
-            height: 100vh;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #007bff;
-        }
+body,
+html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    scroll-padding-top: 100px;
+
+}
+
+.navbar {
+    height: 100px;
+    padding: 10px 20px;
+    box-shadow: none;
+    z-index: 1000;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    background: transparent;
+}
+
+.navbar .nav-link {
+    color: white !important;
+    font-weight: bold;
+    font-size: 1.1rem;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.navbar .nav-link:hover {
+    color: #f0f0f0 !important;
+}
+
+.navbar .nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background-color: white;
+    left: 0;
+    bottom: -5px;
+    transition: width 0.4s ease;
+}
+
+.navbar .nav-link:hover::after {
+    width: 100%;
+}
+
+#logo {
+    height: 80px;
+    max-height: 100%;
+    width: auto;
+    transition: all 0.3s ease;
+}
+
+h1 {
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.text-container {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    /* Center the content horizontally */
+    align-items: center;
+    width: 100%;
+    /* Take full width of parent */
+}
+
+#changing-text {
+    font-size: 1em;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 25ch;
+    animation: typing 2s steps(25) infinite alternate;
+    margin: 0 auto;
+    /* Center the text */
+    text-align: center;
+}
+
+.btns a {
+    margin: 10px;
+    padding: 12px 30px;
+    border-radius: 30px;
+    background-color: #007bff;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#main .btns a {
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+.btns a:hover {
+    background-color: #0056b3;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.text-container {
+    font-size: 2em;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 25ch;
+    animation: typing 2s steps(25) infinite alternate;
+}
+
+@keyframes typing {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: 25ch;
+    }
+}
+
+section {
+    height: 100vh;
+    /* Use fixed height */
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    /* Prevent content overflow */
+}
+
+.section {
+    padding: 0;
+    /* Remove default padding */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+#main {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('./imgs/changibackground.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+}
+
+#about {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    background-image: url('./imgs/travelbg5.jpg');
+    background-position: center;
+    position: relative;
+}
+
+#about .container.fade-in {
+    height: 100vh;
+    width: 100%;
+    margin: 0;
+    padding: 100px 0;
+    display: flex;
+    align-items: center;
+}
+
+#about .row {
+    width: 100%;
+    margin: 0;
+}
+
+/* About content positioning */
+#about .col-md-10 {
+    padding: 0;
+}
+
+#about .row.align-items-center {
+    margin: 0;
+    padding: 0;
+}
+
+#process {
+    margin-top: -100px;
+    /* Offset the section to remove gap */
+    background-image: url('./imgs/travelbg4.jpg');
+    background-position: center;
+    background-size: cover;
+
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+
+
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1s ease, transform 1s ease;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Update these CSS styles */
+#process {
+    height: 100vh;
+    margin: 0;
+    /* Remove negative margin */
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-image: url('./imgs/travelbg4.jpg');
+    background-position: center;
+}
+
+.step-container {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+    padding: 15px;
+}
+
+.step-container.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.step {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    transition: transform 0.3s ease;
+    min-height: 300px;
+    /* Add minimum height */
+    display: flex;
+    flex-direction: column;
+}
+
+.step-icon {
+    width: 80px;
+    height: 80px;
+    background-color: #007bff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 20px;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.step-icon i {
+    font-size: 35px;
+    color: white;
+}
+
+.step:hover .step-icon {
+    transform: scale(1.1);
+    background-color: #0056b3;
+}
+
+.step-title {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.step-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    flex-grow: 1;
+    text-align: center;
+
+}
+
+/* Add stagger effect to step containers */
+.step-container:nth-child(1) {
+    transition-delay: 0.1s;
+}
+
+.step-container:nth-child(2) {
+    transition-delay: 0.2s;
+}
+
+.step-container:nth-child(3) {
+    transition-delay: 0.3s;
+}
+
+.step-container:nth-child(4) {
+    transition-delay: 0.4s;
+}
+
+.step-container:nth-child(5) {
+    transition-delay: 0.5s;
+}
+
+.bg-fade-in {
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+.bg-fade-in.visible {
+    opacity: 1;
+}
+
+.parallax {
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+.parallax::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+}
+
+.parallax-content {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+/* Update the step card styles to work better with the background */
+.step {
+    background: rgba(255, 255, 255, 0.95);
+    /* Make cards slightly transparent */
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    height: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+}
+
+.step:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.card-container {
+    position: relative;
+    min-height: 600px;
+    /* Adjust based on your needs */
+    perspective: 1000px;
+}
+
+.feature-card {
+    position: absolute;
+    transform-style: preserve-3d;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.6s ease-out;
+    opacity: 0;
+    width: 250px;
+    /* Fixed width for polaroid look */
+}
+
+.feature-card:hover {
+    transform: scale(1.05) rotateZ(0deg) !important;
+    z-index: 10;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.feature-card .card-img-top {
+    border-radius: 3px;
+    margin-bottom: 10px;
+}
+
+.feature-card .card-body {
+    padding: 10px;
+    text-align: center;
+}
+
+.feature-card .card-title {
+    font-family: 'Permanent Marker', cursive, sans-serif;
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+}
+
+.feature-card .card-text {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Position each card uniquely */
+.feature-card:nth-child(1) {
+    top: 0%;
+    left: 10%;
+    transform: rotate(-3deg) translateZ(0);
+}
+
+.feature-card:nth-child(2) {
+    top: 10%;
+    left: 40%;
+    transform: rotate(5deg) translateZ(0);
+}
+
+
+.feature-card:nth-child(3) {
+    top: 25%;
+    left: 75%;
+    transform: rotate(-1deg) translateZ(0);
+}
+
+/* Update the visible state to maintain rotation */
+.feature-card.visible {
+    opacity: 1;
+    /* Remove any transform override here */
+}
+
+/* Update hover effect to maintain rotation */
+.feature-card:hover {
+    transform: translate(0, -10px) !important;
+    /* Use translate instead of scale */
+    z-index: 10;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Remove or update the float animation */
+@keyframes float {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(0, -5px);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+.feature-card:hover {
+    transform: scale(1.05) !important;
+    animation: none;
+}
+
+@media (max-width: 768px) {
+
+    /* Container adjustments */
+    #about .container.fade-in {
+        padding: 20px 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        /* Reduce overall gap between elements */
+    }
+
+    /* About box adjustments */
+    #about .col-md-6:first-child {
+        width: 100%;
+        margin-bottom: 20px;
+        /* Reduced from 40px */
+        display: flex;
+        justify-content: center;
+    }
+
+    #about .col-md-6>div[style*="background-color: rgba(255, 255, 255, 0.9)"] {
+        margin: 0 0 10px 0 !important;
+        /* Reduced margin bottom */
+        padding: 20px !important;
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Card container adjustments */
+    .card-container {
+        min-height: auto;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 10px;
+        padding: 0 15px;
+        /* Removed top/bottom padding */
+        margin-top: 0;
+        /* Removed top margin */
+        width: 100%;
+        max-width: 500px;
+    }
+
+    /* Rest of the styles remain the same */
+    .feature-card {
+        position: relative;
+        width: 130px;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        margin: 5px;
+        flex: 0 0 auto;
+    }
+}
+
+/* Small screen adjustments */
+@media (max-width: 575px) {
+    /* Container adjustments */
+    #about .container.fade-in {
+        padding: 10px;
+        min-height: auto;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Reduce top spacing for navbar */
+    #about {
+        padding-top: 60px;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    /* About box adjustments */
+    #about .col-md-6:first-child {
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    #about .col-md-6 > div[style*="background-color: rgba(255, 255, 255, 0.9)"] {
+        margin: 0 !important;
+        padding: 15px !important;
+    }
+
+    /* Make text more compact */
+    #about h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem !important;
+    }
+
+    #about .lead {
+        font-size: 1rem;
+        margin-bottom: 0.5rem !important;
+    }
+
+    #about p {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem !important;
+        line-height: 1.4;
+    }
+
+    /* Card container adjustments */
+    .card-container {
+        min-height: auto;
+        padding: 5px;
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 8px;
+        justify-content: flex-start;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 10px;
+    }
+
+    /* Feature card adjustments */
+    .feature-card {
+        width: 140px;
+        flex: 0 0 auto;
+        margin: 0;
+        transform: none !important;
+    }
+
+    .feature-card .card-body {
+        padding: 5px;
+    }
+
+    .feature-card .card-title {
+        font-size: 0.8rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .feature-card .card-text {
+        font-size: 0.7rem;
+        margin-bottom: 0;
+    }
+
+    /* Add scroll indicators */
+    .card-container::after {
+        content: '';
+        flex: 0 0 5px;
+    }
+
+    /* Disable parallax on small screens */
+    .parallax {
+        background-attachment: scroll;
+    }
+}
+
+/* Add these styles to your existing CSS */
+.contact-container {
+    font-size: 15px;
+    font-weight: 300;
+    max-width: 800px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: 10px;
+    color: #333;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    margin: 20px auto;
+}
+
+.social-icons {
+    margin-top: 20px;
+}
+
+.social-icons a {
+    margin: 0 15px;
+    display: inline-block;
+}
+
+.social-icons img {
+    width: 50px;
+    height: 50px;
+    transition: transform 0.3s ease;
+}
+
+.social-icons img:hover {
+    transform: scale(1.2);
+}
+
+/* Update the contact section specific styles */
+#contact {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #007bff;
+}
