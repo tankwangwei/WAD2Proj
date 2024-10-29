@@ -183,12 +183,12 @@
             <div id="weatherResults">
                 <table class="table table-striped table-bordered table-hover">
                     <thead>
-                        <tr>
+                        <!-- <tr>
                             <th>Day</th>
                             <th>Lowest Temperature (°C)</th>
                             <th>Highest Temperature (°C)</th>
                             <th>Summary</th>
-                        </tr>
+                        </tr> -->
                     </thead>
                     <tbody id="dailyPredict"></tbody>
                 </table>
@@ -283,11 +283,34 @@
                     let data = response.data;
                     console.log(data);
 
+                    errorMessageEle.innerText = ""
+
                     let kelvin = data.current.temp;
                     let degreeCelcius = kelvin - 273.15;
                     temperatureEle.innerText = "Current Temperature: " + degreeCelcius.toFixed(2) + "°C";
 
                     dailyPredictEle.innerText = "";
+
+                    let tableRow = document.createElement("tr")
+                    
+                    let tableHead1 = document.createElement("th")
+                    tableHead1.innerText = "Day"
+                    tableRow.appendChild(tableHead1)
+                    
+                    let tableHead2 = document.createElement("th")
+                    tableHead2.innerText = "Lowest Temperature"
+                    tableRow.appendChild(tableHead2)
+
+                    let tableHead3 = document.createElement("th")
+                    tableHead3.innerText = "Highest Temperature"
+                    tableRow.appendChild(tableHead3)
+
+                    let tableHead4 = document.createElement("th")
+                    tableHead4.innerText = "Summary"
+                    tableRow.appendChild(tableHead4)
+
+                    dailyPredictEle.appendChild(tableRow)
+
                     data.daily.forEach((day, index) => {
                         let row = document.createElement("tr");
 
