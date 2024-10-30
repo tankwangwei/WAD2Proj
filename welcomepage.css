@@ -57,15 +57,7 @@ h1 {
     font-weight: bold;
 }
 
-.text-container {
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: center;
-    /* Center the content horizontally */
-    align-items: center;
-    width: 100%;
-    /* Take full width of parent */
-}
+
 
 #changing-text {
     font-size: 1em;
@@ -109,6 +101,13 @@ h1 {
     overflow: hidden;
     width: 25ch;
     animation: typing 2s steps(25) infinite alternate;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    /* Center the content horizontally */
+    align-items: center;
+    width: 100%;
+    /* Take full width of parent */
 }
 
 @keyframes typing {
@@ -158,45 +157,41 @@ section {
     padding: 0;
     display: flex;
     align-items: center;
+    background-size: cover;
     background-image: url('./imgs/travelbg5.jpg');
     background-position: center;
-    position: relative;
 }
 
 #about .container.fade-in {
     height: 100vh;
     width: 100%;
-    margin: 0;
-    padding: 100px 0;
+    margin: 20;
+    padding: 100px 20px;
     display: flex;
     align-items: center;
 }
 
 #about .row {
     width: 100%;
-    margin: 0;
+    margin: 10px;
+    justify-content: center;
 }
 
-/* About content positioning */
-#about .col-md-10 {
-    padding: 0;
-}
 
-#about .row.align-items-center {
-    margin: 0;
-    padding: 0;
-}
+
+
 
 #process {
-    margin-top: -100px;
-    /* Offset the section to remove gap */
+    min-height: 100vh;
+    height: auto;
+    margin: 0;
+    padding: 50px 30px; /* Reduced top/bottom padding from 100px to 60px */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     background-image: url('./imgs/travelbg4.jpg');
     background-position: center;
     background-size: cover;
-
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
 }
 
 
@@ -213,18 +208,6 @@ section {
     transform: translateY(0);
 }
 
-/* Update these CSS styles */
-#process {
-    height: 100vh;
-    margin: 0;
-    /* Remove negative margin */
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    background-image: url('./imgs/travelbg4.jpg');
-    background-position: center;
-}
 
 .step-container {
     opacity: 0;
@@ -239,17 +222,18 @@ section {
 }
 
 .step {
-    background: white;
+    background: rgba(255, 255, 255, 0.95);
     padding: 25px;
     border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     height: 100%;
-    transition: transform 0.3s ease;
-    min-height: 300px;
-    /* Add minimum height */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    min-height: 320px; /* Increased from 300px to accommodate longer text */
     display: flex;
     flex-direction: column;
+    justify-content: flex-start; /* Changed from default to flex-start */
 }
+
 
 .step-icon {
     width: 80px;
@@ -285,8 +269,10 @@ section {
     line-height: 1.6;
     flex-grow: 1;
     text-align: center;
-
+    overflow-wrap: break-word; /* Added to handle long words */
+    word-wrap: break-word; /* Added for better browser support */
 }
+
 
 /* Add stagger effect to step containers */
 .step-container:nth-child(1) {
@@ -366,23 +352,24 @@ section {
 }
 
 .card-container {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    justify-content: space-between;
+    padding: 20px 0;
+    height: auto;
     position: relative;
-    min-height: 600px;
-    /* Adjust based on your needs */
-    perspective: 1000px;
 }
 
 .feature-card {
-    position: absolute;
-    transform-style: preserve-3d;
+    flex: 1;
     background: white;
     padding: 10px;
     border-radius: 5px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    transition: all 0.6s ease-out;
-    opacity: 0;
-    width: 250px;
-    /* Fixed width for polaroid look */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: calc(33.333% - 10px);
+    position: relative;
 }
 
 .feature-card:hover {
@@ -392,8 +379,11 @@ section {
 }
 
 .feature-card .card-img-top {
+    width: 100%;
+    height: auto;
     border-radius: 3px;
     margin-bottom: 10px;
+    object-fit: cover;
 }
 
 .feature-card .card-body {
@@ -412,31 +402,7 @@ section {
     color: #666;
 }
 
-/* Position each card uniquely */
-.feature-card:nth-child(1) {
-    top: 0%;
-    left: 10%;
-    transform: rotate(-3deg) translateZ(0);
-}
 
-.feature-card:nth-child(2) {
-    top: 10%;
-    left: 40%;
-    transform: rotate(5deg) translateZ(0);
-}
-
-
-.feature-card:nth-child(3) {
-    top: 25%;
-    left: 75%;
-    transform: rotate(-1deg) translateZ(0);
-}
-
-/* Update the visible state to maintain rotation */
-.feature-card.visible {
-    opacity: 1;
-    /* Remove any transform override here */
-}
 
 /* Update hover effect to maintain rotation */
 .feature-card:hover {
@@ -466,159 +432,6 @@ section {
     animation: none;
 }
 
-@media (max-width: 768px) {
-
-    /* Container adjustments */
-    #about .container.fade-in {
-        padding: 20px 15px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-        /* Reduce overall gap between elements */
-    }
-
-    /* About box adjustments */
-    #about .col-md-6:first-child {
-        width: 100%;
-        margin-bottom: 20px;
-        /* Reduced from 40px */
-        display: flex;
-        justify-content: center;
-    }
-
-    #about .col-md-6>div[style*="background-color: rgba(255, 255, 255, 0.9)"] {
-        margin: 0 0 10px 0 !important;
-        /* Reduced margin bottom */
-        padding: 20px !important;
-        width: 100%;
-        text-align: center;
-    }
-
-    /* Card container adjustments */
-    .card-container {
-        min-height: auto;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        gap: 10px;
-        padding: 0 15px;
-        /* Removed top/bottom padding */
-        margin-top: 0;
-        /* Removed top margin */
-        width: 100%;
-        max-width: 500px;
-    }
-
-    /* Rest of the styles remain the same */
-    .feature-card {
-        position: relative;
-        width: 130px;
-        top: auto !important;
-        left: auto !important;
-        transform: none !important;
-        margin: 5px;
-        flex: 0 0 auto;
-    }
-}
-
-/* Small screen adjustments */
-@media (max-width: 575px) {
-    /* Container adjustments */
-    #about .container.fade-in {
-        padding: 10px;
-        min-height: auto;
-        height: auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    /* Reduce top spacing for navbar */
-    #about {
-        padding-top: 60px;
-        height: auto;
-        min-height: 100vh;
-    }
-
-    /* About box adjustments */
-    #about .col-md-6:first-child {
-        padding: 10px;
-        margin-bottom: 10px;
-    }
-
-    #about .col-md-6 > div[style*="background-color: rgba(255, 255, 255, 0.9)"] {
-        margin: 0 !important;
-        padding: 15px !important;
-    }
-
-    /* Make text more compact */
-    #about h2 {
-        font-size: 1.5rem;
-        margin-bottom: 0.5rem !important;
-    }
-
-    #about .lead {
-        font-size: 1rem;
-        margin-bottom: 0.5rem !important;
-    }
-
-    #about p {
-        font-size: 0.9rem;
-        margin-bottom: 0.5rem !important;
-        line-height: 1.4;
-    }
-
-    /* Card container adjustments */
-    .card-container {
-        min-height: auto;
-        padding: 5px;
-        margin-top: 10px;
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        gap: 8px;
-        justify-content: flex-start;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 10px;
-    }
-
-    /* Feature card adjustments */
-    .feature-card {
-        width: 140px;
-        flex: 0 0 auto;
-        margin: 0;
-        transform: none !important;
-    }
-
-    .feature-card .card-body {
-        padding: 5px;
-    }
-
-    .feature-card .card-title {
-        font-size: 0.8rem;
-        margin-bottom: 0.2rem;
-    }
-
-    .feature-card .card-text {
-        font-size: 0.7rem;
-        margin-bottom: 0;
-    }
-
-    /* Add scroll indicators */
-    .card-container::after {
-        content: '';
-        flex: 0 0 5px;
-    }
-
-    /* Disable parallax on small screens */
-    .parallax {
-        background-attachment: scroll;
-    }
-}
-
-/* Add these styles to your existing CSS */
 .contact-container {
     font-size: 15px;
     font-weight: 300;
@@ -660,4 +473,436 @@ section {
     align-items: center;
     justify-content: center;
     background-color: #007bff;
+}
+
+
+@media (max-width: 768px) {
+
+    #about {
+        min-height: 100%;
+        height: auto;
+        padding: 80px 0;
+    }
+
+    #about .container.fade-in {
+        height: auto;
+        min-height: auto;
+        padding: 30px 20px;
+        width: 100%;
+    }
+
+    .card-container {
+        gap: 8px;
+    }
+
+    .feature-card {
+        min-width: 160px;
+    }
+
+    .feature-card .card-title {
+        font-size: 0.9rem;
+    }
+
+    .feature-card .card-text {
+        font-size: 0.75rem;
+    }
+
+    #process {
+        padding: 50px 40px;
+        height: fit-content;
+    }
+
+    .container-fluid {
+        padding: 0 10px;
+    }
+
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .step-container {
+        width: calc(50% - 20px);
+        padding: 10px;
+    }
+
+    .step {
+        padding: 20px;
+        min-height: 220px;
+    }
+
+    .step-title {
+        font-size: 1.2rem;
+    }
+
+    .step-description {
+        font-size: 0.9rem;
+    }
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 576px) {
+
+    h1 {
+        font-size: 3rem;
+        /* Smaller font size for mobile */
+        padding: 0 15px;
+        /* Add some padding on the sides */
+        width: 100%;
+        /* Full width */
+        text-align: center;
+        margin: 0 auto 1rem;
+        /* Center with auto margins */
+        line-height: 1.2;
+        /* Adjust line height for better readability */
+    }
+
+    /* Section height adjustment */
+    #about {
+        height: auto;
+        min-height: 100vh;
+        padding: 80px 0;
+    }
+
+    #about .container.fade-in {
+        height: auto;
+        min-height: 100vh;
+        padding: 20px 15px;
+    }
+
+    /* Content layout */
+    #about .row {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    #about .col-md-6 {
+        width: 100%;
+        display: flex;
+        /* Makes container a flex container */
+        flex-direction: column;
+        /* Stack items vertically */
+        align-items: center;
+        /* Centers items horizontally in the flex container */
+    }
+
+    .card-container {
+        width: 90%;
+        /* Takes less than full width */
+        margin: 0 auto;
+        /* Auto margins on left and right center the container */
+        align-items: center;
+        /* Centers items horizontally within the container */
+    }
+
+    /* Individual card centering */
+    .feature-card {
+        width: 100%;
+        max-width: 300px;
+        /* Limits card width */
+        margin: 0 auto 15px;
+        /* Auto margins on left and right center each card */
+    }
+
+    /* Text box adjustments */
+    #about .col-md-6>div[style*="background-color: rgba(255, 255, 255, 0.9)"] {
+        padding: 15px !important;
+        margin-bottom: 15px !important;
+    }
+
+    /* Adjust text sizes */
+    #about h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    #about .lead {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    #about p {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+
+    /* Card container adjustments */
+    .card-container {
+        flex-direction: column;
+        gap: 15px;
+        padding: 0;
+    }
+
+
+    .feature-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .feature-card .card-img-top {
+        height: 65%;
+    }
+
+    .feature-card .card-body {
+        padding: 8px;
+    }
+
+    .feature-card .card-title {
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+    }
+
+    .feature-card .card-text {
+        font-size: 0.8rem;
+        line-height: 1.2;
+    }
+
+    /* Background image adjustment */
+    .parallax {
+        background-attachment: scroll;
+    }
+
+    #process {
+        padding: 40px 10px;
+        height: fit-content;
+    }
+
+    .step-container {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .step {
+        min-height: 200px;
+    }
+
+    .step-icon {
+        flex-shrink: 0;
+    }
+
+    .step-icon i {
+        font-size: 25px;
+    }
+
+    h2.text-center {
+        font-size: 1.8rem;
+
+        margin-bottom: 10px;
+    }
+}
+
+/* Additional adjustments for very small screens */
+@media (max-width: 375px) {
+    #process {
+        padding-top: 80px; /* Increased top padding */
+        height: auto;
+    }
+
+    #process .container-fluid {
+        padding: 0 5px;
+    }
+
+    #process h2.text-center {
+        font-size: 1.5rem;
+        margin-top: 0; /* Remove top margin */
+        margin-bottom: 20px;
+        padding-top: 0; /* Remove top padding from heading */
+    }
+
+    #process .row {
+        gap: 10px;
+        padding: 10px 0;
+        margin-top: 10px; /* Add space after the heading */
+    }
+
+    .step-container {
+        width: 100%;
+        padding: 5px;
+        margin-bottom: 10px;
+    }
+
+    .step {
+        min-height: 180px;
+        padding: 15px;
+    }
+
+    .step-icon {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 10px;
+    }
+
+    .step-icon i {
+        font-size: 20px;
+    }
+
+    .step-title {
+        flex-shrink: 0;
+    }
+
+    .step-description {
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+}
+
+
+
+#process .container-fluid {
+    height: auto;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px; /* Removed vertical padding */
+}
+#process .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin: 0;
+    padding: 20px 0;
+}
+
+/* Specific styles for screens larger than 992px */
+@media (max-width: 993px) {
+    .step-container {
+        width: calc(50% - 20px); /* Your existing responsive styles */
+        margin: 0;
+        flex: none;
+    }
+
+    .step-container:nth-child(4) {
+        margin-left: 0;
+    }
+
+    .step-container:nth-child(n+4) {
+        margin-top: 0;
+    }
+}
+
+
+@media (max-width: 1200px) {
+    .step-container {
+        flex: 0 0 calc(33% - 20px); /* Slightly smaller width */
+    }
+    
+    .step {
+        min-height: 380px; /* Increased height for this breakpoint */
+    }
+
+    .step-description {
+        font-size: 1.2rem; /* Slightly smaller font */
+        line-height: 1.5;
+        margin-top: 15px;
+    }
+
+
+}
+
+
+@media (max-width: 612px) {
+    #process {
+        padding: 40px 15px;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    #process .container-fluid {
+        padding: 10px;
+        width: 100%;
+    }
+
+    #process .row {
+        gap: 15px;
+        padding: 10px 0;
+    }
+
+    .step-container {
+        width: calc(100% - 30px); /* Take up most of the width */
+        margin: 0;
+        padding: 0;
+    }
+
+    .step {
+        min-height: 160px; /* Reduced height since we're wider */
+        padding: 20px 25px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .step-icon {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 15px;
+    }
+
+    .step-title {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+
+    .step-description {
+        font-size: 1rem;
+        line-height: 1.4;
+        max-width: 400px; /* Prevent text from stretching too wide */
+        margin: 0 auto;
+    }
+}
+
+/* Adjust the earlier breakpoint to prevent conflict */
+@media (max-width: 992px) {
+    .feature-card .card-title {
+        font-size: 1rem; /* Reduced from 1.1rem */
+        margin-bottom: 4px;
+    }
+
+    .feature-card .card-text {
+        font-size: 0.8rem; /* Reduced from 0.9rem */
+        line-height: 1.3;
+    }
+
+    /* You might also want to adjust the spacing */
+    .feature-card .card-body {
+        padding: 8px;
+    }
+    .step-container {
+        width: calc(50% - 20px);
+        margin: 0;
+        flex: none;
+    }
+
+    .step-title {
+        font-size: 1.35rem;
+        margin-bottom: 25px;
+    }
+
+    .step-description {
+        font-size: 1.rem;
+        line-height: 1.5;
+        max-width: 400px; /* Prevent text from stretching too wide */
+        margin: 0 auto;
+    }
+
+    #process h2.text-center {
+        padding-top: 80px;
+    }
+}
+
+
+/* Keep the existing 576px breakpoint for further refinements */
+@media (max-width: 576px) {
+    .step {
+        min-height: 140px; /* Even shorter for mobile */
+    }
+
+    .step-title {
+        font-size: 1.2rem;
+    }
+
+    .step-description {
+        font-size: 0.95rem;
+    }
 }
