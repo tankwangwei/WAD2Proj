@@ -20,15 +20,18 @@ const urlParams = new URLSearchParams(window.location.search);
 const tripID = urlParams.get('tripID');
 const location = decodeURIComponent(urlParams.get('location'));
 
-initAutocomplete("location", (locationCoords) => {
-    // Use the selected coordinates to search for attractions
-    searchAttractions(locationCoords, displayAttractions);
-});
+// Set the location input field and trigger the attractions search
+document.getElementById("location").value = location;
 
-document.getElementById('searchForm').addEventListener('submit', function (event) {
-    event.preventDefault(); // Prevent page refresh
-    const locationInput = document.getElementById('location').value;
-    searchAttractionsByText(locationInput, displayAttractions);
+// Initialize autocomplete and trigger search on load
+initAutocomplete("location", (selectedLocation) => {
+    if (!selectedLocation) {
+        // If no new location is selected, use the passed location for search
+        searchAttractionsByText(location, displayAttractions);
+    } else {
+        // If a new location is selected manually, use that for search
+        searchAttractions(selectedLocation, displayAttractions);
+    }
 });
 
 // Display attractions in cards
