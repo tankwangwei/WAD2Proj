@@ -45,6 +45,29 @@ html {
     width: 100%;
 }
 
+/* Position the collapsed navbar content below the toggler button on small screens */
+@media (max-width: 767.98px) {
+    .navbar-collapse {
+        position: absolute;
+        top: 100%; /* Positions it directly below the navbar */
+        right: 15px; /* Aligns it to the right edge of the screen */
+        width: auto;
+        border-radius: 5px;
+        z-index: 1000;
+    }
+    .navbar-collapse .navbar-nav .nav-link {
+        color: #333; /* Adjust color to be visible */
+    }
+}
+
+/* For larger screens: standard layout without absolute positioning */
+@media (min-width: 768px) {
+    .navbar-collapse {
+        position: static;
+        background-color: transparent;
+    }
+}
+
 #logo {
     height: 80px;
     max-height: 100%;
