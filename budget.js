@@ -1,161 +1,177 @@
-// Variables to hold the current budget and expenses
+// Existing variables and elements
 let totalBudget = 0;
-let remainingBudget = 0;
-let expenses = [];
-let expenseChart = null; // This will hold the chart instance
+let totalSpending = 0;
+const expenses = [];
+let expenseChart;
 
-// Handle budget update
-document.getElementById('budgetForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent form submission
+const budgetForm = document.getElementById('budgetForm');
+const expenseForm = document.getElementById('expenseForm');
+const expenseCard = document.getElementById('expenseCard');
+const dashboardSection = document.getElementById('dashboardSection');
 
-    const budgetInput = document.getElementById('budget').value;
+const dashboardTotalBudget = document.getElementById('dashboardTotalBudget');
+const dashboardTotalSpending = document.getElementById('dashboardTotalSpending');
+const dashboardRemainingBudget = document.getElementById('dashboardRemainingBudget');
+const recentTransactionsTable = document.getElementById('recentTransactionsTable');
+const recentTransactionsContainer = document.getElementById('recentTransactionsContainer');
+const dateRange = document.getElementById('dateRange'); // Date range dropdown
 
-    totalBudget = parseFloat(budgetInput);
-    remainingBudget = totalBudget;
+// Variables to track edit mode and the current transaction index
+let isEditMode = false;
+let currentEditIndex = null;
 
-    document.getElementById('currentBudget').textContent = totalBudget.toFixed(2);
-    document.getElementById('remainingBudget').textContent = `$${remainingBudget.toFixed(2)}`;
-});
+// Function to update the Recent Transactions Table
+function updateRecentTransactionsTable() {
+    recentTransactionsTable.innerHTML = ''; // Clear existing rows
+    expenses.forEach((expense, index) => {
+        const row = document.createElement('tr');
 
-// Handle adding new expense
-document.getElementById('expenseForm').addEventListener('submit', function(event) {
+        const dateCell = document.createElement('td');
+        dateCell.textContent = expense.date;
+
+        const descriptionCell = document.createElement('td');
+        descriptionCell.textContent = expense.description;
+
+        const amountCell = document.createElement('td');
+        amountCell.textContent = `$${expense.amount.toFixed(2)}`;
+
+        // Action buttons (Edit and Delete) with spacing
+        const actionCell = document.createElement('td');
+        actionCell.style.display = 'flex';  // Use flex display for spacing
+        actionCell.style.gap = '10px';      // Add 10px space between buttons
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.classList.add('edit-btn');
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.classList.add('delete-btn');
+
+        actionCell.appendChild(editBtn);
+        actionCell.appendChild(deleteBtn);
+
+        // Event listeners for Edit and Delete buttons
+        editBtn.addEventListener('click', () => enterEditMode(index));
+        deleteBtn.addEventListener('click', () => deleteTransaction(index));
+
+        // Append cells to row
+        row.appendChild(dateCell);
+        row.appendChild(descriptionCell);
+        row.appendChild(amountCell);
+        row.appendChild(actionCell);
+        recentTransactionsTable.appendChild(row);
+    });
+    recentTransactionsContainer.style.display = expenses.length ? 'block' : 'none';
+}
+
+// Enter edit mode for a specific transaction
+function enterEditMode(index) {
+    const { date, amount, category, description } = expenses[index];
+
+    // Populate form with existing transaction data
+    document.getElementById('date').value = date;
+    document.getElementById('amount').value = amount;
+    document.getElementById('category').value = category;
+    document.getElementById('description').value = description;
+
+    // Set edit mode and store the index
+    isEditMode = true;
+    currentEditIndex = index;
+
+    // Update the submit button to show 'Update Expense'
+    expenseForm.querySelector('button[type="submit"]').textContent = 'Update Expense';
+}
+
+// Delete a transaction
+function deleteTransaction(index) {
+    totalSpending -= expenses[index].amount;
+    expenses.splice(index, 1); // Remove from expenses array
+    updateDashboard();
+    updateExpenseChart(getFilteredExpenses());
+    updateRecentTransactionsTable(); // Refresh transaction table
+}
+
+// Add or update a transaction
+expenseForm.addEventListener('submit', function(event) {
     event.preventDefault();
 
     const amount = parseFloat(document.getElementById('amount').value);
+    const date = document.getElementById('date').value;
     const category = document.getElementById('category').value;
     const description = document.getElementById('description').value;
-    const date = document.getElementById('date').value; // Get the date input
 
-    remainingBudget -= amount;
-    expenses.push({ amount, category, description, date });
+    if (isEditMode && currentEditIndex !== null) {
+        // Edit mode: update the existing transaction
+        const oldAmount = expenses[currentEditIndex].amount;
+        expenses[currentEditIndex] = { date, description, category, amount };
+        totalSpending = totalSpending - oldAmount + amount;
 
-    document.getElementById('remainingBudget').textContent = `$${remainingBudget.toFixed(2)}`;
+        // Reset edit mode
+        isEditMode = false;
+        currentEditIndex = null;
+        expenseForm.querySelector('button[type="submit"]').textContent = 'Add Expense';
+    } else {
+        // Add mode: add a new transaction
+        if (amount > (totalBudget - totalSpending)) {
+            alert('Expense exceeds the remaining budget!');
+            return;
+        }
 
-    updateRecentTransactions(amount, category, description, date);
-    updateSpendingOverview();
-    updateExpenseChart(); // Update the pie chart
+        totalSpending += amount;
+        expenses.push({ date, description, category, amount });
+    }
+
+    // Sort expenses by transaction date in descending order (newest date first)
+    expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    updateDashboard();
+    updateExpenseChart(getFilteredExpenses());
+    updateRecentTransactionsTable(); // Refresh transaction table
+    expenseForm.reset();
 });
 
-// Update recent transactions list in a table format
-function updateRecentTransactions(amount, category, description, date) {
-    const recentTransactionsTableBody = document.getElementById('recentTransactionsTable'); // Target the <tbody>
+// Reset edit mode on form reset
+expenseForm.addEventListener('reset', function() {
+    isEditMode = false;
+    currentEditIndex = null;
+    expenseForm.querySelector('button[type="submit"]').textContent = 'Add Expense';
+});
 
-    // Create a new row for the table
-    const row = document.createElement('tr');
 
-    // Create and populate the columns (date, description, cost)
-    const dateCell = document.createElement('td');
-    dateCell.textContent = date;
-
-    const descriptionCell = document.createElement('td');
-    descriptionCell.textContent = description;
-
-    const costCell = document.createElement('td');
-    costCell.textContent = `$${amount.toFixed(2)}`;
-
-    // Append the cells to the row
-    row.appendChild(dateCell);
-    row.appendChild(descriptionCell);
-    row.appendChild(costCell);
-
-    // Append the row to the table body
-    recentTransactionsTableBody.appendChild(row);
-
-    // Show the table if there are transactions
-    const recentTransactionsContainer = document.getElementById('recentTransactionsContainer');
-    if (expenses.length > 0) {
-        recentTransactionsContainer.style.display = 'table'; // Show the table container
-    }
+// Function to update dashboard values
+function updateDashboard() {
+    dashboardTotalBudget.textContent = `$${totalBudget.toLocaleString()}`;
+    dashboardTotalSpending.textContent = `$${totalSpending.toLocaleString()}`;
+    dashboardRemainingBudget.textContent = `$${(totalBudget - totalSpending).toLocaleString()}`;
 }
 
-// Function to filter expenses by date range
-function filterExpensesByDateRange() {
-    const dateRange = document.getElementById('dateRange').value;
-    let filteredExpenses = [];
+// Event listener for budget form submission
+budgetForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    totalBudget = parseFloat(document.getElementById('budget').value);
+    updateDashboard();
+    expenseCard.style.display = 'block';
+    dashboardSection.style.display = 'block';
+});
 
-    if (!dateRange) {
-        // No date range selected, do nothing
-        alert('Please select a date range to filter expenses.');
-        return;
-    }
-
-    const today = new Date();
-    let startDate, endDate;
-
-    if (dateRange === 'today') {
-        startDate = endDate = today.toISOString().split('T')[0]; // Get today's date
-    } else if (dateRange === 'week') {
-        endDate = today.toISOString().split('T')[0];
-        startDate = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0]; // 7 days ago
-    } else if (dateRange === 'month') {
-        endDate = today.toISOString().split('T')[0];
-        startDate = new Date(today.setMonth(today.getMonth() - 1)).toISOString().split('T')[0]; // 1 month ago
-    } else if (dateRange === 'custom') {
-        document.getElementById('customDateRange').style.display = 'block'; // Show custom range inputs
-        return; // Wait for user to input the custom range
-    }
-
-    // Filter expenses based on the selected date range
-    filteredExpenses = expenses.filter(expense => {
-        return expense.date >= startDate && expense.date <= endDate;
-    });
-
-    // Update the overview and pie chart with the filtered expenses
-    updateFilteredOverviewAndChart(filteredExpenses);
-}
-
-
-// Update spending overview and pie chart based on filtered expenses
-function updateFilteredOverviewAndChart(filteredExpenses) {
-    // Update Spending Overview
-    const spendingOverviewList = document.getElementById('spendingOverview');
-    spendingOverviewList.innerText = ''; // Clear the list
-
+// Function to update the expense chart
+function updateExpenseChart(expensesToChart) {
     const categoryTotals = {};
-    let totalExpenses = 0;
 
-    // Calculate total expenses and category totals for filtered expenses
-    filteredExpenses.forEach(expense => {
-        if (!categoryTotals[expense.category]) {
-            categoryTotals[expense.category] = 0;
-        }
-        categoryTotals[expense.category] += expense.amount;
-        totalExpenses += expense.amount;
-    });
-
-    // Display totals by category
-    for (const category in categoryTotals) {
-        const percentage = (categoryTotals[category] / totalExpenses * 100).toFixed(2); // Calculate percentage
-        const listItem = document.createElement('li');
-        listItem.textContent = `${category}: $${categoryTotals[category].toFixed(2)} (${percentage}%)`;
-        spendingOverviewList.appendChild(listItem);
-    }
-
-    // Update the pie chart with filtered data
-    updateExpenseChart(filteredExpenses);
-}
-
-// Update the pie chart with filtered data
-function updateExpenseChart(filteredExpenses) {
-    const categoryTotals = {};
-    filteredExpenses.forEach(expense => {
-        if (!categoryTotals[expense.category]) {
-            categoryTotals[expense.category] = 0;
-        }
-        categoryTotals[expense.category] += expense.amount;
+    expensesToChart.forEach(expense => {
+        categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + expense.amount;
     });
 
     const categories = Object.keys(categoryTotals);
     const amounts = Object.values(categoryTotals);
 
+    const ctx = document.getElementById('spendingChart').getContext('2d');
     if (expenseChart) {
-        // If the chart already exists, update its data
         expenseChart.data.labels = categories;
         expenseChart.data.datasets[0].data = amounts;
         expenseChart.update();
     } else {
-        // Create a new pie chart
-        const ctx = document.getElementById('expenseChart').getContext('2d');
         expenseChart = new Chart(ctx, {
             type: 'pie',
             data: {
@@ -163,9 +179,7 @@ function updateExpenseChart(filteredExpenses) {
                 datasets: [{
                     label: 'Expenses by Category',
                     data: amounts,
-                    backgroundColor: [
-                        '#3498db', '#e74c3c', '#2ecc71', '#9b59b6', '#f1c40f', '#95a5a6'
-                    ],
+                    backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#9b59b6', '#f1c40f', '#95a5a6'],
                     borderColor: '#fff',
                     borderWidth: 1
                 }]
@@ -173,28 +187,63 @@ function updateExpenseChart(filteredExpenses) {
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        position: 'top',
-                    },
+                    legend: { position: 'top' },
                     datalabels: {
                         formatter: (value, ctx) => {
-                            let sum = 0;
-                            const dataArr = ctx.chart.data.datasets[0].data;
-                            dataArr.forEach(data => {
-                                sum += data;
-                            });
-                            const percentage = (value * 100 / sum).toFixed(2) + "%"; // Calculate percentage
-                            return percentage;
+                            const sum = ctx.chart.data.datasets[0].data.reduce((acc, val) => acc + val, 0);
+                            return ((value * 100 / sum).toFixed(2) + "%");
                         },
-                        color: '#fff',  // Set color for the percentage labels
-                        font: {
-                            weight: 'bold',
-                            size: 14
-                        }
+                        color: '#fff',
+                        font: { weight: 'bold', size: 14 }
                     }
                 }
             },
-            plugins: [ChartDataLabels] // Enable the datalabels plugin
+            plugins: [ChartDataLabels]
         });
     }
 }
+
+// Date Range Filtering for Chart
+function getFilteredExpenses() {
+    const selectedRange = dateRange.value;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return expenses.filter(expense => {
+        const expenseDate = new Date(expense.date);
+        expenseDate.setHours(0, 0, 0, 0);
+
+        if (selectedRange === 'today') {
+            return expenseDate.getTime() === today.getTime();
+        } else if (selectedRange === 'week') {
+            const oneWeekAgo = new Date(today);
+            oneWeekAgo.setDate(today.getDate() - 6);
+            return expenseDate >= oneWeekAgo && expenseDate <= today;
+        } else if (selectedRange === 'month') {
+            const oneMonthAgo = new Date(today);
+            oneMonthAgo.setMonth(today.getMonth() - 1);
+            return expenseDate >= oneMonthAgo && expenseDate <= today;
+        }
+
+        return true;
+    });
+}
+
+// Reset edit mode if the form is reset or if a new transaction is added
+expenseForm.addEventListener('reset', function() {
+    isEditMode = false;
+    currentEditIndex = null;
+    expenseForm.querySelector('button[type="submit"]').textContent = 'Add Expense';
+});
+
+// Event listener for date range selection to update the chart
+dateRange.addEventListener('change', () => updateExpenseChart(getFilteredExpenses()));
+
+
+
+
+
+
+
+
+

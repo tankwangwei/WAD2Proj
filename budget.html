@@ -3,173 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budgeting</title>
+    <title>Budget Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
             color: #333;
-            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f4f6f9;
         }
         h1, h2 {
             color: #2c3e50;
         }
         .card {
             background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
-            padding: 20px;
+            padding: 25px;
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
         }
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        input, select {
+        .form-group input {
             width: 100%;
-            padding: 8px;
+            padding: 15px 15px 15px 50px;
+            font-size: 16px;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        .form-group select {
+            width: 100%;
+            padding: 15px 15px 15px 50px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            appearance: none;
+            background-color: #fff;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+            outline: none;
+        }
+        .form-group i {
+            position: absolute;
+            left: 15px;
+            color: #888;
+            font-size: 18px;
         }
         button {
             background-color: #3498db;
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 8px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         button:hover {
             background-color: #2980b9;
         }
-        #remainingBudget {
-            font-size: 24px;
-            font-weight: bold;
-            color: #27ae60;
-        }
-        #spendingOverview, #recentTransactions {
-            list-style-type: none;
-            padding: 0;
-        }
-        #spendingOverview li, #recentTransactions li {
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
+            flex-direction: column;
+            gap: 20px;
         }
 
-        table {
-        width: 100%;
-        border-collapse: collapse;
+        /* Overview styling */
+        .overview {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        th, td {
-            text-align: center; /* Center the text */
-            padding: 10px; /* Add some padding for better readability */
-            border: 1px solid #ddd; /* Add borders to table cells */
+        .overview div {
+            text-align: center;
+        }
+        .overview div p {
+            font-size: 18px;
+            margin: 5px 0;
+            color: #555;
+        }
+        .overview div h2 {
+            font-size: 30px;
+            margin: 5px 0;
+        }
+        .chart-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 300px; /* Set a fixed height to keep the chart container centered */
+        }
+
+        /* Transaction history table styling */
+        .transaction-history table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .transaction-history th, .transaction-history td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .transaction-history th {
+            color: #555;
+        }
+        .transaction-history td {
+            color: #333;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 </head>
 <body>
     <h1>Budgeting</h1>
 
-    <!-- Budget Form -->
-    <div class="card">
-        <h2>Set Budget</h2>
-        <form id="budgetForm">
-            <div class="form-group">
-                <label for="budget">Total Budget:</label>
-                <input type="number" id="budget" name="budget" required>
-            </div>
-            <button type="submit">Update Budget</button>
-        </form>
-        <p>Current Budget: $<span id="currentBudget">0.00</span></p>
+    <!-- Form Container for Side-by-Side Layout -->
+    <div style="display: flex; gap: 20px;">
+
+        <!-- Budget Form -->
+        <div class="card" style="width: 50%;">
+            <h2>Edit Budget</h2>
+            <form id="budgetForm">
+                <div class="form-group">
+                    <i class="fas fa-suitcase"></i>
+                    <select id="trip" name="trip" required>
+                        <option value="">Select a trip</option>
+                        <option value="Trip 1">Trip 1</option>
+                        <option value="Trip 2">Trip 2</option>
+                        <option value="Trip 3">Trip 3</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-dollar-sign"></i>
+                    <input type="number" id="budget" name="budget" placeholder="Total Budget" required>
+                </div>
+                <button type="submit">Update Budget</button>
+            </form>
+        </div>
+
+        <!-- Add Expense Form with Date Input -->
+        <div class="card" id="expenseCard" style="width: 50%">
+            <h2>Add Expense</h2>
+            <form id="expenseForm">
+                <div class="form-group">
+                    <i class="fas fa-calendar-alt"></i>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <input type="number" id="amount" name="amount" step="0.01" placeholder="Amount" required>
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-tags"></i>
+                    <select id="category" name="category" required>
+                        <option value="">Select category</option>
+                        <option value="Accommodation">Accommodation</option>
+                        <option value="Transportation">Transportation</option>
+                        <option value="Food">Food</option>
+                        <option value="Activities">Activities</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Miscellaneous">Miscellaneous</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <i class="fas fa-comment"></i>
+                    <input type="text" id="description" name="description" placeholder="Description" required>
+                </div>
+                <button type="submit">Add Expense</button>
+            </form>
+        </div>
+
     </div>
 
-    <div class="card">
-        <h2>Remaining Budget</h2>
-        <p id="remainingBudget">$0.00</p>
-    </div>
-
-    <!-- Add Expense Form with Date Input -->
-    <div class="card">
-        <h2>Add Expense</h2>
-        <form id="expenseForm">
-            <div class="form-group">
-                <label for="date">Date:</label>
-                <input type="date" id="date" name="date" required>
+    <!-- Dashboard Section (Initially Hidden) -->
+    <div class="card" id="dashboardSection" style="display: none;">
+        <h2>Dashboard Overview</h2>
+        <div class="overview">
+            <div>
+                <p>Total Budget</p>
+                <h2 id="dashboardTotalBudget">$0</h2>
             </div>
-            <div class="form-group">
-                <label for="amount">Amount:</label>
-                <input type="number" id="amount" name="amount" step="0.01" required>
+            <div>
+                <p>Total Spending</p>
+                <h2 id="dashboardTotalSpending">$0</h2>
             </div>
-            <div class="form-group">
-                <label for="category">Category:</label>
-                <select id="category" name="category" required>
-                    <option value="">Select category</option>
-                    <option value="Accommodation">Accommodation</option>
-                    <option value="Transportation">Transportation</option>
-                    <option value="Food">Food</option>
-                    <option value="Activities">Activities</option>
-                    <option value="Shopping">Shopping</option>
-                    <option value="Miscellaneous">Miscellaneous</option>
-                </select>
+            <div>
+                <p>Remaining Budget</p>
+                <h2 id="dashboardRemainingBudget">$0</h2>
             </div>
-            <div class="form-group">
-                <label for="description">Description:</label>
-                <input type="text" id="description" name="description" required>
+        </div>
+        <!-- Spending Overview with Dropdown and Chart -->
+        <div class="spending-overview">
+            <h3>Spending Overview</h3>
+            <select id="dateRange" onchange="filterExpensesByDateRange()">
+                <option value="today">Today</option>
+                <option value="week">Past Week</option>
+                <option value="month">Past Month</option>
+            </select>
+        
+            <!-- Chart Container -->
+            <div class="chart-container">
+                <canvas id="spendingChart"></canvas>
             </div>
-            <button type="submit">Add Expense</button>
-        </form>
-    </div>
-
-    <!-- Date Range Filter -->
-    <div class="card">
-        <h2>Select Date Range</h2>
-        <select id="dateRange" onchange="filterExpensesByDateRange()">
-            <option value="today">Today</option>
-            <option value="week">Past Week</option>
-            <option value="month">Past Month</option>
-            <option value="custom">Custom Range</option>
-        </select>
-        <!-- Custom Range Inputs (initially hidden) -->
-        <div id="customDateRange" style="display: none;">
-            <label for="startDate">Start Date:</label>
-            <input type="date" id="startDate">
-            <label for="endDate">End Date:</label>
-            <input type="date" id="endDate">
-            <button type="button" onclick="filterExpensesByCustomRange()">Filter</button>
+        </div>
+        
+        <!-- Recent Transactions Container (Initially Hidden) -->
+        <div class="card transaction-history" id="recentTransactionsContainer" style="display: none;">
+            <h3>Recent Transactions</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Actions</th> <!-- New column for Edit/Delete buttons -->
+                    </tr>
+                </thead>                
+                <tbody id="recentTransactionsTable">
+                    <!-- Dynamic rows will be inserted here -->
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Spending Overview -->
-    <div class="card">
-        <h2>Spending Overview</h2>
-        <ul id="spendingOverview"></ul>
-        <canvas id="expenseChart" width="400" height="400"></canvas>
-    </div>
-
-    <div class="card">
-        <h3>Recent Transactions</h3>
-        <table id="recentTransactionsContainer" style="display: none;"> <!-- Start hidden -->
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Cost</th>
-                </tr>
-            </thead>
-            <tbody id="recentTransactionsTable">
-                <!-- Recent transactions will be added here -->
-            </tbody>
-        </table>
-    </div>
-    
     <script src="budget.js"></script>
 </body>
 </html>
