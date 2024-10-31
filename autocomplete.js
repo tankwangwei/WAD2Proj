@@ -4,7 +4,7 @@ let placeChangedCallback;
 export function initAutocomplete(inputID, callback) {
     const input = document.getElementById(inputID);
     autocomplete = new google.maps.places.Autocomplete(input, {
-        types: ['(cities)'] // Limit to cities, can be modified
+        types: ['(regions)'] // Limit to cities, can be modified
     });
 
     // Set up an event listener on `place_changed`
@@ -52,7 +52,7 @@ export function searchAttractionsByText(locationText, callback) {
     const service = new google.maps.places.PlacesService(document.createElement('div'));
     const request = {
         query: locationText,
-        type: ['locality'] // Search for cities, towns, etc.
+        type: ['regions'] // Search for cities, towns, etc.
     };
 
     service.textSearch(request, (results, status) => {

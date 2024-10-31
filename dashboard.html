@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="./imgs/favicon.ico">
-    <title>Home - TripPal</title>
+    <title>Dashboard - TripPal</title>
     <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDK3MEA8WqPihQ2SUBndsYyRldsR9am2rI&libraries=places"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -325,16 +325,6 @@
             <section class="col-lg-4 col-md-6">
                 <div id="currency-section" class="converter-container section-container">
                     <h2 class="text-center">Currency Converter</h2>
-                    <div class="form-group">
-                        <label for="amount" class="form-label text-dark">Amount</label>
-                        <input type="number" class="form-control" id="amount" placeholder="Enter amount" min="0" step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="currency" class="form-label text-dark">Convert to:</label>
-                        <select class="form-select" id="currency">
-                            <option value="">Select a currency</option>
-                        </select>
-                    </div>
                     <div id="result" class="result">Please input amount and currency</div>
                 </div>
             </section>
@@ -347,93 +337,258 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const params = new URLSearchParams(window.location.search);
-            const location = params.get("location");
+            const country = params.get("location");
 
-            if (location) {
-                console.log("Location:", location);
-                document.getElementById("weather-location").textContent = location;
-                fetchWeatherData(location);
+            if (country) {
+                console.log("Country:", country);
+                document.getElementById("weather-location").textContent = country;
+                fetchWeatherData(country);
+                fetchCurrencyByCountry(country)
+                    .then(currencyCode => {
+                        if (currencyCode) {
+                            // Fetch and display conversion rate for 1 EUR to the country's currency
+                            fetchConversionRate(currencyCode);
+                        } else {
+                            resultElem.innerText = "Currency not found for the specified country.";
+                        }
+                    })
+                    .catch(error => console.error("Error fetching currency for country:", error));
             } else {
-                console.log("No location parameter found in URL.");
+                resultElem.innerText = "Country not specified.";
             }
         });
 
-        let currencyRates = {};
         const resultElem = document.getElementById("result");
-        const currencySelect = document.getElementById("currency");
-        const amountInput = document.getElementById("amount");
 
-        function getCurrency() {
-            let url = "http://data.fixer.io/api/latest";
-            let key = "c0f555a5661422620003b935f9e77b04";
+        function fetchCurrencyByCountry(location) {
+            // Extract the country name if location includes a city (e.g., "Bali, Indonesia")
+            const locationParts = location.split(",").map(part => part.trim());
+            const country = locationParts[locationParts.length - 1];
+
+            // Map of countries to their currency codes
+            const countryToCurrencyMap = {
+                "Afghanistan": "AFN",
+                "Albania": "ALL",
+                "Algeria": "DZD",
+                "Andorra": "EUR",
+                "Angola": "AOA",
+                "Argentina": "ARS",
+                "Armenia": "AMD",
+                "Australia": "AUD",
+                "Austria": "EUR",
+                "Azerbaijan": "AZN",
+                "Bahamas": "BSD",
+                "Bahrain": "BHD",
+                "Bangladesh": "BDT",
+                "Barbados": "BBD",
+                "Belarus": "BYN",
+                "Belgium": "EUR",
+                "Belize": "BZD",
+                "Benin": "XOF",
+                "Bhutan": "BTN",
+                "Bolivia": "BOB",
+                "Bosnia and Herzegovina": "BAM",
+                "Botswana": "BWP",
+                "Brazil": "BRL",
+                "Brunei": "BND",
+                "Bulgaria": "BGN",
+                "Burkina Faso": "XOF",
+                "Burundi": "BIF",
+                "Cabo Verde": "CVE",
+                "Cambodia": "KHR",
+                "Cameroon": "XAF",
+                "Canada": "CAD",
+                "Central African Republic": "XAF",
+                "Chad": "XAF",
+                "Chile": "CLP",
+                "China": "CNY",
+                "Colombia": "COP",
+                "Comoros": "KMF",
+                "Congo (Congo-Brazzaville)": "CDF",
+                "Costa Rica": "CRC",
+                "Croatia": "HRK",
+                "Cuba": "CUP",
+                "Cyprus": "EUR",
+                "Czechia (Czech Republic)": "CZK",
+                "Denmark": "DKK",
+                "Djibouti": "DJF",
+                "Dominica": "XCD",
+                "Dominican Republic": "DOP",
+                "Ecuador": "USD",
+                "Egypt": "EGP",
+                "El Salvador": "USD",
+                "Equatorial Guinea": "XAF",
+                "Eritrea": "ERN",
+                "Estonia": "EUR",
+                "Ethiopia": "ETB",
+                "Fiji": "FJD",
+                "Finland": "EUR",
+                "France": "EUR",
+                "Gabon": "XAF",
+                "Gambia": "GMD",
+                "Georgia": "GEL",
+                "Germany": "EUR",
+                "Ghana": "GHS",
+                "Greece": "EUR",
+                "Grenada": "XCD",
+                "Guatemala": "GTQ",
+                "Guinea": "GNF",
+                "Guinea-Bissau": "XOF",
+                "Guyana": "GYD",
+                "Haiti": "HTG",
+                "Honduras": "HNL",
+                "Hungary": "HUF",
+                "Iceland": "ISK",
+                "India": "INR",
+                "Indonesia": "IDR",
+                "Iran": "IRR",
+                "Iraq": "IQD",
+                "Ireland": "EUR",
+                "Israel": "ILS",
+                "Italy": "EUR",
+                "Jamaica": "JMD",
+                "Japan": "JPY",
+                "Jordan": "JOD",
+                "Kazakhstan": "KZT",
+                "Kenya": "KES",
+                "Kiribati": "AUD",
+                "Kuwait": "KWD",
+                "Kyrgyzstan": "KGS",
+                "Laos": "LAK",
+                "Latvia": "EUR",
+                "Lebanon": "LBP",
+                "Lesotho": "LSL",
+                "Liberia": "LRD",
+                "Libya": "LYD",
+                "Liechtenstein": "CHF",
+                "Lithuania": "EUR",
+                "Luxembourg": "EUR",
+                "Madagascar": "MGA",
+                "Malawi": "MWK",
+                "Malaysia": "MYR",
+                "Maldives": "MVR",
+                "Mali": "XOF",
+                "Malta": "EUR",
+                "Marshall Islands": "USD",
+                "Mauritania": "MRU",
+                "Mauritius": "MUR",
+                "Mexico": "MXN",
+                "Moldova": "MDL",
+                "Monaco": "EUR",
+                "Mongolia": "MNT",
+                "Montenegro": "EUR",
+                "Morocco": "MAD",
+                "Mozambique": "MZN",
+                "Myanmar (formerly Burma)": "MMK",
+                "Namibia": "NAD",
+                "Nauru": "AUD",
+                "Nepal": "NPR",
+                "Netherlands": "EUR",
+                "New Zealand": "NZD",
+                "Nicaragua": "NIO",
+                "Niger": "XOF",
+                "Nigeria": "NGN",
+                "North Macedonia": "MKD",
+                "Norway": "NOK",
+                "Oman": "OMR",
+                "Pakistan": "PKR",
+                "Palau": "USD",
+                "Panama": "PAB",
+                "Papua New Guinea": "PGK",
+                "Paraguay": "PYG",
+                "Peru": "PEN",
+                "Philippines": "PHP",
+                "Poland": "PLN",
+                "Portugal": "EUR",
+                "Qatar": "QAR",
+                "Romania": "RON",
+                "Russia": "RUB",
+                "Rwanda": "RWF",
+                "Saint Kitts and Nevis": "XCD",
+                "Saint Lucia": "XCD",
+                "Saint Vincent and the Grenadines": "XCD",
+                "Samoa": "WST",
+                "San Marino": "EUR",
+                "Sao Tome and Principe": "STN",
+                "Saudi Arabia": "SAR",
+                "Senegal": "XOF",
+                "Serbia": "RSD",
+                "Seychelles": "SCR",
+                "Sierra Leone": "SLL",
+                "Singapore": "SGD",
+                "Slovakia": "EUR",
+                "Slovenia": "EUR",
+                "Solomon Islands": "SBD",
+                "Somalia": "SOS",
+                "South Africa": "ZAR",
+                "South Korea": "KRW",
+                "South Sudan": "SSP",
+                "Spain": "EUR",
+                "Sri Lanka": "LKR",
+                "Sudan": "SDG",
+                "Suriname": "SRD",
+                "Sweden": "SEK",
+                "Switzerland": "CHF",
+                "Syria": "SYP",
+                "Taiwan": "TWD",
+                "Tajikistan": "TJS",
+                "Tanzania": "TZS",
+                "Thailand": "THB",
+                "Timor-Leste": "USD",
+                "Togo": "XOF",
+                "Tonga": "TOP",
+                "Trinidad and Tobago": "TTD",
+                "Tunisia": "TND",
+                "Turkey": "TRY",
+                "Turkmenistan": "TMT",
+                "Tuvalu": "AUD",
+                "Uganda": "UGX",
+                "Ukraine": "UAH",
+                "United Arab Emirates": "AED",
+                "United Kingdom": "GBP",
+                "United States": "USD",
+                "Uruguay": "UYU",
+                "Uzbekistan": "UZS",
+                "Vanuatu": "VUV",
+                "Vatican City": "EUR",
+                "Venezuela": "VES",
+                "Vietnam": "VND",
+                "Yemen": "YER",
+                "Zambia": "ZMW",
+                "Zimbabwe": "ZWL"
+            };
+
+            // Return the currency code for the extracted country, or null if not found
+            return Promise.resolve(countryToCurrencyMap[country] || null);
+        }
+
+
+        function fetchConversionRate(currencyCode) {
+            const url = "http://data.fixer.io/api/latest";
+            const apiKey = "c0f555a5661422620003b935f9e77b04";
 
             axios.get(url, {
                 params: {
-                    access_key: key,
+                    access_key: apiKey,
+                    symbols: currencyCode
                 }
             })
                 .then(response => {
-                    let data = response.data;
-                    console.log(data);
-                    currencyRates = data.rates;
-
-                    // Set a clear placeholder option
-                    currencySelect.innerText = ""; // Clear existing options
-                    let placeholderOption = document.createElement("option");
-                    placeholderOption.value = "";
-                    placeholderOption.innerText = "Select a currency";
-                    placeholderOption.selected = true;
-                    placeholderOption.disabled = true;
-                    currencySelect.appendChild(placeholderOption);
-
-                    // Populate with sorted currency options
-                    Object.keys(currencyRates).sort().forEach(key => {
-                        let optionElem = document.createElement("option");
-                        optionElem.value = key;
-                        optionElem.innerText = key;
-                        currencySelect.appendChild(optionElem);
-                    });
+                    const rate = response.data.rates[currencyCode];
+                    if (rate) {
+                        resultElem.innerText = `1 EUR = ${rate.toFixed(2)} ${currencyCode}`;
+                        resultElem.style.color = "#0d6efd";
+                    } else {
+                        resultElem.innerText = "Conversion rate not available.";
+                        resultElem.style.color = "#dc3545";
+                    }
                 })
                 .catch(error => {
-                    console.error("Error fetching rates:", error);
-                    resultElem.innerText = "Error loading currency rates. Please try again later.";
+                    console.error("Error fetching conversion rate:", error);
+                    resultElem.innerText = "Error loading conversion rate. Please try again later.";
                     resultElem.style.color = "#dc3545";
                 });
         }
-
-
-        function updateConversion() {
-            const amount = parseFloat(amountInput.value);
-            const selectedCurrency = currencySelect.value;
-
-            if (!amount && !selectedCurrency) {
-                resultElem.innerText = "Please input amount and currency";
-                resultElem.style.color = "#6c757d";
-                return;
-            }
-
-            if (!amount || !selectedCurrency) {
-                resultElem.innerText = "Please input amount and currency";
-                resultElem.style.color = "#6c757d";
-                return;
-            }
-
-            if (currencyRates[selectedCurrency]) {
-                const convertedAmount = (amount * currencyRates[selectedCurrency]).toFixed(2);
-                resultElem.innerText = `${amount.toFixed(2)} EUR = ${convertedAmount} ${selectedCurrency}`;
-                resultElem.style.color = "#0d6efd";
-            }
-        }
-
-        getCurrency();
-
-        // Event listeners for the currency converter
-        let timeout = null;
-        amountInput.addEventListener("input", () => {
-            clearTimeout(timeout);
-            timeout = setTimeout(updateConversion, 300);
-        });
-        currencySelect.addEventListener("change", updateConversion);
 
         function fetchWeatherData(city) {
             const geoUrl = "http://api.openweathermap.org/geo/1.0/direct";
