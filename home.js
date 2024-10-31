@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import { initAutocomplete, searchAttractions, searchAttractionsByText, displayNoAttractionsMessage } from "./autocomplete.js"; 
+import { initAutocomplete, searchAttractions, searchAttractionsByText, displayNoAttractionsMessage } from "./autocomplete.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAb7M3MiQ3tGYMT1PCFRam-Z0S6rXqwVcQ",
@@ -14,16 +14,41 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Flatpickr Date Range Picker Initialization
+document.addEventListener('DOMContentLoaded', function () {
+    flatpickr("#date-range", {
+        mode: "range",
+        dateFormat: "Y-m-d",
+        minDate: "today"
+    });
+});
+
+// Google Places Autocomplete Initialization
+// window.onload = function () {
+//     let locationEle = document.getElementById("location");
+//     let autocomplete = new google.maps.places.Autocomplete(locationEle);
+
+//     autocomplete.addListener('place_changed', function () {
+//         let place = autocomplete.getPlace();
+//         if (place.geometry) {
+//             let latValue = place.geometry.location.lat();
+//             let lonValue = place.geometry.location.lng();
+//             console.log("Selected Location Latitude:", latValue, "Longitude:", lonValue);
+//         }
+//     });
+// };
+
 // Prevent multiple submissions with a flag
 let isSubmitting = false;
 
+// Ensure initAutocomplete function is invoked correctly
 initAutocomplete("location", (location) => {
     console.log("Selected location:", location);
 });
 
 document.getElementById("newTripForm").addEventListener("submit", async (event) => {
     event.preventDefault(); // Prevent form's default submission behavior
-    
+
     // Check if already submitting to avoid duplicates
     if (isSubmitting) return;
     isSubmitting = true;
@@ -31,14 +56,14 @@ document.getElementById("newTripForm").addEventListener("submit", async (event) 
     const tripName = document.getElementById("tripName").value;
     const location = document.getElementById("location").value;
 
-    // Create new trip in firebase
+    // Create new trip in Firebase
     try {
         const tripRef = await addDoc(collection(db, "trips"), {
             name: tripName,
             location: location,
             createdAt: new Date()
         });
-        
+
         console.log("New trip created with ID:", tripRef.id);
 
         // Redirect to the attractions page with trip ID and location as URL parameters
