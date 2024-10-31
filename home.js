@@ -76,7 +76,7 @@ document.getElementById("newTripForm").addEventListener("submit", async (event) 
 
         // Redirect to the attractions page with trip ID and location as URL parameters
         // window.location.href = `attractions.html?tripID=${tripRef.id}&location=${encodeURIComponent(location)}`;
-        window.location.href = 'dashboard.html'
+        window.location.href = `dashboard.html?tripName=${encodeURIComponent(tripName)}&location=${encodeURIComponent(location)}`;
     } catch (error) {
         console.error("Error creating new trip:", error);
     } finally {

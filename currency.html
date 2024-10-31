@@ -10,7 +10,8 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <title>TripPal Currency</title>
     <style>
-        body, html {
+        body,
+        html {
             height: 100%;
             margin: 0;
             font-family: 'Roboto', sans-serif;
@@ -50,10 +51,10 @@
         }
 
         .navbar .nav-link {
-            color: white !important; 
-            font-weight: bold; 
+            color: white !important;
+            font-weight: bold;
             font-size: 1.1rem;
-            position: relative; 
+            position: relative;
             transition: color 0.3s ease;
         }
 
@@ -65,11 +66,11 @@
             content: '';
             position: absolute;
             width: 0;
-            height: 2px; 
-            background-color: white; 
+            height: 2px;
+            background-color: white;
             left: 0;
-            bottom: -5px; 
-            transition: width 0.3s ease; 
+            bottom: -5px;
+            transition: width 0.3s ease;
         }
 
         .navbar .nav-link:hover::after {
@@ -83,8 +84,8 @@
         }
 
         .navbar .nav-link.active::after {
-            background-color: white; 
-            width: 100%; 
+            background-color: white;
+            width: 100%;
         }
 
         h1 {
@@ -145,7 +146,7 @@
         <div class="converter-container">
             <h2 class="mb-4 text-dark">Currency Converter</h2>
             <div class="form-group">
-                <label for="amount" class="form-label text-dark">Amount (EUR)</label>
+                <label for="amount" class="form-label text-dark">Amount</label>
                 <input type="number" class="form-control" id="amount" placeholder="Enter amount" min="0" step="0.01">
             </div>
             <div class="form-group">
@@ -166,52 +167,62 @@
 
         function getCurrency() {
             let url = "http://data.fixer.io/api/latest";
-            let key = "5cac7709887f8c8233ae02bbbae67476";
+            let key = "c0f555a5661422620003b935f9e77b04";
 
             axios.get(url, {
                 params: {
                     access_key: key,
                 }
             })
-            .then(response => {
-                let data = response.data;
-                currencyRates = data.rates;
-                currencySelect.innerHTML = "<option value=''>Select a currency</option>";
+                .then(response => {
+                    let data = response.data;
+                    console.log(data);
+                    currencyRates = data.rates;
 
-                // Sort currencies alphabetically
-                Object.keys(currencyRates).sort().forEach(key => {
-                    let optionElem = document.createElement("option");
-                    optionElem.value = key;
-                    optionElem.innerText = key;
-                    currencySelect.appendChild(optionElem);
+                    // Set a clear placeholder option
+                    currencySelect.innerText = ""; // Clear existing options
+                    let placeholderOption = document.createElement("option");
+                    placeholderOption.value = "";
+                    placeholderOption.innerText = "Select a currency";
+                    placeholderOption.selected = true;
+                    placeholderOption.disabled = true;
+                    currencySelect.appendChild(placeholderOption);
+
+                    // Populate with sorted currency options
+                    Object.keys(currencyRates).sort().forEach(key => {
+                        let optionElem = document.createElement("option");
+                        optionElem.value = key;
+                        optionElem.innerText = key;
+                        currencySelect.appendChild(optionElem);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching rates:", error);
+                    resultElem.innerText = "Error loading currency rates. Please try again later.";
+                    resultElem.style.color = "#dc3545";
                 });
-            })
-            .catch(error => {
-                console.error("Error fetching rates:", error);
-                resultElem.innerHTML = "Error loading currency rates. Please try again later.";
-                resultElem.style.color = "#dc3545";
-            });
         }
+
 
         function updateConversion() {
             const amount = parseFloat(amountInput.value);
             const selectedCurrency = currencySelect.value;
 
             if (!amount && !selectedCurrency) {
-                resultElem.innerHTML = "Please input amount and currency";
+                resultElem.innerText = "Please input amount and currency";
                 resultElem.style.color = "#6c757d";
                 return;
             }
 
             if (!amount || !selectedCurrency) {
-                resultElem.innerHTML = "Please input amount and currency";
+                resultElem.innerText = "Please input amount and currency";
                 resultElem.style.color = "#6c757d";
                 return;
             }
 
             if (currencyRates[selectedCurrency]) {
                 const convertedAmount = (amount * currencyRates[selectedCurrency]).toFixed(2);
-                resultElem.innerHTML = `${amount.toFixed(2)} EUR = ${convertedAmount} ${selectedCurrency}`;
+                resultElem.innerText = `${amount.toFixed(2)} EUR = ${convertedAmount} ${selectedCurrency}`;
                 resultElem.style.color = "#0d6efd";
             }
         }
@@ -220,7 +231,7 @@
 
         // Add event listener for amount input with debounce
         let timeout = null;
-        amountInput.addEventListener("input", function() {
+        amountInput.addEventListener("input", function () {
             clearTimeout(timeout);
             timeout = setTimeout(updateConversion, 300);
         });
@@ -229,7 +240,7 @@
         currencySelect.addEventListener("change", updateConversion);
 
         // Add event listener for clearing the input
-        amountInput.addEventListener("blur", function() {
+        amountInput.addEventListener("blur", function () {
             if (!this.value) {
                 updateConversion();
             }
