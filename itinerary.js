@@ -16,6 +16,7 @@ const db = getFirestore(app);
 const activitiesContainer = document.getElementById('activitiesContainer');
 let map;
 
+
 async function initMap() {
     const singaporeCenter = { lat: 1.3521, lng: 103.8198 };  // default center
     const { Map } = await google.maps.importLibrary("maps");
@@ -29,10 +30,17 @@ async function initMap() {
     loadActivities();
 }
 
+// Show saved activities
+async function savedActivities() {
+    const savedActivitiesRef = collection(db, "savedActivities");
+    const querySnapshot = await getDocs(savedActivitiesRef);
+
+}
+
 // Display saved activities on map
-async function loadActivities(tripID) {
-    const activitiesRef = collection(db, `trips/${tripID}/activities`);
-    const querySnapshot = await getDocs(activitiesRef);
+async function loadActivities() {
+    const savedActivitiesRef = collection(db, "savedActivities");
+    const querySnapshot = await getDocs(savedActivitiesRef);
 
     const bounds = new google.maps.LatLngBounds();
 
@@ -41,9 +49,8 @@ async function loadActivities(tripID) {
 
         const lat = parseFloat(activity.lat);
         const lng = parseFloat(activity.lng);
-
         if (!isNaN(lat) && !isNaN(lng)) {
-            renderActivity(activity, docSnapshot.id);  // Render each activity
+            displayActivity(activity, docSnapshot.id);  // Render each activity
 
             // Add marker to the map
             const marker = new google.maps.Marker({
@@ -62,24 +69,23 @@ async function loadActivities(tripID) {
     map.fitBounds(bounds);
 }
 
-function renderActivity(activity, id, tripID) {
+function displayActivity(activity, id) {
     const activityCard = document.createElement('div');
     activityCard.classList.add('col-md-4', 'activity-card');
 
     activityCard.innerHTML = `
       <h5>${activity.name}</h5>
       <p>Address: ${activity.address}</p>
-      <button class="btn btn-danger" onclick="removeActivity('${tripID}', '${id}')">Remove</button>
+      <button class="btn btn-danger" onclick="removeActivity('${id}')">Remove</button>
     `;
 
     activitiesContainer.appendChild(activityCard);
 }
 
 // Remove activity from Firestore and update the list
-async function removeActivity(tripID, activityID) {
+async function removeActivity(id) {
     try {
-        await deleteDoc(doc(db, `trips/${tripID}/activities`, activityID));
-        console.log("Activity removed with ID:", activityID);
+        await deleteDoc(doc(db, "savedActivities", id));
         location.reload();  // Reload the page to refresh the list of activities and map
     } catch (error) {
         console.error("Error removing document: ", error);
