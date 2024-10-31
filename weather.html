@@ -439,6 +439,33 @@
         .highlight-today p {
             color: white;
         }
+
+        .row {
+            display: flex;
+            align-items: stretch;
+            /* Makes both columns match height */
+        }
+
+        .col-md-7 {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* Centers the chart vertically */
+        }
+
+        .graph-container {
+            width: 100%;
+            max-width: 800px;
+            height: 100%;
+            /* Takes up full height of the column */
+            display: flex;
+            align-items: center;
+        }
+
+        #temperatureChart {
+            width: 100% !important;
+            height: 100% !important;
+        }
     </style>
 </head>
 
@@ -486,16 +513,20 @@
             <div class="loading-spinner" id="loadingSpinner"></div>
 
             <p id="errorMessage"></p>
-
-            <p id="location"></p>
-
-            <p id="temperature"></p>
-
-            <div class="graph-container">
-                <canvas id="temperatureChart"></canvas>
+            <div class="row">
+                <div class="col-md-5 d-flex flex-column align-items-center text-center">
+                    <p id="location" class="text-center"></p>
+                    <p id="temperature" class="text-center"></p>
+                    <div id="humidityCardsContainer" class="humidity-cards-container"></div>
+                </div>
+                <div class="col-md-7">
+                    <div class="graph-container">
+                        <canvas id="temperatureChart"></canvas>
+                    </div>
+                </div>
             </div>
 
-            <div id="humidityCardsContainer" class="humidity-cards-container"></div>
+
             <div id="weatherResults">
                 <table class="table table-striped table-bordered table-hover">
                     <thead>
@@ -593,99 +624,104 @@
             })
     }
 
-// Global variable to store the chart instance
-let temperatureChart;
+    // Global variable to store the chart instance
+    let temperatureChart;
 
-function getWeather(locationText) {
-    let url = "https://api.openweathermap.org/data/3.0/onecall";
-    let key = "4e1a69304c74566a0ebcf18acbafbc18";
+    function getWeather(locationText) {
+        let url = "https://api.openweathermap.org/data/3.0/onecall";
+        let key = "4e1a69304c74566a0ebcf18acbafbc18";
 
-    document.getElementById('loadingSpinner').style.display = 'block';
-    temperatureEle.style.opacity = '0';
-    document.getElementById('location').style.opacity = '0';
-    dailyPredictEle.innerText = '';
+        document.getElementById('loadingSpinner').style.display = 'block';
+        temperatureEle.style.opacity = '0';
+        document.getElementById('location').style.opacity = '0';
+        dailyPredictEle.innerText = '';
 
-    document.querySelector('.container').classList.add('has-results');
+        document.querySelector('.container').classList.add('has-results');
 
-    axios.get(url, {
-        params: {
-            lat: latValue,
-            lon: lonValue,
-            appid: key,
-            exclude: 'minutely' // To include hourly forecast data for the chart
-        }
-    })
-    .then(response => {
-        let data = response.data;
-        document.getElementById('loadingSpinner').style.display = 'none';
-        errorMessageEle.innerText = "";
-
-        // Display location and current weather summary
-        const locationEle = document.getElementById('location');
-        locationEle.innerText = locationText; 
-        locationEle.classList.add('slide-up');
-
-        let kelvin = data.current.temp;
-        let degreeCelcius = (kelvin - 273.15).toFixed(2);
-        let description = data.current.weather[0].description;
-        
-        temperatureEle.innerText = `${degreeCelcius}°C ${description.charAt(0).toUpperCase() + description.slice(1)}`;
-        temperatureEle.classList.add('slide-up');
-        temperatureEle.style.opacity = '1';
-
-        // Display humidity cards and daily table as before
-        const humidityCardsContainer = document.getElementById("humidityCardsContainer");
-        humidityCardsContainer.innerHTML = "";
-        data.daily.slice(0, 4).forEach((day, index) => {
-            let card = document.createElement("div");
-            card.className = "humidity-card";
-
-            // Apply highlight-today class to the first card (Today)
-            if (index === 0) {
-                card.classList.add("highlight-today");
+        axios.get(url, {
+            params: {
+                lat: latValue,
+                lon: lonValue,
+                appid: key,
+                exclude: 'minutely' // To include hourly forecast data for the chart
             }
+        })
+            .then(response => {
+                let data = response.data;
+                document.getElementById('loadingSpinner').style.display = 'none';
+                errorMessageEle.innerText = "";
 
-            let date = new Date();
-            date.setDate(date.getDate() + index);
-            let formattedDate = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                // Display location and current weather summary
+                const locationEle = document.getElementById('location');
+                locationEle.innerText = locationText;
+                locationEle.classList.add('slide-up');
 
-            card.innerHTML = `
+                let kelvin = data.current.temp;
+                let degreeCelcius = (kelvin - 273.15).toFixed(2);
+                let description = data.current.weather[0].description;
+
+                let iconSrc = getWeatherIcon(description);
+                temperatureEle.innerHTML = `
+                <span style="font-size: 3rem; font-weight: bold;">${degreeCelcius}°C</span><br>
+                <img src="${iconSrc}" alt="${description}" style="width: 40px; vertical-align: middle; margin-right: 5px;">
+                <span style="font-size: 1.5rem;">${description.charAt(0).toUpperCase() + description.slice(1)}</span>
+                `;
+                temperatureEle.classList.add('slide-up');
+                temperatureEle.style.opacity = '1';
+
+                // Display humidity cards and daily table as before
+                const humidityCardsContainer = document.getElementById("humidityCardsContainer");
+                humidityCardsContainer.innerHTML = "";
+                data.daily.slice(0, 4).forEach((day, index) => {
+                    let card = document.createElement("div");
+                    card.className = "humidity-card";
+
+                    // Apply highlight-today class to the first card (Today)
+                    if (index === 0) {
+                        card.classList.add("highlight-today");
+                    }
+
+                    let date = new Date();
+                    date.setDate(date.getDate() + index);
+                    let formattedDate = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
+                    card.innerHTML = `
                 <h4>${index === 0 ? "Today" : formattedDate}</h4>
                 <img src="${getWeatherIcon(day.weather[0].description)}" alt="${day.weather[0].description}">
                 <p>Humidity ${day.humidity}%</p>
             `;
-            humidityCardsContainer.appendChild(card);
-        });
-
-        // Create table header
-        dailyPredictEle.innerHTML = "";
-        let tableRow = document.createElement("tr");
-        ["Day", "Lowest Temperature", "Highest Temperature", "Summary"].forEach(header => {
-            let th = document.createElement("th");
-            th.innerText = header;
-            tableRow.appendChild(th);
-        });
-        dailyPredictEle.appendChild(tableRow);
-
-        // Add daily forecast rows
-        const table = document.querySelector('.table');
-        table.style.opacity = '0';
-
-        setTimeout(() => {
-            table.classList.add('fade-in');
-
-            data.daily.forEach((day, index) => {
-                let row = document.createElement("tr");
-
-                let date = new Date();
-                date.setDate(date.getDate() + index);
-                let formattedDate = date.toLocaleDateString('en-GB', {
-                    weekday: 'short',
-                    day: 'numeric',
-                    month: 'short'
+                    humidityCardsContainer.appendChild(card);
                 });
 
-                row.innerHTML = `
+                // Create table header
+                dailyPredictEle.innerHTML = "";
+                let tableRow = document.createElement("tr");
+                ["Day", "Lowest Temperature", "Highest Temperature", "Summary"].forEach(header => {
+                    let th = document.createElement("th");
+                    th.innerText = header;
+                    tableRow.appendChild(th);
+                });
+                dailyPredictEle.appendChild(tableRow);
+
+                // Add daily forecast rows
+                const table = document.querySelector('.table');
+                table.style.opacity = '0';
+
+                setTimeout(() => {
+                    table.classList.add('fade-in');
+
+                    data.daily.forEach((day, index) => {
+                        let row = document.createElement("tr");
+
+                        let date = new Date();
+                        date.setDate(date.getDate() + index);
+                        let formattedDate = date.toLocaleDateString('en-GB', {
+                            weekday: 'short',
+                            day: 'numeric',
+                            month: 'short'
+                        });
+
+                        row.innerHTML = `
                     <td>${formattedDate}</td>
                     <td>${(day.temp.min - 273.15).toFixed(2)}°C</td>
                     <td>${(day.temp.max - 273.15).toFixed(2)}°C</td>
@@ -694,68 +730,68 @@ function getWeather(locationText) {
                         ${day.weather[0].description.charAt(0).toUpperCase() + day.weather[0].description.slice(1)}
                     </td>
                 `;
-                dailyPredictEle.appendChild(row);
-            });
-        }, 300);
+                        dailyPredictEle.appendChild(row);
+                    });
+                }, 300);
 
-        document.getElementById('weatherResults').classList.add('show');
+                document.getElementById('weatherResults').classList.add('show');
 
-        // Extract hourly temperature data for the chart
-        const hours = data.hourly.slice(0, 24).map((hour, index) => {
-            let date = new Date();
-            date.setHours(date.getHours() + index);
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        });
-        const temperatures = data.hourly.slice(0, 24).map(hour => (hour.temp - 273.15).toFixed(2));
+                // Extract hourly temperature data for the chart
+                const hours = data.hourly.slice(0, 24).map((hour, index) => {
+                    let date = new Date();
+                    date.setHours(date.getHours() + index);
+                    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                });
+                const temperatures = data.hourly.slice(0, 24).map(hour => (hour.temp - 273.15).toFixed(2));
 
-        // Check if a chart already exists and destroy it if it does
-        if (temperatureChart) {
-            temperatureChart.destroy();
-        }
-
-        // Render temperature chart
-        const ctx = document.getElementById('temperatureChart').getContext('2d');
-        temperatureChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: hours,
-                datasets: [{
-                    label: 'Temperature (°C)',
-                    data: temperatures,
-                    backgroundColor: 'rgba(0, 123, 255, 0.2)',
-                    borderColor: 'rgba(0, 123, 255, 1)',
-                    borderWidth: 2,
-                    pointRadius: 3,
-                    pointBackgroundColor: 'rgba(0, 123, 255, 1)',
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Time'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Temperature (°C)'
-                        },
-                        beginAtZero: false
-                    }
+                // Check if a chart already exists and destroy it if it does
+                if (temperatureChart) {
+                    temperatureChart.destroy();
                 }
-            }
-        });
 
-    })
-    .catch(error => {
-        document.getElementById('loadingSpinner').style.display = 'none';
-        errorMessageEle.innerText = "Failed to retrieve weather data. Please try again.";
-        document.querySelector('.container').classList.remove('has-results');
-        document.getElementById('weatherResults').classList.remove('show');
-    });
-}
+                // Render temperature chart
+                const ctx = document.getElementById('temperatureChart').getContext('2d');
+                temperatureChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: hours,
+                        datasets: [{
+                            label: 'Temperature (°C)',
+                            data: temperatures,
+                            backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                            borderColor: 'rgba(0, 123, 255, 1)',
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointBackgroundColor: 'rgba(0, 123, 255, 1)',
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Time'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Temperature (°C)'
+                                },
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+
+            })
+            .catch(error => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                errorMessageEle.innerText = "Failed to retrieve weather data. Please try again.";
+                document.querySelector('.container').classList.remove('has-results');
+                document.getElementById('weatherResults').classList.remove('show');
+            });
+    }
 
     function getWeatherIcon(summary) {
         const iconMap = {
