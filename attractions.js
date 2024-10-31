@@ -20,17 +20,33 @@ const urlParams = new URLSearchParams(window.location.search);
 const tripID = urlParams.get('tripID');
 const location = decodeURIComponent(urlParams.get('location'));
 
-// Set the location input field and trigger the attractions search
-document.getElementById("location").value = location;
+// Set the location input field
+const locationInput = document.getElementById("location");
+locationInput.value = location;
 
-// Initialize autocomplete and trigger search on load
-initAutocomplete("location", (selectedLocation) => {
-    if (!selectedLocation) {
-        // If no new location is selected, use the passed location for search
+// Automatically search for attractions on page load if location is defined
+document.addEventListener("DOMContentLoaded", () => {
+    if (location) {
         searchAttractionsByText(location, displayAttractions);
-    } else {
-        // If a new location is selected manually, use that for search
+    }
+});
+
+// Initialize autocomplete
+initAutocomplete("location", (selectedLocation) => {
+    if (selectedLocation) {
+        // If a new location is selected, search for attractions in the new location
         searchAttractions(selectedLocation, displayAttractions);
+    }
+});
+
+// Listen for the search form submission to trigger attractions search
+document.getElementById("searchForm").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent page refresh
+    const locationInputValue = locationInput.value;
+
+    // Trigger a new search based on the input value
+    if (locationInputValue) {
+        searchAttractionsByText(locationInputValue, displayAttractions);
     }
 });
 
