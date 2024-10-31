@@ -20,17 +20,33 @@ const urlParams = new URLSearchParams(window.location.search);
 const tripID = urlParams.get('tripID');
 const location = decodeURIComponent(urlParams.get('location'));
 
-// Set the location input field and trigger the attractions search
-document.getElementById("location").value = location;
+// Set the location input field
+const locationInput = document.getElementById("location");
+locationInput.value = location;
 
-// Initialize autocomplete and trigger search on load
-initAutocomplete("location", (selectedLocation) => {
-    if (!selectedLocation) {
-        // If no new location is selected, use the passed location for search
+// Automatically search for attractions on page load if location is defined
+document.addEventListener("DOMContentLoaded", () => {
+    if (location) {
         searchAttractionsByText(location, displayAttractions);
-    } else {
-        // If a new location is selected manually, use that for search
+    }
+});
+
+// Initialize autocomplete
+initAutocomplete("location", (selectedLocation) => {
+    if (selectedLocation) {
+        // If a new location is selected, search for attractions in the new location
         searchAttractions(selectedLocation, displayAttractions);
+    }
+});
+
+// Listen for the search form submission to trigger attractions search
+document.getElementById("searchForm").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent page refresh
+    const locationInputValue = locationInput.value;
+
+    // Trigger a new search based on the input value
+    if (locationInputValue) {
+        searchAttractionsByText(locationInputValue, displayAttractions);
     }
 });
 
@@ -63,7 +79,13 @@ function displayAttractions(attractions) {
                     <p class="card-text">Rating: ${attraction.rating || "N/A"}</p>
                     <p class="card-text">Reviews: ${attraction.user_ratings_total || 0}</p>
                     <p class="card-text">Address: ${attraction.formatted_address || attraction.vicinity}</p>
-                    <button class="btn btn-success" onclick="saveActivity('${tripID}', '${attraction.name}', '${attraction.formatted_address || attraction.vicinity}', ${lat}, ${lng}, '${imageUrl}')">Save Activity</button>
+
+                    <!-- <button class="btn btn-success" onclick="saveActivity('${tripID}', '${attraction.name}', '${attraction.formatted_address || attraction.vicinity}', ${lat}, ${lng}, '${imageUrl}')">Save Activity</button> --!>
+
+                    <div class="save-icon" onclick="saveActivity('${tripID}', '${attraction.name}', '${attraction.formatted_address || attraction.vicinity}', ${lat}, ${lng}, '${imageUrl}', this)">
+                        <span class="icon plus-icon" title="Save Activity">＋</span>
+                        <span class="icon checkmark-icon" title="Saved" style="display:none;">✔</span>
+                    </div>
                 </div>
             </div>
         `;
@@ -82,9 +104,26 @@ async function saveActivity(tripID, name, address, lat, lng, imageUrl) {
             savedAt: new Date()
         });
         console.log("Activity saved with ID:", activityRef.id);
+
+        iconElement.querySelector('.plus-icon').style.display = 'none';
+        iconElement.querySelector('.checkmark-icon').style.display = 'inline';
+        showNotification("Activity saved successfully", iconElement.closest('.card'));
+
     } catch (error) {
         console.error("Error saving activity:", error);
     }
+}
+
+function showNotification(message, cardElement) {
+    const notification = document.createElement("div");
+    notification.className = "notification";
+    notification.innerText = message;
+    cardElement.appendChild(notification);
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
 }
 
 window.saveActivity = saveActivity;
