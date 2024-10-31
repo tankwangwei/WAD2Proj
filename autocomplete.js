@@ -7,7 +7,7 @@ export function initAutocomplete(inputID, callback) {
         types: ['(cities)'] // Limit to cities, can be modified
     });
 
-    // Set up an event listener on place_changed
+    // Set up an event listener on `place_changed`
     autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
         if (place.geometry) {
@@ -71,3 +71,4 @@ export function displayNoAttractionsMessage() {
     attractionContainer.innerHTML = ''; // Clear previous results
     attractionContainer.innerHTML = '<h2>No attractions found.</h2>'; // Show message if no attractions
 }
+

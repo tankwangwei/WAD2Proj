@@ -30,9 +30,9 @@ async function initMap() {
 }
 
 // Display saved activities on map
-async function loadActivities() {
-    const savedActivitiesRef = collection(db, "savedActivities");
-    const querySnapshot = await getDocs(savedActivitiesRef);
+async function loadActivities(tripID) {
+    const activitiesRef = collection(db, `trips/${tripID}/activities`);
+    const querySnapshot = await getDocs(activitiesRef);
 
     const bounds = new google.maps.LatLngBounds();
 
@@ -41,8 +41,9 @@ async function loadActivities() {
 
         const lat = parseFloat(activity.lat);
         const lng = parseFloat(activity.lng);
+
         if (!isNaN(lat) && !isNaN(lng)) {
-            displayActivity(activity, docSnapshot.id);  // Render each activity
+            renderActivity(activity, docSnapshot.id);  // Render each activity
 
             // Add marker to the map
             const marker = new google.maps.Marker({
@@ -61,23 +62,24 @@ async function loadActivities() {
     map.fitBounds(bounds);
 }
 
-function displayActivity(activity, id) {
+function renderActivity(activity, id, tripID) {
     const activityCard = document.createElement('div');
     activityCard.classList.add('col-md-4', 'activity-card');
 
     activityCard.innerHTML = `
       <h5>${activity.name}</h5>
       <p>Address: ${activity.address}</p>
-      <button class="btn btn-danger" onclick="removeActivity('${id}')">Remove</button>
+      <button class="btn btn-danger" onclick="removeActivity('${tripID}', '${id}')">Remove</button>
     `;
 
     activitiesContainer.appendChild(activityCard);
 }
 
 // Remove activity from Firestore and update the list
-async function removeActivity(id) {
+async function removeActivity(tripID, activityID) {
     try {
-        await deleteDoc(doc(db, "savedActivities", id));
+        await deleteDoc(doc(db, `trips/${tripID}/activities`, activityID));
+        console.log("Activity removed with ID:", activityID);
         location.reload();  // Reload the page to refresh the list of activities and map
     } catch (error) {
         console.error("Error removing document: ", error);
