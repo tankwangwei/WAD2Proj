@@ -25,82 +25,11 @@ initAutocomplete("location", (locationCoords) => {
     searchAttractions(locationCoords, displayAttractions);
 });
 
-
-// function initAutocomplete() {
-//     const input = document.getElementById('location');
-//     autocomplete = new google.maps.places.Autocomplete(input, {
-//         types: ['(cities)'] // Autocomplete limited to cities, can modify to states or countries if needed
-//     });
-
-//     // Listener to handle place selection, Google Maps Javascript API method
-//     autocomplete.addListener('place_changed', onPlaceChanged);
-// }
-
-
-// function onPlaceChanged() {
-//     const place = autocomplete.getPlace();
-//     if (!place.geometry) {
-//         console.log("No details available for the selected location.");
-//         return;
-//     }
-//     searchAttractions(place.geometry.location);
-// }
-
-
 document.getElementById('searchForm').addEventListener('submit', function (event) {
     event.preventDefault(); // Prevent page refresh
     const locationInput = document.getElementById('location').value;
     searchAttractionsByText(locationInput, displayAttractions);
 });
-
-// Search for attractions based on location coordinates using Google Places API
-// function searchAttractions(location) {
-//     const service = new google.maps.places.PlacesService(document.createElement('div'));
-//     const request = {
-//         location: location,
-//         // rankBy: google.maps.places.RankBy.PROMINENCE,
-//         radius: '50000', // Search within 50km
-//         type: [
-//             'tourist_attraction'
-//         ],
-//     };
-
-//     service.nearbySearch(request, function (results, status) {
-//         if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
-//             const topRatedPlaces = results
-//             // .sort((a, b) => b.rating - a.rating) // Sort by descending order
-//             // .filter(place => place.rating >= 3.5 && !place.types.includes('lodging')); // idk if we want this filter.. do we?
-//             displayAttractions(topRatedPlaces);
-//         } else {
-//             displayNoAttractionsMessage();
-//         }
-//     });
-// }
-
-// // Search for attractions by location name using Google Places Text Search API
-// function searchAttractionsByText(location) {
-//     const service = new google.maps.places.PlacesService(document.createElement('div'));
-//     const request = {
-//         query: location,
-//         type: ['locality'] // Search for cities, towns, or other locations
-//     };
-
-//     service.textSearch(request, function (results, status) {
-//         if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
-
-//             // Get coordinates of the first result
-//             const locationCoords = results[0].geometry.location;
-
-//             // Use Nearby Search
-//             searchAttractions(locationCoords);
-
-//             // This is to ensure consistent results whether the user clicks on suggestions or presses the search button
-
-//         } else {
-//             displayNoAttractionsMessage();
-//         }
-//     });
-// }
 
 // Display attractions in cards
 function displayAttractions(attractions) {
@@ -154,19 +83,5 @@ async function saveActivity(tripID, name, address, lat, lng, imageUrl) {
         console.error("Error saving activity:", error);
     }
 }
-
-// Display a message when no attractions are found
-// function displayNoAttractionsMessage() {
-//     const attractionContainer = document.getElementById('attractionsContainer');
-//     attractionContainer.innerHTML = ''; // Clear previous results
-//     attractionContainer.innerHTML = '<h2>No attractions found.</h2>'; // Show message if no attractions
-// }
-
-// window.onload = function () {
-//     initAutocomplete();
-//     if (location) {
-//         searchAttractionsByText(location); // Auto-search for attractions based on location from URL
-//     }
-// };
 
 window.saveActivity = saveActivity;
