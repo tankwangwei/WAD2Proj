@@ -7,13 +7,17 @@
     <title>Plan Your Itinerary</title>
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDK3MEA8WqPihQ2SUBndsYyRldsR9am2rI&libraries=places"></script>
-    <script src="itinerary.js" type="module"></script>
+  
 
     <style>
         body {
           margin: 0;
+          background-size: cover;
+          background-position: center;
+          color: white;
+          padding-top: 120px;
+          box-sizing: border-box;
+  
         }
     
         .containermain {
@@ -21,12 +25,7 @@
           padding: 20px;
           width: 100%;
         }
-    
-        #map {
-          height: 400px;
-          width: 100%;
-          margin-top: 20px;
-        }
+  
     
         .activity-card {
           margin: 10px;
@@ -35,17 +34,164 @@
           border: 1px solid #ddd;
           border-radius: 5px;
         }
+
+        .navbar {
+            background-color: transparent;
+            height: 100px;
+            padding: 10px 20px;
+            box-shadow: none;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        #logo {
+            height: 80px;
+            max-height: 100%;
+            width: auto;
+            transition: all 0.3s ease;
+        }
+
+        .navbar .nav-link {
+            color: black !important; 
+            font-weight: bold; 
+            font-size: 1.1rem;
+            position: relative; 
+            transition: color 0.3s ease;
+        }
+
+        .navbar .nav-link:hover {
+            color: grey!important;
+        }
+
+        .navbar .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px; 
+            background-color: grey; 
+            left: 0;
+            bottom: -5px; 
+            transition: width 0.3s ease; 
+        }
+
+        .navbar .nav-link:hover::after {
+            width: 100%;
+        }
+
+
+        .navbar .nav-link.active {
+            color: black !important;
+            font-weight: bold;
+        }
+
+        .navbar .nav-link.active::after {
+            background-color: black; 
+            width: 100%; 
+        }
+
+        #savedactivities {
+          background-color: rgba(255, 255, 255, 0.5);
+          color: black;
+
+        }
+
+        #calendar {
+          background-color: rgba(255, 255, 255, 0.5);
+          color: black;
+
+        }
+        
+        #mapsection{
+          background-color: rgba(255, 255, 255, 0.5);
+          color: black;
+
+        }
+
+        #map {
+            height: 400px;  /* Set height for the map */
+        }
+
+        
       </style>
 </head>
 
 <body>
-    <div class="container mt-5">
-        <h1>Your Itinerary</h1>
+    <nav class="navbar fixed-top">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <a class="navbar-brand" href="home.html">
+                <img src="./imgs/TripPal Transparent Logo.png" id="logo" alt="TripPal Logo">
+            </a>
+            <ul class="nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="weather.html">Weather</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="currency.html">Currency</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="itinerary.html">Itinerary Builder</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="destination.html">Destination Planning</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="budget.html">Budgeting</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
 
-        <h3>Saved Activities</h3>
-        <div id="activitiesContainer" class="row"></div>
+    <div class="container text-left">
+      <div class="row align-items-start">
+          <div id="savedactivities" class="col-2">
+              Saved Activities
+          </div>
+          <div id="calendar" class="col-6">
+              Calendar
+  
+          </div>
 
-        <h3>Map</h3>
-        <div id="map"></div>
-    </div>
+          <div id="mapsection" class="col-4">
+
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Select Day: 
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark">
+                  <li><a class="dropdown-item active" href="#">Action</a></li>
+                  <li><a class="dropdown-item" href="#">Another action</a></li>
+                  <li><a class="dropdown-item" href="#">Something else here</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="#">Separated link</a></li>
+                </ul>
+              </div>
+
+              <div id="map"></div>  
+              <script async
+                  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDGu5hpR4Dq74dKo4999P_hC7DZfANagRI&callback=initMap">
+              </script>
+
+              <!-- Load your Firebase and application scripts -->
+              <script type="module" src="itinerary.js"></script>
+
+              <!-- Add the event listener directly in the JavaScript file (app.js) -->
+              <script>
+                  // You can also add event listeners here if necessary, but it's already handled in app.js
+                  // This ensures initMap() is called when the DOM content is fully loaded.
+                  document.addEventListener('DOMContentLoaded', function() {
+                      console.log('DOM fully loaded and parsed');
+                      // Any other functions you want to call can go here
+                  });
+              </script>
+            
+            
+          </div>
+      </div>
+  </div>
+
+  </div>
+
+  <script type="module" src="itinerary.js"></script>
 </body>
