@@ -4,35 +4,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDK3MEA8WqPihQ2SUBndsYyRldsR9am2rI&libraries=places"></script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDK3MEA8WqPihQ2SUBndsYyRldsR9am2rI&libraries=places"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <link rel="icon" type="image/x-icon" href="./imgs/favicon.ico">
     <title>Welcome to TripPal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
-        body, html {
+        body,
+        html {
             height: 100%;
             margin: 0;
             font-family: 'Roboto', sans-serif;
             background-image: url('./imgs/changibackground.jpg');
+            background-size: cover;
+            background-position: center;
+
         }
 
         #main {
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             text-align: center;
             min-height: 100vh;
             color: black;
             padding-top: 120px;
+            margin-bottom: 30px;
         }
 
         .navbar {
-            background-color: transparent; /* Transparent navbar */
+            background-color: transparent;
+            /* Transparent navbar */
             height: 100px;
             padding: 10px 20px;
-            box-shadow: none; /* Removes the shadow */
+            box-shadow: none;
+            /* Removes the shadow */
             position: fixed;
             top: 0;
             width: 100%;
@@ -48,10 +56,13 @@
 
         /* Styling for the navigation links */
         .navbar .nav-link {
-            color: white !important; /* White text */
-            font-weight: bold; /* Bold text */
+            color: white !important;
+            /* White text */
+            font-weight: bold;
+            /* Bold text */
             font-size: 1.1rem;
-            position: relative; /* Position relative to use pseudo-elements */
+            position: relative;
+            /* Position relative to use pseudo-elements */
             transition: color 0.3s ease;
         }
 
@@ -63,28 +74,38 @@
         .navbar .nav-link::after {
             content: '';
             position: absolute;
-            width: 0; /* Start with no width */
-            height: 2px; /* Line height */
-            background-color: white; /* Line color */
+            width: 0;
+            /* Start with no width */
+            height: 2px;
+            /* Line height */
+            background-color: white;
+            /* Line color */
             left: 0;
-            bottom: -5px; /* Position it slightly below the text */
-            transition: width 0.3s ease; /* Smooth animation */
+            bottom: -5px;
+            /* Position it slightly below the text */
+            transition: width 0.3s ease;
+            /* Smooth animation */
         }
 
         .navbar .nav-link:hover::after {
-            width: 100%; /* Expand the line to full width on hover */
+            width: 100%;
+            /* Expand the line to full width on hover */
         }
 
         /* Style for the active page link */
         .navbar .nav-link.active {
-            color: rgb(22, 96, 175) !important; /* Distinct color for the active page */
-            font-weight: bold; /* Make the active link bold */
+            color: rgb(22, 96, 175) !important;
+            /* Distinct color for the active page */
+            font-weight: bold;
+            /* Make the active link bold */
         }
 
         /* Add underline to the active link */
         .navbar .nav-link.active::after {
-            background-color: rgb(22, 96, 175); /* Make the underline match the active color */
-            width: 100%; /* Show the underline for the active link */
+            background-color: rgb(22, 96, 175);
+            /* Make the underline match the active color */
+            width: 100%;
+            /* Show the underline for the active link */
         }
 
         .btns a {
@@ -104,25 +125,6 @@
             box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
         }
 
-        .search-bar {
-            max-width: 600px;
-            margin: 20px auto;
-        }
-
-        table {
-            width: 100%;
-            table-layout: fixed;
-            margin-top: 20px;
-            color: white;
-        }
-
-        th, td {
-            padding: 5px;
-            text-align: center;
-            vertical-align: middle;
-            width: 25%;
-        }
-
         td img {
             width: 30px;
             height: auto;
@@ -130,7 +132,15 @@
         }
 
         #weatherResults {
-            min-height: 300px;
+            opacity: 0;
+            height: 0;
+            transition: all 0.3s ease;
+        }
+
+        #weatherResults.show {
+            opacity: 1;
+            height: auto;
+            margin-top: 20px;
         }
 
         #errorMessage {
@@ -138,6 +148,250 @@
             font-weight: bold;
             margin-top: 10px;
         }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            margin: 0 auto;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            /* Add smooth transition */
+            max-height: 200px;
+            /* Initial height */
+            overflow: hidden;
+            /* Hide overflow content initially */
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 2rem;
+            font-weight: bold;
+        }
+
+        .search-bar {
+            margin-bottom: 2rem;
+        }
+
+        .search-bar .form-control {
+            border-radius: 20px 0 0 20px;
+            border: 1px solid #ddd;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .search-bar .btn {
+            border-radius: 0 20px 20px 0;
+            padding: 0.75rem 1.5rem;
+            background-color: #007bff;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar .btn:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        #temperature {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin: 1.5rem 0;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .table {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .table th {
+            background-color: #007bff;
+            color: white;
+            padding: 1rem;
+        }
+
+        .table td {
+            padding: 1rem;
+            color: #333;
+        }
+
+        .container.has-results {
+            max-height: 2000px;
+            /* Large enough to show all content */
+        }
+
+        #location {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin: 1rem 0;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        /* Animation classes */
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            margin: 20px auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 576px) { /* for the navbar */
+            #main {
+                padding-top: 120px;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.7rem;
+                margin-bottom: 1.1rem;
+            }
+
+            .search-bar {
+                margin-bottom: 1rem;
+            }
+
+            .table th,
+            .table td {
+                padding: 0.5rem;
+                font-size: 0.8rem;
+            }
+
+            /* Adjust the input group for better mobile display */
+            .input-group.search-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .input-group.search-bar .form-control,
+            .input-group.search-bar .btn {
+                border-radius: 20px;
+                width: 100%;
+            }
+
+            /* Make table scroll horizontally on small screens */
+            .table-responsive {
+                margin: 0 -0.75rem;
+                /* Negative margin to allow full-width scroll */
+                padding: 0 0.75rem;
+            }
+        }
+
+      /* First, remove or comment out your original media queries for the navbar */
+
+/* Then add these new styles */
+@media (max-width: 919px) {
+    .navbar {
+        height: auto;
+        padding: 5px;
+    }
+
+    /* Hide original nav menu */
+    .navbar .nav {
+        display: none;
+    }
+
+    /* Show hamburger button */
+    .navbar-toggler {
+        display: block;
+        background-color: transparent;
+        border: 1px solid white;
+        padding: 8px;
+        color: white;
+        border-radius: 4px;
+    }
+
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        display: block;
+        width: 30px;
+        height: 30px;
+    }
+
+    /* Style for the expanded menu */
+    .navbar .nav.show {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.9);
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .navbar .nav-item {
+        margin: 0.5rem 0;
+    }
+}
+
+/* Hide hamburger on larger screens */
+@media (min-width: 920px) {
+    .navbar-toggler {
+        display: none;
+    }
+
+    .navbar .nav {
+        display: flex;
+    }
+}
     </style>
 </head>
 
@@ -147,6 +401,12 @@
             <a class="navbar-brand" href="home.html">
                 <img src="./imgs/TripPal Transparent Logo.png" id="logo">
             </a>
+
+            <button class="navbar-toggler d-lg-none" type="button" id="navbarToggler">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+
             <ul class="nav">
                 <li class="nav-item">
                     <a class="nav-link" href="weather.html">Weather</a>
@@ -158,7 +418,7 @@
                     <a class="nav-link" href="itinerary.html">Itinerary Builder</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="destination.html">Destination Planning</a>
+                    <a class="nav-link" href="attractions.html">Destination Planning</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="budget.html">Budgeting</a>
@@ -176,7 +436,11 @@
                 <button class="btn btn-primary" id="get">Get Weather</button>
             </div>
 
+            <div class="loading-spinner" id="loadingSpinner"></div>
+
             <p id="errorMessage"></p>
+
+            <p id="location"></p>
 
             <p id="temperature"></p>
 
@@ -204,118 +468,159 @@
 </html>
 
 
-    <script>
-        window.onload = function () {
-            let cityEle = document.getElementById("city");
-            let autocomplete = new google.maps.places.Autocomplete(cityEle);
+<script>
+    window.onload = function () {
+        let cityEle = document.getElementById("city");
+        let autocomplete = new google.maps.places.Autocomplete(cityEle);
 
-            autocomplete.addListener('place_changed', function () {
-                let place = autocomplete.getPlace();
-                if (place.geometry) {
-                    latValue = place.geometry.location.lat();
-                    lonValue = place.geometry.location.lng();
-                    getWeather();
-                }
-            });
-        };
-        let cityEle = document.getElementById("city")
-        let btnEle = document.getElementById("get")
-        let errorMessageEle = document.getElementById("errorMessage")
-        let dailyPredictEle = document.getElementById("dailyPredict")
-        let temperatureEle = document.getElementById("temperature")
-
-        btnEle.addEventListener("click", getGeo)
-        cityEle.addEventListener("keyup", checkEnter)
-
-        function checkEnter(event) {
-            if (event.key === 'Enter') {
-                getGeo();
+        autocomplete.addListener('place_changed', function () {
+            let place = autocomplete.getPlace();
+            if (place.geometry) {
+                latValue = place.geometry.location.lat();
+                lonValue = place.geometry.location.lng();
+                const locationText = place.formatted_address;
+                getWeather(locationText);
             }
+        });
+    };
+    let cityEle = document.getElementById("city")
+    let btnEle = document.getElementById("get")
+    let errorMessageEle = document.getElementById("errorMessage")
+    let dailyPredictEle = document.getElementById("dailyPredict")
+    let temperatureEle = document.getElementById("temperature")
+
+    btnEle.addEventListener("click", getGeo)
+    cityEle.addEventListener("keyup", checkEnter)
+
+    function checkEnter(event) {
+        if (event.key === 'Enter') {
+            getGeo();
         }
+    }
 
-        var latValue
-        var lonValue
+    var latValue
+    var lonValue
 
-        function getGeo() {
-            let city = cityEle.value
-            let url = "http://api.openweathermap.org/geo/1.0/direct"
-            let key = "4e1a69304c74566a0ebcf18acbafbc18"
+    function getGeo() {
+        let city = cityEle.value
+        let url = "http://api.openweathermap.org/geo/1.0/direct"
+        let key = "4e1a69304c74566a0ebcf18acbafbc18"
 
-            axios.get(url, {
-                params: {
-                    q: city,
-                    appid: key
-                }
-            })
-                .then(response => {
-                    let data = response.data
+        document.querySelector('.container').classList.remove('has-results');
+        document.getElementById('weatherResults').classList.remove('show');
 
-                    if (data.length === 0) {
-                        errorMessageEle.innerText = "Invalid city or country. Please try again.";
-                        dailyPredictEle.innerText = "";
-                        temperatureEle.innerText = "";
-                        return;
-                    }
 
-                    latValue = data[0].lat
-                    lonValue = data[0].lon
-                    errorMessageEle.innerText = "";
-                    getWeather()
-                })
-                .catch(error => {
-                    console.log(error.message)
-                    errorMessageEle.innerText = "Please enter a city or country";
-                })
-        }
+        axios.get(url, {
+            params: {
+                q: city,
+                appid: key
+            }
+        })
+            .then(response => {
+                let data = response.data
 
-        function getWeather() {
-            let url = "https://api.openweathermap.org/data/3.0/onecall";
-            let key = "4e1a69304c74566a0ebcf18acbafbc18";
-
-            axios.get(url, {
-                params: {
-                    lat: latValue,
-                    lon: lonValue,
-                    appid: key
-                }
-            })
-                .then(response => {
-                    let data = response.data;
-                    console.log(data);
-
-                    errorMessageEle.innerText = ""
-
-                    let kelvin = data.current.temp;
-                    let degreeCelcius = kelvin - 273.15;
-                    temperatureEle.innerText = "Current Temperature: " + degreeCelcius.toFixed(2) + "°C";
-
+                if (data.length === 0) {
+                    errorMessageEle.innerText = "Invalid city or country. Please try again.";
                     dailyPredictEle.innerText = "";
+                    temperatureEle.innerText = "";
+                    document.getElementById('location').innerText = "";
+                    return;
+                }
 
-                    let tableRow = document.createElement("tr")
-                    
-                    let tableHead1 = document.createElement("th")
-                    tableHead1.innerText = "Day"
-                    tableRow.appendChild(tableHead1)
-                    
-                    let tableHead2 = document.createElement("th")
-                    tableHead2.innerText = "Lowest Temperature"
-                    tableRow.appendChild(tableHead2)
+                latValue = data[0].lat
+                lonValue = data[0].lon
+                const cityName = data[0].name;
+                const countryName = data[0].country;
+                const locationText = `${cityName}, ${countryName}`;
+                errorMessageEle.innerText = "";
+                getWeather(locationText)
+            })
+            .catch(error => {
+                console.log(error.message)
+                errorMessageEle.innerText = "Please enter a city or country";
+            })
+    }
 
-                    let tableHead3 = document.createElement("th")
-                    tableHead3.innerText = "Highest Temperature"
-                    tableRow.appendChild(tableHead3)
+    function getWeather(locationText) {
+        let url = "https://api.openweathermap.org/data/3.0/onecall";
+        let key = "4e1a69304c74566a0ebcf18acbafbc18";
 
-                    let tableHead4 = document.createElement("th")
-                    tableHead4.innerText = "Summary"
-                    tableRow.appendChild(tableHead4)
+        document.getElementById('loadingSpinner').style.display = 'block';
+        temperatureEle.style.opacity = '0';
+        document.getElementById('location').style.opacity = '0';
+        dailyPredictEle.innerText = '';
 
-                    dailyPredictEle.appendChild(tableRow)
+        document.querySelector('.container').classList.add('has-results');
 
+
+        axios.get(url, {
+            params: {
+                lat: latValue,
+                lon: lonValue,
+                appid: key,
+                exclude: 'minutely,hourly' // Add this to get daily forecast
+            }
+        })
+            .then(response => {
+                let data = response.data;
+                console.log(data);
+
+                document.getElementById('loadingSpinner').style.display = 'none';
+                errorMessageEle.innerText = "";
+
+                const locationEle = document.getElementById('location');
+                locationEle.innerText = locationText;
+                locationEle.classList.add('slide-up');
+
+                let kelvin = data.current.temp;
+                let degreeCelcius = kelvin - 273.15;
+                temperatureEle.innerText = "Current Temperature: " + degreeCelcius.toFixed(2) + "°C";
+                temperatureEle.classList.add('slide-up');
+
+                // Create table header
+                let tableRow = document.createElement("tr");
+
+                let tableHead1 = document.createElement("th");
+                tableHead1.innerText = "Day";
+                tableRow.appendChild(tableHead1);
+
+                let tableHead2 = document.createElement("th");
+                tableHead2.innerText = "Lowest Temperature";
+                tableRow.appendChild(tableHead2);
+
+                let tableHead3 = document.createElement("th");
+                tableHead3.innerText = "Highest Temperature";
+                tableRow.appendChild(tableHead3);
+
+                let tableHead4 = document.createElement("th");
+                tableHead4.innerText = "Summary";
+                tableRow.appendChild(tableHead4);
+
+                dailyPredictEle.appendChild(tableRow);
+
+                // Add animation class to table
+                const table = document.querySelector('.table');
+                table.style.opacity = '0';
+
+                setTimeout(() => {
+                    table.classList.add('fade-in');
+
+                    // Add daily forecast rows
                     data.daily.forEach((day, index) => {
                         let row = document.createElement("tr");
 
                         let dayCell = document.createElement("td");
-                        dayCell.innerText = "Day " + (index + 1);
+
+                        let date = new Date();
+                        date.setDate(date.getDate() + index);
+
+                        let formattedDate = date.toLocaleDateString('en-GB', {
+                            weekday: 'short',
+                            day: 'numeric',
+                            month: 'short'
+                        });
+
+                        dayCell.innerText = formattedDate;
                         row.appendChild(dayCell);
 
                         let minTempCell = document.createElement("td");
@@ -344,79 +649,113 @@
                         row.appendChild(summaryCell);
                         dailyPredictEle.appendChild(row);
                     });
-                })
-                .catch(error => {
-                    console.log(error.message);
-                    errorMessageEle.innerText = "Failed to retrieve weather data. Please try again.";
-                });
+                }, 300);
+
+                document.getElementById('weatherResults').classList.add('show');
+
+            })
+            .catch(error => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                console.log(error.message);
+                errorMessageEle.innerText = "Failed to retrieve weather data. Please try again.";
+                document.querySelector('.container').classList.remove('has-results');
+                document.getElementById('weatherResults').classList.remove('show');
+
+            });
+    }
+
+    function getWeatherIcon(summary) {
+        const iconMap = {
+            "clear sky": "./imgs/clearsky.png",
+            "few clouds": "./imgs/fewclouds.png",
+            "scattered clouds": "./imgs/scatteredclouds.png",
+            "broken clouds": "./imgs/brokenclouds.png",
+            "overcast clouds": "./imgs/brokenclouds.png",
+            "shower rain": "./imgs/showerrain.png",
+            "light intensity drizzle": "./imgs/showerrain.png",
+            "drizzle": "./imgs/showerrain.png",
+            "heavy intensity drizzle": "./imgs/showerrain.png",
+            "light intensity drizzle rain": "./imgs/showerrain.png",
+            "drizzle rain": "./imgs/showerrain.png",
+            "heavy intesnity drizzle rain": "./imgs/showerrain.png",
+            "shower rain and drizzle": "./imgs/showerrain.png",
+            "heavy shower rain and drizzle": "./imgs/showerrain.png",
+            "shower drizzle": "./imgs/showerrain.png",
+            "light intensity shower rain": "./imgs/showerrain.png",
+            "shower rain": "./imgs/showerrain.png",
+            "heavy intensity shower rain": "./imgs/showerrain.png",
+            "ragged shower rain": "./imgs/showerrain.png",
+            "rain": "./imgs/rain.png",
+            "light rain": "./imgs/rain.png",
+            "moderate rain": "./imgs/rain.png",
+            "heavy intensity rain": "./imgs/rain.png",
+            "very heavy rain": "./imgs/rain.png",
+            "extreme rain": "./imgs/rain.png",
+            "thunderstorm": "./imgs/thunderstorm.png",
+            "thunderstorm with light rain": "./imgs/thunderstorm.png",
+            "thunderstorm with rain": "./imgs/thunderstorm.png",
+            "thunderstorm with heavy rain": "./imgs/thunderstorm.png",
+            "light thunderstorm": "./imgs/thunderstorm.png",
+            "heavy thunderstorm": "./imgs/thunderstorm.png",
+            "ragged thunderstorm": "./imgs/thunderstorm.png",
+            "thunderstorm with light drizzle": "./imgs/thunderstorm.png",
+            "thunderstorm with drizzle": "./imgs/thunderstorm.png",
+            "thunderstorm with heavy drizzle": "./imgs/thunderstorm.png",
+            "snow": "./imgs/snow.png",
+            "freezing rain": "./imgs/snow.png",
+            "light snow": "./imgs/snow.png",
+            "heavy snow": "./imgs/snow.png",
+            "sleet": "./imgs/snow.png",
+            "light shower sleet": "./imgs/snow.png",
+            "shower sleet": "./imgs/snow.png",
+            "light rain and snow": "./imgs/snow.png",
+            "rain and snow": "./imgs/snow.png",
+            "light shower and snow": "./imgs/snow.png",
+            "shower snow": "./imgs/snow.png",
+            "heavy shower snow": "./imgs/snow.png",
+            "mist": "./imgs/mist.png",
+            "smoke": "./imgs/mist.png",
+            "haze": "./imgs/mist.png",
+            "sand/dust whirls": "./imgs/mist.png",
+            "fog": "./imgs/mist.png",
+            "sand": "./imgs/mist.png",
+            "dust": "./imgs/mist.png",
+            "volcanic ash": "./imgs/mist.png",
+            "squalls": "./imgs/mist.png",
+            "tornado": "./imgs/mist.png",
+            "few clouds": "./imgs/fewclouds.png"
+
+        };
+
+        return iconMap[summary.toLowerCase()]
+    }
+
+
+    // Hamburger menu functionality
+// Add this to your existing JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const navbarToggler = document.querySelector('.navbar-toggler');
+    const navMenu = document.querySelector('.nav');
+
+    navbarToggler.addEventListener('click', function() {
+        navMenu.classList.toggle('show');
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!navMenu.contains(event.target) && !navbarToggler.contains(event.target)) {
+            navMenu.classList.remove('show');
         }
+    });
 
-        function getWeatherIcon(summary) {
-            const iconMap = {
-                "clear sky": "./imgs/clearsky.png",
-                "few clouds": "./imgs/fewclouds.png",
-                "scattered clouds": "./imgs/scatteredclouds.png",
-                "broken clouds": "./imgs/brokenclouds.png",
-                "overcast clouds": "./imgs/brokenclouds.png",
-                "shower rain": "./imgs/showerrain.png",
-                "light intensity drizzle": "./imgs/showerrain.png",
-                "drizzle": "./imgs/showerrain.png",
-                "heavy intensity drizzle": "./imgs/showerrain.png",
-                "light intensity drizzle rain": "./imgs/showerrain.png",
-                "drizzle rain": "./imgs/showerrain.png",
-                "heavy intesnity drizzle rain": "./imgs/showerrain.png",
-                "shower rain and drizzle": "./imgs/showerrain.png",
-                "heavy shower rain and drizzle": "./imgs/showerrain.png",
-                "shower drizzle": "./imgs/showerrain.png",
-                "light intensity shower rain": "./imgs/showerrain.png",
-                "shower rain": "./imgs/showerrain.png",
-                "heavy intensity shower rain": "./imgs/showerrain.png",
-                "ragged shower rain": "./imgs/showerrain.png",
-                "rain": "./imgs/rain.png",
-                "light rain": "./imgs/rain.png",
-                "moderate rain": "./imgs/rain.png",
-                "heavy intensity rain": "./imgs/rain.png",
-                "very heavy rain": "./imgs/rain.png",
-                "extreme rain": "./imgs/rain.png",
-                "thunderstorm": "./imgs/thunderstorm.png",
-                "thunderstorm with light rain": "./imgs/thunderstorm.png",
-                "thunderstorm with rain": "./imgs/thunderstorm.png",
-                "thunderstorm with heavy rain": "./imgs/thunderstorm.png",
-                "light thunderstorm": "./imgs/thunderstorm.png",
-                "heavy thunderstorm": "./imgs/thunderstorm.png",
-                "ragged thunderstorm": "./imgs/thunderstorm.png",
-                "thunderstorm with light drizzle": "./imgs/thunderstorm.png",
-                "thunderstorm with drizzle": "./imgs/thunderstorm.png",
-                "thunderstorm with heavy drizzle": "./imgs/thunderstorm.png",
-                "snow": "./imgs/snow.png",
-                "freezing rain": "./imgs/snow.png",
-                "light snow": "./imgs/snow.png",
-                "heavy snow": "./imgs/snow.png",
-                "sleet": "./imgs/snow.png",
-                "light shower sleet": "./imgs/snow.png",
-                "shower sleet": "./imgs/snow.png",
-                "light rain and snow": "./imgs/snow.png",
-                "rain and snow": "./imgs/snow.png",
-                "light shower and snow": "./imgs/snow.png",
-                "shower snow": "./imgs/snow.png",
-                "heavy shower snow": "./imgs/snow.png",
-                "mist": "./imgs/mist.png",
-                "smoke": "./imgs/mist.png",
-                "haze": "./imgs/mist.png",
-                "sand/dust whirls": "./imgs/mist.png",
-                "fog": "./imgs/mist.png",
-                "sand": "./imgs/mist.png",
-                "dust": "./imgs/mist.png",
-                "volcanic ash": "./imgs/mist.png",
-                "squalls": "./imgs/mist.png",
-                "tornado": "./imgs/mist.png",
-                "few clouds": "./imgs/fewclouds.png"
-
-            };
-
-            return iconMap[summary.toLowerCase()]
+    // Close menu when window is resized above breakpoint
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 919) {
+            navMenu.classList.remove('show');
         }
-    </script>
+    });
+});
+</script>
 
 </body>
 
