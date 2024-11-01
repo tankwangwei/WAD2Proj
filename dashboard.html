@@ -22,8 +22,8 @@
             padding: 0;
             font-family: 'Roboto', sans-serif;
             position: relative;
-            overflow: hidden;
             /* Prevent scrolling */
+            background-color: pink;
         }
 
         .carousel {
@@ -241,22 +241,109 @@
                 font-size: 16px;
             }
         }
+
+        .attraction-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .attraction-card img {
+            width: 100%;
+            height: 180px;
+            /* Keep image height fixed */
+            object-fit: cover;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+
+        .attraction-card-body {
+            padding: 15px;
+            font-family: 'Roboto', sans-serif;
+            flex-grow: 1;
+            /* Take up remaining space */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .attraction-card-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            /* Adds spacing to separate title and location */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            /* Prevents title overflow */
+        }
+
+        .attraction-card-location {
+            color: #888;
+            font-size: 0.9rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            /* Prevents location overflow */
+        }
+
+        .attractions-carousel-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+        }
+
+        .attraction-card {
+            flex: 1 1 30%;
+            /* Allows each card to grow and take equal space */
+            max-width: 30%;
+            /* Sets a maximum width for each card */
+            height: auto;
+            /* Adjust height to fit the content */
+            box-sizing: border-box;
+            /* Ensures padding and border are included in the width */
+            margin: 0;
+        }
+
+        #attractionsContainer {
+            display: flex;
+            gap: 20px;
+            /* Space between cards */
+            justify-content: space-around;
+            /* Distribute cards evenly */
+            padding: 0;
+            margin: 0;
+        }
+
+        .carousel-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .carousel-button-left {
+            left: 10px;
+        }
+
+        .carousel-button-right {
+            right: 10px;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Background Carousel -->
-    <div id="backgroundCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="./imgs/travelbg1.jpg" class="d-block w-100" alt="Travel 1">
-            </div>
-            <div class="carousel-item">
-                <img src="./imgs/travelbg3.jpg" class="d-block w-100" alt="Travel 2">
-            </div>
-        </div>
-    </div>
-
     <nav class="navbar navbar-expand-md fixed-top">
         <div class="container-fluid d-flex justify-content-between align-items-center">
             <a class="navbar-brand" href="home.html">
@@ -288,7 +375,19 @@
         </div>
     </nav>
 
-    <div class="container-fluid mt-5 pt-5">
+    <div class="container p-5">
+        <div class="attractions-carousel-container mt-5">
+            <!-- Left button -->
+            <button class="carousel-button carousel-button-left" onclick="goLeft()">&#8249;</button>
+            <!-- Attraction cards container -->
+            <div id="attractionsContainer" class="d-flex"></div>
+            <!-- Right button -->
+            <button class="carousel-button carousel-button-right" onclick="goRight()">&#8250;</button>
+        </div>
+    </div>
+
+
+    <div class="container-fluid">
         <div class="row">
             <!-- Weather Section -->
             <aside class="col-lg-4 col-md-6">
@@ -311,15 +410,13 @@
                 </div>
             </aside>
 
-            <!-- Attractions Section -->
+            <!-- Attractions Section
             <section class="col-lg-4 col-md-6">
                 <div id="attractions-section" class="p-3 rounded section-container">
                     <h2 class="text-center">Top Attractions</h2>
-                    <div id="attractionsContainer" class="row">
-                        <!-- Attraction cards go here -->
-                    </div>
+                    <div id="attractionsContainer" class="row"></div>
                 </div>
-            </section>
+            </section> -->
 
             <!-- Currency Converter Section -->
             <section class="col-lg-4 col-md-6">
@@ -337,13 +434,21 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const params = new URLSearchParams(window.location.search);
-            const country = params.get("location");
+            let location = params.get("location");
 
-            if (country) {
-                console.log("Country:", country);
-                document.getElementById("weather-location").textContent = country;
-                fetchWeatherData(country);
-                fetchCurrencyByCountry(country)
+            if (location) {
+                // Save the location in localStorage for future use
+                localStorage.setItem("location", location);
+            } else {
+                // If location parameter isn't in the URL, use the one from localStorage
+                location = localStorage.getItem("location");
+            }
+
+            if (location) {
+                console.log("Location:", location);
+                document.getElementById("weather-location").textContent = location;
+                fetchWeatherData(location);
+                fetchCurrencyByCountry(location)
                     .then(currencyCode => {
                         if (currencyCode) {
                             // Fetch and display conversion rate for 1 EUR to the country's currency
@@ -352,9 +457,9 @@
                             resultElem.innerText = "Currency not found for the specified country.";
                         }
                     })
-                    .catch(error => console.error("Error fetching currency for country:", error));
+                    .catch(error => console.error("Error fetching currency for location:", error));
             } else {
-                resultElem.innerText = "Country not specified.";
+                resultElem.innerText = "Location not specified.";
             }
         });
 
@@ -565,7 +670,7 @@
 
         function fetchConversionRate(currencyCode) {
             const url = "http://data.fixer.io/api/latest";
-            const apiKey = "c0f555a5661422620003b935f9e77b04";
+            // const apiKey = "c0f555a5661422620003b935f9e77b04"; commenting out to save usage
 
             axios.get(url, {
                 params: {
@@ -628,56 +733,82 @@
             });
         }
 
+        let currentPage = 0;
+        const cardsPerPage = 3; // Adjust based on how many cards you want visible at a time
+
         function displayAttractions(attractions) {
-            const attractionContainer = document.getElementById('attractionsContainer');
-            // Clear previous results
-            while (attractionContainer.firstChild) {
-                attractionContainer.removeChild(attractionContainer.firstChild);
-            }
+            const container = document.getElementById('attractionsContainer');
+            container.innerHTML = ''; // Clear any previous cards
 
-            if (attractions.length === 0) {
-                const noAttractionsMessage = document.createElement("p");
-                noAttractionsMessage.textContent = "No attractions found.";
-                attractionContainer.appendChild(noAttractionsMessage);
-                return;
-            }
-
-            attractions.forEach(attraction => {
-                const cardColumn = document.createElement('div');
-                cardColumn.classList.add('col-md-4', 'mb-4');
-
+            attractions.forEach((attraction) => {
                 const card = document.createElement('div');
-                card.classList.add('card', 'h-100');
+                card.classList.add('attraction-card');
 
-                const imageUrl = attraction.photos ? attraction.photos[0].getUrl({ maxWidth: 400 }) : 'https://via.placeholder.com/400';
+                // Image element
                 const img = document.createElement('img');
-                img.src = imageUrl;
-                img.classList.add('card-img-top');
+                img.src = attraction.photos ? attraction.photos[0].getUrl({ maxWidth: 800 }) : 'https://via.placeholder.com/800x400';
                 img.alt = attraction.name;
                 card.appendChild(img);
 
-                const cardBody = document.createElement('div');
-                cardBody.classList.add('card-body');
+                // Card body container
+                const body = document.createElement('div');
+                body.classList.add('attraction-card-body');
 
+                // Title element
                 const title = document.createElement('h5');
-                title.classList.add('card-title');
-                title.textContent = attraction.name;
-                cardBody.appendChild(title);
+                title.classList.add('attraction-card-title');
+                title.innerText = attraction.name;
+                body.appendChild(title);
 
-                const rating = document.createElement('p');
-                rating.classList.add('card-text');
-                rating.textContent = `Rating: ${attraction.rating || "N/A"}`;
-                cardBody.appendChild(rating);
+                // Location element
+                const location = document.createElement('p');
+                location.classList.add('attraction-card-location');
+                location.innerText = attraction.vicinity || 'Address not available';
+                body.appendChild(location);
 
-                const address = document.createElement('p');
-                address.classList.add('card-text');
-                address.textContent = `Address: ${attraction.vicinity || "Not available"}`;
-                cardBody.appendChild(address);
+                card.appendChild(body);
 
-                card.appendChild(cardBody);
-                cardColumn.appendChild(card);
-                attractionContainer.appendChild(cardColumn);
+                // Add click event to navigate to the attractions page
+                card.addEventListener('click', () => {
+                    const location = localStorage.getItem("location"); // Get the stored location
+                    window.location.href = `attractions.html?location=${encodeURIComponent(location)}`;
+                });
+
+                container.appendChild(card);
             });
+
+            updateVisibleCards(); // Initial update to show the first set of cards
+        }
+
+
+
+        function updateVisibleCards() {
+            const container = document.getElementById('attractionsContainer');
+            const cards = Array.from(container.children);
+            const start = currentPage * cardsPerPage;
+            const end = start + cardsPerPage;
+
+            cards.forEach((card, index) => {
+                card.style.display = index >= start && index < end ? 'block' : 'none';
+            });
+        }
+
+        function goLeft() {
+            if (currentPage > 0) {
+                currentPage--;
+                updateVisibleCards();
+            }
+        }
+
+        function goRight() {
+            const container = document.getElementById('attractionsContainer');
+            const totalCards = container.children.length;
+            const maxPage = Math.ceil(totalCards / cardsPerPage) - 1;
+
+            if (currentPage < maxPage) {
+                currentPage++;
+                updateVisibleCards();
+            }
         }
 
 
@@ -698,7 +829,7 @@
 
         function displayForecast(dailyForecast) {
             const weatherTable = document.getElementById("weather-details");
-            weatherTable.innerHTML = "";
+            weatherTable.innerText = "";
 
             dailyForecast.forEach((day, index) => {
                 if (index > 6) return;
