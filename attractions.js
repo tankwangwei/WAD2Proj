@@ -79,8 +79,7 @@ function displayAttractions(attractions) {
                     <p class="card-text">Rating: ${attraction.rating || "N/A"}</p>
                     <p class="card-text">Reviews: ${attraction.user_ratings_total || 0}</p>
                     <p class="card-text">Address: ${attraction.formatted_address || attraction.vicinity}</p>
-
-                    <!-- <button class="btn btn-success" onclick="saveActivity('${tripID}', '${attraction.name}', '${attraction.formatted_address || attraction.vicinity}', ${lat}, ${lng}, '${imageUrl}')">Save Activity</button> --!>
+                    <p class="card-text about" id="about-${attraction.place_id}">Loading about...</p>
 
                     <div class="save-icon" onclick="saveActivity('${tripID}', '${attraction.name}', '${attraction.formatted_address || attraction.vicinity}', ${lat}, ${lng}, '${imageUrl}', this)">
                         <span class="icon plus-icon" title="Save Activity">＋</span>
@@ -90,7 +89,25 @@ function displayAttractions(attractions) {
             </div>
         `;
         attractionContainer.append(attractionCard);
+
+        fetchAttractionSummary(attraction.name, `about-${attraction.place_id}`);
     });
+}
+
+async function fetchAttractionSummary(attractionName, elementId) {
+    try {
+        const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(attractionName)}`);
+        const data = await response.json();
+        
+        if (data.extract) {
+            document.getElementById(elementId).innerText = data.extract;
+        } else {
+            document.getElementById(elementId).innerText = "No additional information available.";
+        }
+    } catch (error) {
+        console.error("Error fetching Wikipedia summary:", error);
+        document.getElementById(elementId).innerText = "Information unavailable.";
+    }
 }
 
 async function saveActivity(tripID, name, address, lat, lng, imageUrl) {
