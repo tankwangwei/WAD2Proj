@@ -470,34 +470,49 @@
 </head>
 
 <body>
-    <nav class="navbar fixed-top">
+    <nav class="navbar navbar-expand-md fixed-top">
         <div class="container-fluid d-flex justify-content-between align-items-center">
+            <!-- Logo -->
             <a class="navbar-brand" href="home.html">
                 <img src="./imgs/TripPal Transparent Logo.png" id="logo">
             </a>
 
-            <button class="navbar-toggler d-lg-none" type="button" id="navbarToggler">
+            <!-- Toggler button for smaller screens -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-
-            <ul class="nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="weather.html">Weather</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="currency.html">Currency</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="itinerary.html">Itinerary Builder</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="attractions.html">Destination Planning</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="budget.html">Budgeting</a>
-                </li>
-            </ul>
+            <!-- Collapsible navbar content -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="itinerary.html">Itinerary Builder</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="attractions.html">Attractions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="budget.html">Budget</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="weather.html">Weather</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="currency.html">Currency</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <img src="./imgs/profile.svg" alt="Profile Icon"
+                                style="width: 30px; height: 30px; margin-right: 5px;">
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                            <li><a class="dropdown-item" href="WelcomePage.html">Sign Out</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
 
@@ -883,7 +898,12 @@
             }
         });
     });
+
+    
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 
 </body>
 
