@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,9 +21,12 @@
 
 
         }
-        h1, h2 {
+
+        h1,
+        h2 {
             color: #2c3e50;
         }
+
         .card {
             background: #fff;
             border-radius: 10px;
@@ -31,12 +35,14 @@
             padding: 25px;
             margin-top: 100px;
         }
+
         .form-group {
             margin-bottom: 20px;
             position: relative;
             display: flex;
             align-items: center;
         }
+
         .form-group input {
             width: 100%;
             padding: 15px 15px 15px 50px;
@@ -46,6 +52,7 @@
             box-sizing: border-box;
             transition: all 0.3s ease;
         }
+
         .form-group select {
             width: 100%;
             padding: 15px 15px 15px 50px;
@@ -57,17 +64,21 @@
             appearance: none;
             background-color: #fff;
         }
-        .form-group input:focus, .form-group select:focus {
+
+        .form-group input:focus,
+        .form-group select:focus {
             border-color: #3498db;
             box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
             outline: none;
         }
+
         .form-group i {
             position: absolute;
             left: 15px;
             color: #888;
             font-size: 18px;
         }
+
         button {
             background-color: #3498db;
             color: white;
@@ -78,6 +89,7 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
         button:hover {
             background-color: #2980b9;
         }
@@ -143,25 +155,30 @@
             padding: 20px;
             background-color: #fff;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .overview div {
             text-align: center;
         }
+
         .overview div p {
             font-size: 18px;
             margin: 5px 0;
             color: #555;
         }
+
         .overview div h2 {
             font-size: 30px;
             margin: 5px 0;
         }
+
         .chart-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 300px; /* Set a fixed height to keep the chart container centered */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+            /* Set a fixed height to keep the chart container centered */
         }
 
         /* Transaction history table styling */
@@ -169,22 +186,27 @@
             width: 100%;
             border-collapse: collapse;
         }
-        .transaction-history th, .transaction-history td {
+
+        .transaction-history th,
+        .transaction-history td {
             padding: 10px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
+
         .transaction-history th {
             color: #555;
         }
+
         .transaction-history td {
             color: #333;
         }
     </style>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-md fixed-top">
         <div class="container-fluid d-flex justify-content-between align-items-center">
@@ -252,7 +274,7 @@
                         <option value="">Select Currency</option>
                         <!-- Options will be dynamically populated by JavaScript -->
                     </select>
-                </div> 
+                </div>
                 <div class="form-group">
                     <i class="fas fa-dollar-sign"></i>
                     <input type="number" id="budget" name="budget" placeholder="Total Budget" required>
@@ -315,18 +337,20 @@
         <!-- Spending Overview with Dropdown and Chart -->
         <div class="spending-overview">
             <h3>Spending Overview</h3>
-            <select id="dateRange" onchange="getFilteredExpenses()">
+            <select id="dateRange" onchange="updateExpenseChart(getFilteredExpenses())">
                 <option value="today">Today</option>
                 <option value="week">Past Week</option>
                 <option value="month">Past Month</option>
+                <option value="all">All Time</option> 
             </select>
-        
+
             <!-- Chart Container -->
             <div class="chart-container">
                 <canvas id="spendingChart"></canvas>
             </div>
         </div>
-        
+
+
         <!-- Recent Transactions Container (Initially Hidden) -->
         <div class="card transaction-history" id="recentTransactionsContainer" style="display: none;">
             <h3>Recent Transactions</h3>
@@ -338,7 +362,7 @@
                         <th>Amount</th>
                         <th>Actions</th> <!-- New column for Edit/Delete buttons -->
                     </tr>
-                </thead>                
+                </thead>
                 <tbody id="recentTransactionsTable">
                     <!-- Dynamic rows will be inserted here -->
                 </tbody>
@@ -349,6 +373,7 @@
     <script src="budget.js" type="module"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    
+
 </body>
+
 </html>

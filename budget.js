@@ -643,6 +643,9 @@ function getFilteredExpenses() {
                 shouldInclude = expenseDate >= oneMonthAgo && expenseDate <= today;
                 break;
             }
+            case 'all':
+                shouldInclude = true; // Include all expenses for "All Time"
+                break;
             default:
                 shouldInclude = true;
         }
@@ -654,6 +657,7 @@ function getFilteredExpenses() {
     console.log('Filtered expenses result:', filteredExpenses);
     return filteredExpenses;
 }
+
 
 // Reset edit mode if the form is reset or if a new transaction is added
 expenseForm.addEventListener('reset', function() {
