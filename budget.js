@@ -22,192 +22,13 @@ const firebaseConfig = {
     appId: "1:191549341083:web:ad67ea6030d29c8700353e"
 };
 
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
-
-async function loadTrips() {
-    const tripSelect = document.getElementById('trip');
-    tripSelect.innerHTML = '<option value="">Select a trip</option>';
-
-    try {
-        const tripsRef = collection(db, "trips");
-        const querySnapshot = await getDocs(tripsRef);
-        
-        console.log("Number of trips found:", querySnapshot.size); // Debug log
-        
-        querySnapshot.forEach((doc) => {
-            const tripData = doc.data();
-            console.log("Trip data:", tripData); // Debug log
-            
-            const option = document.createElement('option');
-            option.value = doc.id;
-            option.textContent = tripData.name || 'Unnamed Trip'; // Fallback if name is missing
-            tripSelect.appendChild(option);
-        });
-    } catch (error) {
-        console.error("Error loading trips:", error);
-    }
-}
-
-Chart.register(ChartDataLabels);
-
-
-// Add this function to initialize the chart
-function initializeChart() {
-    console.log('Initializing chart...');
-    
-    const ctx = document.getElementById('spendingChart');
-    if (!ctx) {
-        console.error('Cannot find chart canvas element');
-        return;
-    }
-
-    try {
-        // Destroy existing chart if it exists
-        if (expenseChart) {
-            expenseChart.destroy();
-        }
-
-        // Create empty chart with default config
-        expenseChart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: [],
-                datasets: [{
-                    data: [],
-                    backgroundColor: [
-                        'rgba(52, 152, 219, 0.8)',   // Blue
-                        'rgba(231, 76, 60, 0.8)',    // Red
-                        'rgba(46, 204, 113, 0.8)',   // Green
-                        'rgba(155, 89, 182, 0.8)',   // Purple
-                        'rgba(241, 196, 15, 0.8)',   // Yellow
-                        'rgba(149, 165, 166, 0.8)'   // Gray
-                    ],
-                    borderColor: 'white',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        display: true,
-                        labels: {
-                            color: 'black',
-                            font: {
-                                size: 12
-                            }
-                        }
-                    },
-                    datalabels: {
-                        color: 'white',
-                        font: {
-                            weight: 'bold',
-                            size: 12
-                        },
-                        formatter: (value, ctx) => {
-                            if (value === 0) return '';
-                            const total = ctx.dataset.data.reduce((acc, data) => acc + data, 0);
-                            const percentage = ((value * 100) / total).toFixed(1);
-                            return percentage + '%';
-                        }
-                    }
-                }
-            }
-        });
-        
-        console.log('Chart initialized successfully');
-    } catch (error) {
-        console.error('Error initializing chart:', error);
-    }
-}
-
-// Function to load trip budget and expenses
-async function loadTripData(tripId) {
-    try {
-        // Get trip data including budget
-        const tripRef = doc(db, "trips", tripId);
-        const tripDoc = await getDoc(tripRef);
-        
-        if (tripDoc.exists()) {
-            const tripData = tripDoc.data();
-            // Set budget from trip data
-            totalBudget = tripData.budget || 0;
-            document.getElementById('budget').value = totalBudget;
-            
-            // Show the expense form and dashboard
-            expenseCard.style.display = 'block';
-            dashboardSection.style.display = 'block';
-            
-            // Update dashboard with initial values
-            updateDashboard();
-        } else {
-            console.log("No trip found with ID:", tripId);
-            return;
-        }
-
-        // Set up expenses listener
-        const expensesRef = collection(db, "expenses");
-        const q = query(expensesRef, where("tripId", "==", tripId));
-
-        // Clear existing expenses
-        expenses.length = 0;
-        totalSpending = 0;
-
-        // Set up real-time listener for expenses
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            // Clear existing expenses before adding new ones
-            expenses.length = 0;
-            totalSpending = 0;
-
-            snapshot.forEach((doc) => {
-                const expense = {
-                    id: doc.id,
-                    ...doc.data()
-                };
-                expenses.push(expense);
-                totalSpending += Number(expense.amount); // Ensure amount is treated as a number
-            });
-
-            // Sort expenses by date (most recent first)
-            expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            // Log current state
-            console.log('Current expenses:', expenses);
-            console.log('Total spending:', totalSpending);
-            console.log('Total budget:', totalBudget);
-
-            // Update UI elements
-            updateDashboard();
-            updateExpenseChart(getFilteredExpenses());
-            updateRecentTransactionsTable();
-
-            // Show/hide transactions container based on whether there are expenses
-            recentTransactionsContainer.style.display = expenses.length ? 'block' : 'none';
-        }, (error) => {
-            console.error("Error getting expenses:", error);
-        });
-
-        // Return unsubscribe function to clean up listener when needed
-        return unsubscribe;
-
-    } catch (error) {
-        console.error("Error in loadTripData:", error);
-        alert('Error loading trip data. Please try again.');
-    }
-
-    function updateAllVisualizations() {
-        updateDashboard();
-        const filteredExpenses = getFilteredExpenses();
-        console.log('Filtered expenses for chart:', filteredExpenses);
-        updateExpenseChart(filteredExpenses);
-        updateRecentTransactionsTable();
-    }
-}
-
+const auth = getAuth();
+let userUID = null;
 
 // Existing variables and elements
 let totalBudget = 0;
@@ -215,8 +36,6 @@ let totalSpending = 0;
 const expenses = [];
 let expenseChart;
 let currentTripId = null;
-
-
 const budgetForm = document.getElementById('budgetForm');
 const expenseForm = document.getElementById('expenseForm');
 const expenseCard = document.getElementById('expenseCard');
@@ -232,6 +51,303 @@ const dateRange = document.getElementById('dateRange'); // Date range dropdown
 // Variables to track edit mode and the current transaction index
 let isEditMode = false;
 let currentEditIndex = null;
+
+const EXPENSE_CATEGORIES = {
+    ACCOMMODATION: 'Accommodation',
+    TRANSPORTATION: 'Transportation',
+    FOOD: 'Food',
+    ACTIVITIES: 'Activities',
+    SHOPPING: 'Shopping',
+    MISCELLANEOUS: 'Miscellaneous'
+};
+
+const CATEGORY_COLORS = {
+    'Accommodation': 'rgba(52, 152, 219, 0.8)',   // Blue
+    'Transportation': 'rgba(231, 76, 60, 0.8)',   // Red
+    'Food': 'rgba(46, 204, 113, 0.8)',           // Green
+    'Activities': 'rgba(155, 89, 182, 0.8)',      // Purple
+    'Shopping': 'rgba(241, 196, 15, 0.8)',        // Yellow
+    'Miscellaneous': 'rgba(149, 165, 166, 0.8)'   // Gray
+};
+
+
+async function loadTrips() {
+    console.log("Current auth state:", auth.currentUser); // Debug auth state
+    console.log("Local userUID:", userUID); // Debug local userUID
+
+    const tripSelect = document.getElementById('trip');
+    tripSelect.innerHTML = '<option value="">Select a trip</option>';
+
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            console.error("No user logged in");
+            window.location.href = "login.html";
+            return;
+        }
+        userUID = user.uid;
+        console.log("Attempting to load trips for user:", userUID);
+        console.log("Full collection path:", `users/${userUID}/trips`);
+
+        // Query trips from user's subcollection
+        const tripsRef = collection(db, `users/${userUID}/trips`);
+        const querySnapshot = await getDocs(tripsRef);
+        
+        console.log("Number of trips found:", querySnapshot.size); // Debug log
+        
+        querySnapshot.forEach((doc) => {
+            const tripData = doc.data();
+            console.log("Trip data:", tripData); // Debug log
+            
+            const option = document.createElement('option');
+            option.value = doc.id;
+            option.textContent = tripData.name || 'Unnamed Trip'; // Fallback if name is missing
+            tripSelect.appendChild(option);
+        });
+
+        if (querySnapshot.size === 0) {
+            console.log("No trips found for user"); // Debug log
+        }
+    } catch (error) {
+        console.error("Error loading trips:", error);
+        console.error("Error details:", error.code, error.message);
+    }
+}
+
+Chart.register(ChartDataLabels);
+
+
+// Add this function to initialize the chart
+function initializeChart() {
+    const ctx = document.getElementById('spendingChart');
+    if (!ctx) {
+        console.error('Cannot find chart canvas element');
+        return;
+    }
+
+    try {
+        if (expenseChart) {
+            expenseChart.destroy();
+        }
+
+        expenseChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    backgroundColor: [],
+                    borderColor: 'white',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        top: 20,
+                        bottom: 20,
+                        left: 20,
+                        right: 20
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        display: true,
+                        labels: {
+                            font: {
+                                size: 14
+                            },
+                            padding: 20,
+                            generateLabels: (chart) => {
+                                const datasets = chart.data.datasets;
+                                return datasets[0].data.map((data, i) => ({
+                                    text: `${chart.data.labels[i]} - $${data.toFixed(2)}`,
+                                    fillStyle: datasets[0].backgroundColor[i],
+                                    index: i
+                                }));
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: 'white',
+                        font: { 
+                            weight: 'bold', 
+                            size: 16 // Increased font size
+                        },
+                        formatter: (value, ctx) => {
+                            if (value === 0) return '';
+                            const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value * 100) / sum).toFixed(1);
+                            return `${percentage}%`;
+                        },
+                        display: (context) => {
+                            return context.dataset.data[context.dataIndex] > 0;
+                        },
+                        // Add offset to prevent text from being cut off
+                        offset: 8,
+                        // Add padding around labels
+                        padding: {
+                            top: 5,
+                            bottom: 5,
+                            left: 5,
+                            right: 5
+                        },
+                        // Add background to labels for better readability
+                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                        borderRadius: 4
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const value = context.raw;
+                                if (value === 0) return 'No expenses recorded';
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value * 100) / total).toFixed(1);
+                                return `${context.label}: $${value.toFixed(2)} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        console.log('Chart initialized with improved styling');
+    } catch (error) {
+        console.error('Error initializing chart:', error);
+    }
+}
+
+// Function to load trip budget and expenses
+async function loadTripData(tripId) {
+    console.log('Loading trip data for ID:', tripId);
+    try {
+        if (!userUID) {
+            const user = auth.currentUser;
+            if (!user) {
+                throw new Error("No user logged in");
+            }
+            userUID = user.uid;
+        }
+        console.log('Current userUID:', userUID);
+
+        // Get trip data including budget
+        const tripRef = doc(db, `users/${userUID}/trips`, tripId);
+        const tripDoc = await getDoc(tripRef);
+        
+        if (tripDoc.exists()) {
+            const tripData = tripDoc.data();
+            console.log('Retrieved trip data:', tripData);
+            
+            totalBudget = tripData.budget || 0;
+            document.getElementById('budget').value = totalBudget;
+            
+            expenseCard.style.display = 'block';
+            dashboardSection.style.display = 'block';
+            
+            updateDashboard();
+        } else {
+            console.log("No trip found with ID:", tripId);
+            return;
+        }
+
+        // Set up expenses listener for this trip
+        console.log('Setting up expenses listener for trip:', tripId);
+        const expensesRef = collection(db, `users/${userUID}/trips/${tripId}/expenses`);
+        const q = query(expensesRef);
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            console.log('Snapshot received with size:', snapshot.size);
+            
+            // Clear existing expenses
+            expenses.length = 0;
+            totalSpending = 0;
+            
+            // Debug: Print all documents in snapshot
+            snapshot.forEach((doc) => {
+                console.log('Raw document data:', doc.id, doc.data());
+            });
+        
+            snapshot.forEach((doc) => {
+                const expenseData = doc.data();
+                const expense = {
+                    id: doc.id,
+                    ...expenseData
+                };
+                
+                // Detailed logging for each expense
+                console.log('Processing expense:', {
+                    id: expense.id,
+                    amount: expense.amount,
+                    category: expense.category,
+                    date: expense.date,
+                    description: expense.description
+                });
+                
+                // Validate expense category
+                if (!expense.category) {
+                    console.warn('Expense missing category:', expense);
+                } else if (!Object.values(EXPENSE_CATEGORIES).includes(expense.category)) {
+                    console.warn('Invalid category found:', expense.category);
+                    console.log('Valid categories are:', Object.values(EXPENSE_CATEGORIES));
+                }
+
+                // Validate expense amount
+                const amount = Number(expense.amount);
+                if (isNaN(amount)) {
+                    console.warn('Invalid amount found:', expense.amount);
+                } else {
+                    totalSpending += amount;
+                }
+
+                expenses.push(expense);
+            });
+        
+            // Log final state
+            console.log('All loaded expenses:', expenses);
+            console.log('Total spending calculated:', totalSpending);
+            console.log('Current total budget:', totalBudget);
+
+            // Sort expenses by date
+            expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Get filtered expenses for the chart
+            const filteredExpenses = getFilteredExpenses();
+            console.log('Filtered expenses for chart:', filteredExpenses);
+
+            // Update UI
+            updateDashboard();
+            updateExpenseChart(filteredExpenses);
+            updateRecentTransactionsTable();
+            
+            // Show/hide transactions container
+            recentTransactionsContainer.style.display = expenses.length ? 'block' : 'none';
+
+            // Debug: Log final state of chart data
+            if (expenseChart) {
+                console.log('Current chart data:', {
+                    labels: expenseChart.data.labels,
+                    data: expenseChart.data.datasets[0].data,
+                    backgroundColor: expenseChart.data.datasets[0].backgroundColor
+                });
+            }
+        });
+
+        console.log('Trip data load complete');
+        return unsubscribe;
+
+    } catch (error) {
+        console.error("Error in loadTripData:", error);
+        console.error("Error details:", {
+            code: error.code,
+            message: error.message,
+            stack: error.stack
+        });
+        alert('Error loading trip data. Please try again.');
+    }
+}
 
 // Function to update the Recent Transactions Table
 function updateRecentTransactionsTable() {
@@ -301,7 +417,7 @@ function enterEditMode(index) {
 expenseForm.addEventListener('submit', async function(event) {
     event.preventDefault();
 
-    if (!currentTripId) {
+    if (!currentTripId || !userUID) {
         alert('Please select a trip first');
         return;
     }
@@ -311,48 +427,68 @@ expenseForm.addEventListener('submit', async function(event) {
     const category = document.getElementById('category').value;
     const description = document.getElementById('description').value;
 
+    // Debug logs
+    console.log('Form Data:', {
+        amount,
+        date,
+        category,
+        description
+    });
+    console.log('Valid categories:', Object.values(EXPENSE_CATEGORIES));
+    console.log('Is valid category:', Object.values(EXPENSE_CATEGORIES).includes(category));
+
+    // Additional validation
+    if (isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid amount');
+        return;
+    }
+
+    if (!category || !Object.values(EXPENSE_CATEGORIES).includes(category)) {
+        alert('Please select a valid category');
+        return;
+    }
+
     try {
+        const expenseData = {
+            date,
+            amount,
+            category,
+            description,
+            createdAt: new Date(),
+            tripId: currentTripId
+        };
+
+        console.log('Saving expense with data:', expenseData);
+
         if (isEditMode && currentEditIndex !== null) {
-            // Update existing expense
             const expenseId = expenses[currentEditIndex].id;
-            await updateDoc(doc(db, "expenses", expenseId), {
-                date,
-                amount,
-                category,
-                description,
-                updatedAt: new Date()
-            });
+            await updateDoc(
+                doc(db, `users/${userUID}/trips/${currentTripId}/expenses`, expenseId),
+                {
+                    ...expenseData,
+                    updatedAt: new Date()
+                }
+            );
         } else {
-            // Add new expense
-            const expenseData = {
-                tripId: currentTripId,
-                date,
-                amount,
-                category,
-                description,
-                createdAt: new Date()
-            };
-            
-            console.log('Adding new expense:', expenseData); // Debug log
-            
-            await addDoc(collection(db, "expenses"), expenseData);
+            const docRef = await addDoc(
+                collection(db, `users/${userUID}/trips/${currentTripId}/expenses`),
+                expenseData
+            );
+            console.log('Expense saved with ID:', docRef.id);
         }
+
+        // Verify the expenses array after adding
+        console.log('Current expenses after save:', expenses);
 
         expenseForm.reset();
         isEditMode = false;
         currentEditIndex = null;
         expenseForm.querySelector('button[type="submit"]').textContent = 'Add Expense';
+
     } catch (error) {
-        console.error("Error managing expense:", error);
+        console.error("Error saving expense:", error);
         alert('Error saving expense: ' + error.message);
     }
-});
-
-// Reset edit mode on form reset
-expenseForm.addEventListener('reset', function() {
-    isEditMode = false;
-    currentEditIndex = null;
-    expenseForm.querySelector('button[type="submit"]').textContent = 'Add Expense';
 });
 
 
@@ -380,6 +516,11 @@ function updateDashboard() {
 budgetForm.addEventListener('submit', async function(event) {
     event.preventDefault();
     
+    if (!userUID) {
+        alert('Please log in first');
+        return;
+    }
+
     const selectedTripId = document.getElementById('trip').value;
     if (!selectedTripId) {
         alert('Please select a trip');
@@ -389,10 +530,9 @@ budgetForm.addEventListener('submit', async function(event) {
     totalBudget = parseFloat(document.getElementById('budget').value);
     
     try {
-        // Update trip document with budget
-        await updateDoc(doc(db, "trips", selectedTripId), {
+        await updateDoc(doc(db, `users/${userUID}/trips`, selectedTripId), {
             budget: totalBudget
-        });
+        }); //input budget into firestore
 
         currentTripId = selectedTripId;
         updateDashboard();
@@ -406,71 +546,132 @@ budgetForm.addEventListener('submit', async function(event) {
 
 
 // Function to update the expense chart
-function updateExpenseChart(expensesToChart) {
-    console.log('Updating expense chart with data:', expensesToChart);
+function updateExpenseChart(filteredExpenses) {
+    console.log('Filtered expenses received:', filteredExpenses); // Debug log
 
-    // Initialize chart if it doesn't exist
     if (!expenseChart) {
         initializeChart();
     }
 
+    // Initialize totals for all categories with 0
     const categoryTotals = {};
-
-    // Calculate totals for each category
-    expensesToChart.forEach(expense => {
-        const amount = Number(expense.amount) || 0;
-        const category = expense.category || 'Uncategorized';
-        categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+    Object.values(EXPENSE_CATEGORIES).forEach(category => {
+        categoryTotals[category] = 0;
     });
 
-    console.log('Category totals:', categoryTotals);
+    // Calculate totals for each category
+    filteredExpenses.forEach(expense => {
+        console.log('Processing expense:', expense); // Debug log
+        if (expense.category && Object.values(EXPENSE_CATEGORIES).includes(expense.category)) {
+            categoryTotals[expense.category] += Number(expense.amount) || 0;
+        }
+    });
 
-    // Only update chart if we have data
-    if (Object.keys(categoryTotals).length > 0) {
-        expenseChart.data.labels = Object.keys(categoryTotals);
-        expenseChart.data.datasets[0].data = Object.values(categoryTotals);
-        expenseChart.update();
-        console.log('Chart updated with new data');
+    console.log('Category totals calculated:', categoryTotals); // Debug log
+
+    // Prepare data for chart
+    const labels = [];
+    const data = [];
+    const backgroundColor = [];
+    
+    // Check if we have any expenses
+    const hasExpenses = Object.values(categoryTotals).some(total => total > 0);
+
+    if (hasExpenses) {
+        // Add data for all categories
+        Object.entries(categoryTotals).forEach(([category, total]) => {
+            labels.push(category);
+            data.push(total);
+            backgroundColor.push(CATEGORY_COLORS[category]);
+        });
     } else {
-        console.log('No expense data to display');
-        // Show empty state
-        expenseChart.data.labels = ['No Expenses'];
-        expenseChart.data.datasets[0].data = [1];
-        expenseChart.update();
+        // Show "No Expenses" message
+        labels.push('No Expenses');
+        data.push(0);
+        backgroundColor.push('rgba(200, 200, 200, 0.5)');
     }
+
+    // Update chart data
+    expenseChart.data.labels = labels;
+    expenseChart.data.datasets[0].data = data;
+    expenseChart.data.datasets[0].backgroundColor = backgroundColor;
+
+    // Update chart options
+    expenseChart.options.plugins.legend.display = hasExpenses;
+    expenseChart.options.plugins.datalabels = {
+        color: 'white',
+        font: { weight: 'bold', size: 14 },
+        formatter: (value, ctx) => {
+            if (value === 0) return '';
+            const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            const percentage = ((value * 100) / sum).toFixed(1);
+            return `${percentage}%`;
+        },
+        display: context => context.dataset.data[context.dataIndex] > 0
+    };
+
+    // Refresh the chart
+    expenseChart.update();
+
+    // Debug log the final chart data
+    console.log('Final chart data:', {
+        labels,
+        data,
+        backgroundColor,
+        categoryTotals
+    });
 }
 
 // Date Range Filtering for Chart
 function getFilteredExpenses() {
+    console.log('Getting filtered expenses. Current expenses:', expenses);
     const selectedRange = dateRange.value;
+    console.log('Selected date range:', selectedRange);
+    
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return expenses.filter(expense => {
-        if (!expense.date) return false;
+    const filteredExpenses = expenses.filter(expense => {
+        if (!expense.date) {
+            console.log('Expense missing date:', expense);
+            return false;
+        }
 
         const expenseDate = new Date(expense.date);
-        if (isNaN(expenseDate.getTime())) return false;
+        if (isNaN(expenseDate.getTime())) {
+            console.log('Invalid date for expense:', expense);
+            return false;
+        }
 
         expenseDate.setHours(0, 0, 0, 0);
 
+        let shouldInclude = true;
         switch(selectedRange) {
             case 'today':
-                return expenseDate.getTime() === today.getTime();
+                shouldInclude = expenseDate.getTime() === today.getTime();
+                break;
             case 'week': {
                 const oneWeekAgo = new Date(today);
                 oneWeekAgo.setDate(today.getDate() - 6);
-                return expenseDate >= oneWeekAgo && expenseDate <= today;
+                shouldInclude = expenseDate >= oneWeekAgo && expenseDate <= today;
+                break;
             }
             case 'month': {
                 const oneMonthAgo = new Date(today);
                 oneMonthAgo.setMonth(today.getMonth() - 1);
-                return expenseDate >= oneMonthAgo && expenseDate <= today;
+                shouldInclude = expenseDate >= oneMonthAgo && expenseDate <= today;
+                break;
             }
             default:
-                return true; // Show all expenses if no date range selected
+                shouldInclude = true;
         }
+        
+        console.log('Expense:', expense, 'Included:', shouldInclude);
+        return shouldInclude;
     });
+
+    console.log('Filtered expenses result:', filteredExpenses);
+    return filteredExpenses;
 }
 
 // Reset edit mode if the form is reset or if a new transaction is added
@@ -481,13 +682,14 @@ expenseForm.addEventListener('reset', function() {
 });
 
 // Event listener for date range selection to update the chart
-dateRange.addEventListener('change', () => updateExpenseChart(getFilteredExpenses()));
+dateRange.addEventListener('change', () => updateExpenseChart(getFilteredExpenses())); //getFilteredExpenses into updatexpensechart funct
 
 async function deleteTransaction(index) {
     try {
         const expenseId = expenses[index].id;
-        await deleteDoc(doc(db, "expenses", expenseId));
-        // No need to update UI here as the onSnapshot listener will handle it
+        await deleteDoc(
+            doc(db, `users/${userUID}/trips/${currentTripId}/expenses`, expenseId)
+        );
     } catch (error) {
         console.error("Error deleting expense:", error);
         alert('Error deleting expense');
@@ -495,64 +697,97 @@ async function deleteTransaction(index) {
 }
 
 
-document.addEventListener('DOMContentLoaded', function() { //on load
-    loadTrips();
-    initializeChart(); 
 
-    document.getElementById('trip').addEventListener('change', async function(e) {
-        const selectedTripId = e.target.value;
+document.addEventListener('DOMContentLoaded', function() {
+    // Check authentication first
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            userUID = user.uid;
+            loadTrips();  // Load trips after we have the userUID
+            initializeChart();
 
-        if (expenseChart) {
-            expenseChart.destroy();
-            expenseChart = null;
-        }
-    
-        if (selectedTripId) {
-            currentTripId = selectedTripId;
+            // Add trip selection handler
+            document.getElementById('trip').addEventListener('change', async function(e) {
+                const selectedTripId = e.target.value;
+
+                if (expenseChart) {
+                    expenseChart.destroy();
+                    expenseChart = null;
+                }
             
-            try {
-                const tripRef = doc(db, "trips", selectedTripId);
-                const tripDoc = await getDoc(tripRef);
-                
-                if (tripDoc.exists()) {
-                    const tripData = tripDoc.data();
+                if (selectedTripId) {
+                    currentTripId = selectedTripId;
                     
-                    // Set budget values
-                    totalBudget = Number(tripData.budget) || 0;
-                    document.getElementById('budget').value = totalBudget;
-                    
-                    // Reset spending and expenses
+                    try {
+                        // Use the correct path with user ID
+                        const tripRef = doc(db, `users/${userUID}/trips`, selectedTripId);
+                        const tripDoc = await getDoc(tripRef);
+                        
+                        if (tripDoc.exists()) {
+                            const tripData = tripDoc.data();
+                            
+                            // Set budget values
+                            totalBudget = Number(tripData.budget) || 0;
+                            document.getElementById('budget').value = totalBudget;
+                            
+                            // Reset spending and expenses
+                            totalSpending = 0;
+                            expenses.length = 0;
+                            
+                            // Show UI elements
+                            expenseCard.style.display = 'block';
+                            dashboardSection.style.display = 'block';
+                            
+                            // Load trip data and set up listeners
+                            initializeChart();
+                            await loadTripData(selectedTripId);
+                            
+                            // Initial dashboard update
+                            updateDashboard();
+                        }
+                    } catch (error) {
+                        console.error("Error loading trip:", error);
+                        alert('Error loading trip data. Please try again.');
+                    }
+                } else {
+                    // Reset everything if no trip is selected
+                    expenseCard.style.display = 'none';
+                    dashboardSection.style.display = 'none';
+                    totalBudget = 0;
                     totalSpending = 0;
                     expenses.length = 0;
-                    
-                    // Show UI elements
-                    expenseCard.style.display = 'block';
-                    dashboardSection.style.display = 'block';
-                    
-                    // Load trip data and set up listeners
-                    initializeChart();
-                    await loadTripData(selectedTripId);
-                    
-                    // Initial dashboard update
                     updateDashboard();
                 }
-            } catch (error) {
-                console.error("Error loading trip:", error);
-                alert('Error loading trip data. Please try again.');
-            }
+            });
         } else {
-            // Reset everything if no trip is selected
-            expenseCard.style.display = 'none';
-            dashboardSection.style.display = 'none';
-            totalBudget = 0;
-            totalSpending = 0;
-            expenses.length = 0;
-            updateDashboard();
+            // If no user is logged in, redirect to login page
+            window.location.href = "login.html";
         }
     });
 });
 
+const style = document.createElement('style');
+style.textContent = `
+    .chart-container {
+        position: relative;
+        height: 500px; /* Increased height */
+        width: 100%;
+        margin: 20px 0;
+        padding: 20px;
+    }
 
+    #spendingChart {
+        max-height: 100%;
+    }
+
+    .spending-overview {
+        background-color: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+`;
+document.head.appendChild(style);
 
 
 
