@@ -1,6 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -15,6 +17,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 // Function to validate email format
 function validateEmail(email) {
@@ -22,33 +25,42 @@ function validateEmail(email) {
   return re.test(String(email).toLowerCase());
 }
 
-// Function to validate password (minimum 6 characters)
+// Function to validate password
 function validatePassword(password) {
   return password.length >= 6;
 }
 
-// Ensure DOM is ready before attaching event listeners
+// Function to create user document in Firestore
+async function createUserDocument(userId, email) {
+  try {
+    await setDoc(doc(db, "users", userId), {
+      email: email,
+      createdAt: new Date(),
+      // Add any other initial user data you want to store
+    });
+    console.log("User document created in Firestore");
+  } catch (error) {
+    console.error("Error creating user document:", error);
+    throw error;
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function() {
-  // Get the submit button and error message container
   const submit = document.getElementById("submit");
   const errorMessageDisplay = document.getElementById("error-message");
 
-  // Make sure these elements exist before continuing
   if (!submit || !errorMessageDisplay) {
     console.error("Error: Submit button or error message container not found.");
     return;
   }
 
-
-  // Submit button event listener
-  submit.addEventListener("click", function(event) {
+  submit.addEventListener("click", async function(event) {
     event.preventDefault();
 
-    // Get inputs inside the event listener to ensure they are the latest values entered by the user
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    errorMessageDisplay.innerText = ""; // Clear previous error message
+    errorMessageDisplay.innerText = "";
 
     if (!validateEmail(email)) {
       errorMessageDisplay.innerText = "Invalid email format.";
@@ -60,28 +72,32 @@ document.addEventListener("DOMContentLoaded", function() {
       return;
     }
 
-    // If validation passes, create the account with Firebase
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed up successfully
-        const user = userCredential.user;
-        localStorage.setItem("userUID", user.uid); // Store user UID
-        window.location.href = "login.html"; // Redirect to login page
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
+    try {
+      // Create authentication user
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      // Create user document in Firestore
+      await createUserDocument(user.uid, email);
 
-        // Firebase-specific error handling for registration
-        if (errorCode === 'auth/email-already-in-use') {
+      localStorage.setItem("userUID", user.uid);
+      window.location.href = "login.html";
+    } catch (error) {
+      console.error("Registration error:", error);
+
+      switch (error.code) {
+        case 'auth/email-already-in-use':
           errorMessageDisplay.innerText = "This email is already in use. Please use a different one.";
-        } else if (errorCode === 'auth/invalid-email') {
+          break;
+        case 'auth/invalid-email':
           errorMessageDisplay.innerText = "Invalid email format.";
-        } else if (errorCode === 'auth/weak-password') {
+          break;
+        case 'auth/weak-password':
           errorMessageDisplay.innerText = "Weak password. Please provide a stronger password.";
-        } else {
-          errorMessageDisplay.innerText = errorMessage;
-        }
-      });
+          break;
+        default:
+          errorMessageDisplay.innerText = "An error occurred during registration. Please try again.";
+      }
+    }
   });
 });
