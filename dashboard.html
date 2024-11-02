@@ -13,6 +13,9 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDK3MEA8WqPihQ2SUBndsYyRldsR9am2rI&libraries=places"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <style>
         body,
@@ -426,6 +429,21 @@
                 </div>
             </section>
 
+            <div class="spending-overview">
+                <h3>Spending Overview</h3>
+                <select id="dateRange" onchange="updateExpenseChart(getFilteredExpenses())">
+                    <option value="today">Today</option>
+                    <option value="week">Past Week</option>
+                    <option value="month">Past Month</option>
+                    <option value="all" selected>All Time</option>
+                </select>
+
+                <!-- Chart Container -->
+                <div class="chart-container">
+                    <canvas id="spendingChart"></canvas>
+                </div>
+            </div>
+
             <h1 id="tripNameDisplay">Your Trip</h1>
 
             <div class="trip-selector">
@@ -589,21 +607,25 @@
 
                 if (tripDoc.exists()) {
                     const tripData = tripDoc.data();
+                    console.log("Trip data retrieved:", tripData); // Log for verification
+
                     const location = tripData.location;
+                    const days = tripData.dates ? tripData.dates.length : 7; // Use dates array length as tripDays
+
+                    // Store the calculated days in localStorage
+                    localStorage.setItem("tripDays", days);
+                    console.log("Updated tripDays to:", days); // Confirm days is set correctly
+
+                    localStorage.setItem("location", location);
 
                     // Display trip name and location
                     document.getElementById("tripNameDisplay").textContent = tripData.name || "Your Trip";
                     document.getElementById("weather-location").textContent = location;
 
-                    // Store location in localStorage if needed
-                    localStorage.setItem("location", location);
-
-                    // Update weather, attractions, and currency based on location
+                    // Fetch and display updated weather, attractions, and currency based on location
                     fetchWeatherData(location);
                     fetchAttractionsForLocation(location);
                     fetchCurrencyForLocation(location);
-                } else {
-                    console.warn("Trip data not found for trip ID:", tripId);
                 }
             } catch (error) {
                 console.error("Error loading trip data:", error);
@@ -940,82 +962,81 @@
         }
 
         let currentPage = 0;
-        const cardsPerPage = 3; // Adjust based on how many cards you want visible at a time
+        const cardsPerPage = 3;
 
         function displayAttractions(attractions) {
             const container = document.getElementById('attractionsContainer');
-            container.innerHTML = ''; // Clear any previous cards
-
+            container.innerHTML = '';
             attractions.forEach((attraction) => {
                 const card = document.createElement('div');
                 card.classList.add('attraction-card');
 
-                // Image element
                 const img = document.createElement('img');
                 img.src = attraction.photos ? attraction.photos[0].getUrl({ maxWidth: 800 }) : 'https://via.placeholder.com/800x400';
                 img.alt = attraction.name;
                 card.appendChild(img);
 
-                // Card body container
                 const body = document.createElement('div');
                 body.classList.add('attraction-card-body');
 
-                // Title element
                 const title = document.createElement('h5');
                 title.classList.add('attraction-card-title');
                 title.innerText = attraction.name;
                 body.appendChild(title);
 
-                // Location element
                 const location = document.createElement('p');
                 location.classList.add('attraction-card-location');
                 location.innerText = attraction.vicinity || 'Address not available';
                 body.appendChild(location);
 
                 card.appendChild(body);
-
-                // Add click event to navigate to the attractions page
-                card.addEventListener('click', () => {
-                    const location = localStorage.getItem("location"); // Get the stored location
-                    window.location.href = `attractions.html?location=${encodeURIComponent(location)}`;
-                });
-
                 container.appendChild(card);
             });
 
-            updateVisibleCards(); // Initial update to show the first set of cards
+            updateVisibleCards(attractions.length);
         }
 
-
-
-        function updateVisibleCards() {
+        function updateVisibleCards(totalCards) {
             const container = document.getElementById('attractionsContainer');
             const cards = Array.from(container.children);
             const start = currentPage * cardsPerPage;
-            const end = start + cardsPerPage;
+            const end = Math.min(start + cardsPerPage, totalCards);
+
+            console.log(`Displaying cards from ${start} to ${end - 1}, total cards: ${totalCards}`);
 
             cards.forEach((card, index) => {
                 card.style.display = index >= start && index < end ? 'block' : 'none';
             });
+
+            document.querySelector('.carousel-button-left').disabled = currentPage === 0;
+            document.querySelector('.carousel-button-right').disabled = end >= totalCards;
         }
 
-        function goLeft() {
+        // Attach functions to the global window object
+        window.goLeft = function () {
             if (currentPage > 0) {
                 currentPage--;
-                updateVisibleCards();
+                console.log("Navigated left, current page:", currentPage);
+                updateVisibleCards(document.getElementById('attractionsContainer').children.length);
             }
         }
 
-        function goRight() {
-            const container = document.getElementById('attractionsContainer');
-            const totalCards = container.children.length;
+        window.goRight = function () {
+            const totalCards = document.getElementById('attractionsContainer').children.length;
             const maxPage = Math.ceil(totalCards / cardsPerPage) - 1;
 
             if (currentPage < maxPage) {
                 currentPage++;
-                updateVisibleCards();
+                console.log("Navigated right, current page:", currentPage);
+                updateVisibleCards(totalCards);
             }
         }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Example call to displayAttractions with dummy data
+            const attractions = Array(20).fill({ name: 'Attraction', photos: [], vicinity: 'Address' });
+            displayAttractions(attractions);
+        });
 
 
         function getWeatherForecast(lat, lon) {
@@ -1035,14 +1056,16 @@
 
         function displayForecast(dailyForecast) {
             const weatherTable = document.getElementById("weather-details");
-            weatherTable.innerText = "";
 
-            // Retrieve the number of days from localStorage
-            const tripDays = parseInt(localStorage.getItem("tripDays")) || 7; // Default to 7 if not found
+            // Clear previous content
+            weatherTable.innerHTML = "";
 
-            dailyForecast.forEach((day, index) => {
-                if (index >= tripDays) return; // Limit the rows to the number of selected days
+            // Retrieve and verify the trip's day count from localStorage
+            const tripDays = parseInt(localStorage.getItem("tripDays")) || 7;
+            console.log("Retrieved tripDays for forecast:", tripDays); // Log for debugging
 
+            // Populate rows up to the limit defined by tripDays
+            dailyForecast.slice(0, tripDays).forEach((day, index) => {
                 const row = document.createElement("tr");
 
                 const dayCell = document.createElement("td");
