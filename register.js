@@ -65,6 +65,7 @@ document.addEventListener("DOMContentLoaded", function() {
       .then((userCredential) => {
         // Signed up successfully
         const user = userCredential.user;
+        localStorage.setItem("userUID", user.uid); // Store user UID
         window.location.href = "login.html"; // Redirect to login page
       })
       .catch((error) => {

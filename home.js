@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { initAutocomplete, searchAttractions, searchAttractionsByText, displayNoAttractionsMessage } from "./autocomplete.js";
 
 const firebaseConfig = {
@@ -13,6 +14,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+
+const userUID = localStorage.getItem("userUID");
+
+if (!userUID) {
+    window.location.href = "login.html"; // Redirect to login if not authenticated
+}
 
 // Flatpickr Date Range Picker Initialization
 document.addEventListener('DOMContentLoaded', function () {
@@ -46,41 +54,51 @@ initAutocomplete("location", (location) => {
     console.log("Selected location:", location);
 });
 
-document.getElementById("newTripForm").addEventListener("submit", async (event) => {
-    event.preventDefault(); // Prevent form's default submission behavior
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        const userUID = user.uid;
 
-    // Check if already submitting to avoid duplicates
-    if (isSubmitting) return;
-    isSubmitting = true;
+        document.getElementById("newTripForm").addEventListener("submit", async (event) => {
+            event.preventDefault(); // Prevent form's default submission behavior
 
-    const tripName = document.getElementById("tripName").value;
-    const location = document.getElementById("location").value;
-    const dateRange = document.getElementById("date-range").value;
+            // Check if already submitting to avoid duplicates
+            if (isSubmitting) return;
+            isSubmitting = true;
 
-    // Split the date range into start and end dates
-    const [startDate, endDate] = dateRange.split(" to ");
-    
-    // Generate all dates between start and end dates
-    const tripDates = generateDateRange(startDate, endDate);
+            const tripName = document.getElementById("tripName").value;
+            const location = document.getElementById("location").value;
+            const dateRange = document.getElementById("date-range").value;
 
-    // Create new trip in Firebase
-    try {
-        const tripRef = await addDoc(collection(db, "trips"), {
-            name: tripName,
-            location: location,
-            dates: tripDates,
-            createdAt: new Date()
+            // Split the date range into start and end dates
+            const [startDate, endDate] = dateRange.split(" to ");
+
+            // Generate all dates between start and end dates
+            const tripDates = generateDateRange(startDate, endDate);
+
+            // Create new trip in Firebase
+            try {
+                const tripRef = await addDoc(collection(db, `users/${userUID}/trips`), {
+                    name: tripName,
+                    location: location,
+                    dates: tripDates,
+                    createdAt: new Date()
+                });
+
+                console.log("New trip created with ID:", tripRef.id);
+
+                // Redirect to the attractions page with trip ID and location as URL parameters
+                // window.location.href = `attractions.html?tripID=${tripRef.id}&location=${encodeURIComponent(location)}`;
+                window.location.href = `dashboard.html?tripName=${encodeURIComponent(tripName)}&location=${encodeURIComponent(location)}`;
+            } catch (error) {
+                console.error("Error creating new trip:", error);
+            } finally {
+                isSubmitting = false; // Reset the flag
+            }
         });
-
-        console.log("New trip created with ID:", tripRef.id);
-
-        // Redirect to the attractions page with trip ID and location as URL parameters
-        // window.location.href = `attractions.html?tripID=${tripRef.id}&location=${encodeURIComponent(location)}`;
-        window.location.href = `dashboard.html?tripName=${encodeURIComponent(tripName)}&location=${encodeURIComponent(location)}`;
-    } catch (error) {
-        console.error("Error creating new trip:", error);
-    } finally {
-        isSubmitting = false; // Reset the flag
+    } 
+    else {
+        // If not logged in, redirect to login page
+        window.location.href = "login.html";
     }
 });
 
