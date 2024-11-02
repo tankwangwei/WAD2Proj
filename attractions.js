@@ -17,7 +17,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-let userId; 
+let userId;
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -39,8 +39,23 @@ locationInput.value = location;
 
 // Automatically search for attractions on page load if location is defined
 document.addEventListener("DOMContentLoaded", () => {
-    if (location) {
-        searchAttractionsByText(location, displayAttractions);
+    const urlParams = new URLSearchParams(window.location.search);
+    let location = urlParams.get("location");
+
+    // If the location parameter is null, set it to an empty string
+    if (!location || location === "null" || location === null) {
+        location = "";
+    }
+
+    const locationInput = document.getElementById("location");
+    locationInput.value = decodeURIComponent(location);
+
+    // Automatically search for attractions if location has a valid value
+    if (location.trim() !== "") {
+        // Directly trigger the attraction search without button click
+        setTimeout(() => {
+            searchAttractionsByText(location, displayAttractions);
+        }, 0);
     }
 });
 
@@ -112,7 +127,7 @@ async function fetchAttractionSummary(attractionName, elementId) {
     try {
         const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(attractionName)}`);
         const data = await response.json();
-        
+
         if (data.extract) {
             document.getElementById(elementId).innerText = data.extract;
         } else {
@@ -161,7 +176,7 @@ function showNotification(message, cardElement) {
     notification.className = "notification";
     notification.innerText = message;
     cardElement.appendChild(notification);
-    
+
     // Auto-hide after 3 seconds
     setTimeout(() => {
         notification.remove();

@@ -351,6 +351,15 @@
             margin: 0 auto;
         }
     </style>
+
+    <script>
+        function navigateToAttractionsPage() {
+            const location = localStorage.getItem("location");
+            const url = location ? `attractions.html?location=${encodeURIComponent(location)}` : `attractions.html`;
+            window.location.href = url;
+        }
+
+    </script>
 </head>
 
 <body>
@@ -390,7 +399,7 @@
             <!-- Left button -->
             <button class="carousel-button carousel-button-left" onclick="goLeft()">&#8249;</button>
             <!-- Attraction cards container -->
-            <div id="attractionsContainer" class="d-flex"></div>
+            <div id="attractionsContainer" class="d-flex" onclick="navigateToAttractionsPage()"></div>
             <!-- Right button -->
             <button class="carousel-button carousel-button-right" onclick="goRight()">&#8250;</button>
         </div>

@@ -148,6 +148,26 @@
     <script type="module" src="autocomplete.js"></script>
     <script type="module" src="attractions.js"></script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            let location = urlParams.get("location");
+
+            if (!location || location === "null" || location === null) {
+                location = ""; // Set location to empty string if null
+            }
+
+            const locationInput = document.getElementById("location");
+            locationInput.value = decodeURIComponent(location);
+
+            // Automatically search for attractions if location has a valid value
+            if (location.trim() !== "") {
+                // Call the function directly to display results without requiring a button press
+                searchAttractionsByText(location, displayAttractions);
+            }
+        });
+    </script>
+
 </body>
 
 </html>
