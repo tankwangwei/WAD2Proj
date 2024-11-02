@@ -164,7 +164,7 @@ function initializeChart() {
                             generateLabels: (chart) => {
                                 const datasets = chart.data.datasets;
                                 return datasets[0].data.map((data, i) => ({
-                                    text: `${chart.data.labels[i]} - $${data.toFixed(2)}`,
+                                    text: `${chart.data.labels[i]}`, // Only show the category and amount
                                     fillStyle: datasets[0].backgroundColor[i],
                                     index: i
                                 }));
@@ -175,7 +175,7 @@ function initializeChart() {
                         color: 'white',
                         font: { 
                             weight: 'bold', 
-                            size: 16 // Increased font size
+                            size: 16
                         },
                         formatter: (value, ctx) => {
                             if (value === 0) return '';
@@ -186,16 +186,13 @@ function initializeChart() {
                         display: (context) => {
                             return context.dataset.data[context.dataIndex] > 0;
                         },
-                        // Add offset to prevent text from being cut off
                         offset: 8,
-                        // Add padding around labels
                         padding: {
                             top: 5,
                             bottom: 5,
                             left: 5,
                             right: 5
                         },
-                        // Add background to labels for better readability
                         backgroundColor: 'rgba(0, 0, 0, 0.6)',
                         borderRadius: 4
                     },
@@ -206,7 +203,7 @@ function initializeChart() {
                                 if (value === 0) return 'No expenses recorded';
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = ((value * 100) / total).toFixed(1);
-                                return `${context.label}: $${value.toFixed(2)} (${percentage}%)`;
+                                return `${context.label}: ${value.toFixed(2)} ${selectedCurrency} (${percentage}%)`;
                             }
                         }
                     }
@@ -219,6 +216,7 @@ function initializeChart() {
         console.error('Error initializing chart:', error);
     }
 }
+
 
 // Function to load trip budget and expenses
 async function loadTripData(tripId) {
@@ -492,24 +490,18 @@ expenseForm.addEventListener('submit', async function(event) {
 });
 
 
-// Function to update dashboard values
+// Function to update the dashboard values with the selected currency
 function updateDashboard() {
-    // Ensure we're working with numbers and handle potential NaN values
-    const budget = Number(totalBudget) || 0;
-    const spending = Number(totalSpending) || 0;
-    const remaining = budget - spending;
+    const convertedBudget = convertAmount(totalBudget, selectedCurrency);
+    const convertedSpending = convertAmount(totalSpending, selectedCurrency);
+    const convertedRemaining = convertAmount(totalBudget - totalSpending, selectedCurrency);
 
-    // Format numbers with commas and fixed decimal places
-    dashboardTotalBudget.textContent = `$${budget.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-    dashboardTotalSpending.textContent = `$${spending.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-    dashboardRemainingBudget.textContent = `$${remaining.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    dashboardTotalBudget.textContent = `${convertedBudget} ${selectedCurrency}`;
+    dashboardTotalSpending.textContent = `${convertedSpending} ${selectedCurrency}`;
+    dashboardRemainingBudget.textContent = `${convertedRemaining} ${selectedCurrency}`;
 
-    // Add visual feedback for remaining budget
-    if (remaining < 0) {
-        dashboardRemainingBudget.style.color = '#e74c3c'; // Red for overspent
-    } else {
-        dashboardRemainingBudget.style.color = '#2ecc71'; // Green for within budget
-    }
+    // Change color based on remaining budget
+    dashboardRemainingBudget.style.color = (convertedRemaining < 0) ? '#e74c3c' : '#2ecc71';
 }
 
 // Event listener for budget form submission
@@ -545,43 +537,39 @@ budgetForm.addEventListener('submit', async function(event) {
 });
 
 
-// Function to update the expense chart
+// Function to update the expense chart with the selected currency
 function updateExpenseChart(filteredExpenses) {
-    console.log('Filtered expenses received:', filteredExpenses); // Debug log
-
     if (!expenseChart) {
         initializeChart();
     }
 
-    // Initialize totals for all categories with 0
+    // Initialize totals for all categories
     const categoryTotals = {};
     Object.values(EXPENSE_CATEGORIES).forEach(category => {
         categoryTotals[category] = 0;
     });
 
-    // Calculate totals for each category
+    // Calculate totals for each category in EUR first, then convert
     filteredExpenses.forEach(expense => {
-        console.log('Processing expense:', expense); // Debug log
         if (expense.category && Object.values(EXPENSE_CATEGORIES).includes(expense.category)) {
             categoryTotals[expense.category] += Number(expense.amount) || 0;
         }
     });
 
-    console.log('Category totals calculated:', categoryTotals); // Debug log
-
-    // Prepare data for chart
+    // Prepare data for chart with currency conversion
     const labels = [];
     const data = [];
     const backgroundColor = [];
-    
+
     // Check if we have any expenses
     const hasExpenses = Object.values(categoryTotals).some(total => total > 0);
 
     if (hasExpenses) {
-        // Add data for all categories
+        // Convert each category total to the selected currency and add to chart data
         Object.entries(categoryTotals).forEach(([category, total]) => {
-            labels.push(category);
-            data.push(total);
+            const convertedTotal = parseFloat(convertAmount(total, selectedCurrency));
+            labels.push(`${category} - ${convertedTotal} ${selectedCurrency}`);
+            data.push(convertedTotal);
             backgroundColor.push(CATEGORY_COLORS[category]);
         });
     } else {
@@ -596,30 +584,23 @@ function updateExpenseChart(filteredExpenses) {
     expenseChart.data.datasets[0].data = data;
     expenseChart.data.datasets[0].backgroundColor = backgroundColor;
 
-    // Update chart options
-    expenseChart.options.plugins.legend.display = hasExpenses;
-    expenseChart.options.plugins.datalabels = {
-        color: 'white',
-        font: { weight: 'bold', size: 14 },
-        formatter: (value, ctx) => {
-            if (value === 0) return '';
-            const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
-            const percentage = ((value * 100) / sum).toFixed(1);
-            return `${percentage}%`;
-        },
-        display: context => context.dataset.data[context.dataIndex] > 0
+    // Update chart options for tooltips and datalabels to show amounts in selected currency
+    expenseChart.options.plugins.tooltip.callbacks.label = (context) => {
+        const value = context.raw;
+        if (value === 0) return 'No expenses recorded';
+        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+        const percentage = ((value * 100) / total).toFixed(1);
+        return `${context.label}: ${value.toFixed(2)} ${selectedCurrency} (${percentage}%)`;
+    };
+    expenseChart.options.plugins.datalabels.formatter = (value, ctx) => {
+        if (value === 0) return '';
+        const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+        const percentage = ((value * 100) / sum).toFixed(1);
+        return `${percentage}%`;
     };
 
     // Refresh the chart
     expenseChart.update();
-
-    // Debug log the final chart data
-    console.log('Final chart data:', {
-        labels,
-        data,
-        backgroundColor,
-        categoryTotals
-    });
 }
 
 // Date Range Filtering for Chart
@@ -696,8 +677,6 @@ async function deleteTransaction(index) {
     }
 }
 
-
-
 document.addEventListener('DOMContentLoaded', function() {
     // Check authentication first
     onAuthStateChanged(auth, (user) => {
@@ -767,7 +746,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 let currencyRates = {};
-let selectedCurrency = 'USD'; // Default currency
+let selectedCurrency = 'EUR'; // Default currency
 
 // Fetch and populate currency options
 async function getCurrencyRates() {
@@ -804,22 +783,18 @@ function convertAmount(amount, currency) {
 
 
 
+// Function to update the currency across all elements when selected
 function updateCurrency() {
     selectedCurrency = document.getElementById("currency").value;
     if (!selectedCurrency) return;
 
-    const convertedBudget = convertAmount(totalBudget, selectedCurrency);
-    const convertedSpending = convertAmount(totalSpending, selectedCurrency);
-    const convertedRemaining = convertAmount(totalBudget - totalSpending, selectedCurrency);
-
-    console.log("Updated values - Budget:", convertedBudget, "Spending:", convertedSpending, "Remaining:", convertedRemaining); // Debug log
-
-    dashboardTotalBudget.textContent = `${convertedBudget} ${selectedCurrency}`;
-    dashboardTotalSpending.textContent = `${convertedSpending} ${selectedCurrency}`;
-    dashboardRemainingBudget.textContent = `${convertedRemaining} ${selectedCurrency}`;
-
+    updateDashboard();
+    updateExpenseChart(getFilteredExpenses());
     updateRecentTransactionsTableInCurrency(selectedCurrency);
 }
+
+// Event listener for currency selection
+document.getElementById("currency").addEventListener("change", updateCurrency);
 
 
 function updateRecentTransactionsTableInCurrency(currency) {
