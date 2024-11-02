@@ -766,6 +766,116 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+let currencyRates = {};
+let selectedCurrency = 'USD'; // Default currency
+
+// Fetch and populate currency options
+async function getCurrencyRates() {
+    try {
+        const response = await axios.get("http://data.fixer.io/api/latest", {
+            params: { access_key: "c0f555a5661422620003b935f9e77b04" } // Use your API key here
+        });
+        currencyRates = response.data.rates;
+        console.log("Currency rates fetched:", currencyRates); // Debug log
+        
+        const currencySelect = document.getElementById("currency");
+        currencySelect.innerHTML = '<option value="">Select Currency</option>';
+        
+        Object.keys(currencyRates).sort().forEach(key => {
+            let option = document.createElement("option");
+            option.value = key;
+            option.textContent = key;
+            currencySelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Error fetching currency rates:", error);
+    }
+}
+
+function convertAmount(amount, currency) {
+    const conversionRate = currencyRates[currency];
+    console.log("Converting amount:", amount, "to currency:", currency, "with rate:", conversionRate); // Debug log
+    if (!conversionRate) {
+        console.warn(`Conversion rate not found for currency: ${currency}`);
+        return amount;
+    }
+    return (amount * conversionRate).toFixed(2);
+}
+
+
+
+function updateCurrency() {
+    selectedCurrency = document.getElementById("currency").value;
+    if (!selectedCurrency) return;
+
+    const convertedBudget = convertAmount(totalBudget, selectedCurrency);
+    const convertedSpending = convertAmount(totalSpending, selectedCurrency);
+    const convertedRemaining = convertAmount(totalBudget - totalSpending, selectedCurrency);
+
+    console.log("Updated values - Budget:", convertedBudget, "Spending:", convertedSpending, "Remaining:", convertedRemaining); // Debug log
+
+    dashboardTotalBudget.textContent = `${convertedBudget} ${selectedCurrency}`;
+    dashboardTotalSpending.textContent = `${convertedSpending} ${selectedCurrency}`;
+    dashboardRemainingBudget.textContent = `${convertedRemaining} ${selectedCurrency}`;
+
+    updateRecentTransactionsTableInCurrency(selectedCurrency);
+}
+
+
+function updateRecentTransactionsTableInCurrency(currency) {
+    recentTransactionsTable.innerHTML = '';
+    expenses.forEach((expense, index) => {
+        const row = document.createElement('tr');
+
+        const dateCell = document.createElement('td');
+        dateCell.textContent = expense.date;
+
+        const descriptionCell = document.createElement('td');
+        descriptionCell.textContent = expense.description;
+
+        const amountCell = document.createElement('td');
+        const amount = parseFloat(expense.amount);
+        if (isNaN(amount)) {
+            amountCell.textContent = 'Invalid Amount';
+        } else {
+            const convertedAmount = convertAmount(amount, currency);
+            amountCell.textContent = `${convertedAmount} ${currency}`;
+        }
+
+        const actionCell = document.createElement('td');
+        actionCell.style.display = 'flex';
+        actionCell.style.gap = '10px';
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.classList.add('edit-btn');
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.classList.add('delete-btn');
+
+        actionCell.appendChild(editBtn);
+        actionCell.appendChild(deleteBtn);
+
+        editBtn.addEventListener('click', () => enterEditMode(index));
+        deleteBtn.addEventListener('click', () => deleteTransaction(index));
+
+        row.appendChild(dateCell);
+        row.appendChild(descriptionCell);
+        row.appendChild(amountCell);
+        row.appendChild(actionCell);
+        recentTransactionsTable.appendChild(row);
+    });
+    recentTransactionsContainer.style.display = expenses.length ? 'block' : 'none';
+}
+
+// Event listener for currency selection
+document.getElementById("currency").addEventListener("change", updateCurrency);
+
+// Initialize currency rates on page load
+getCurrencyRates();
+
+
 const style = document.createElement('style');
 style.textContent = `
     .chart-container {
@@ -788,7 +898,6 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
-
 
 
 
