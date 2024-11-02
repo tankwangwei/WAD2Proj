@@ -1,5 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
 import { initAutocomplete, searchAttractions, searchAttractionsByText, displayNoAttractionsMessage } from "./autocomplete.js";
 
 
@@ -14,6 +16,17 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+let userId; 
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        userId = user.uid; // Save user ID for use in Firestore paths
+    } else {
+        // If not logged in, redirect to login page
+        window.location.href = "login.html";
+    }
+});
 
 // Get tripID and location from the URL
 const urlParams = new URLSearchParams(window.location.search);
@@ -85,6 +98,7 @@ function displayAttractions(attractions) {
                         <span class="icon plus-icon" title="Save Activity">＋</span>
                         <span class="icon checkmark-icon" title="Saved" style="display:none;">✔</span>
                     </div>
+
                 </div>
             </div>
         `;
@@ -110,9 +124,20 @@ async function fetchAttractionSummary(attractionName, elementId) {
     }
 }
 
-async function saveActivity(tripID, name, address, lat, lng, imageUrl) {
+async function saveActivity(tripID, name, address, lat, lng, imageUrl, iconElement) {
     try {
-        const activityRef = await addDoc(collection(db, `trips/${tripID}/activities`), {
+        // Check if activity already exists in Firestore
+        const activitiesRef = collection(db, `users/${userId}/trips/${tripID}/activities`);
+        const q = query(activitiesRef, where("name", "==", name), where("address", "==", address));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            // Activity already exists
+            showNotification("Activity is already saved", iconElement.closest('.card'));
+            return;
+        }
+
+        const activityRef = await addDoc(collection(db, `users/${userId}/trips/${tripID}/activities`), {
             name: name,
             address: address,
             lat: lat,
