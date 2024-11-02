@@ -425,13 +425,48 @@
                     <div id="result" class="result">Please input amount and currency</div>
                 </div>
             </section>
+
+            <h1 id="tripNameDisplay">Your Trip</h1>
+
+            <div class="trip-selector">
+                <label for="tripDropdown">Select a Trip:</label>
+                <select id="tripDropdown">
+                    <option value="">Select a trip</option>
+                </select>
+            </div>
+
         </div>
     </div>
 
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            getDocs,
+            doc,
+            getDoc
+        } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAb7M3MiQ3tGYMT1PCFRam-Z0S6rXqwVcQ",
+            authDomain: "wad2-32757.firebaseapp.com",
+            projectId: "wad2-32757",
+            storageBucket: "wad2-32757.appspot.com",
+            messagingSenderId: "191549341083",
+            appId: "1:191549341083:web:ad67ea6030d29c8700353e"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth();
+
         document.addEventListener("DOMContentLoaded", function () {
             const params = new URLSearchParams(window.location.search);
             let location = params.get("location");
@@ -460,6 +495,140 @@
                     .catch(error => console.error("Error fetching currency for location:", error));
             } else {
                 resultElem.innerText = "Location not specified.";
+            }
+
+            const tripName = localStorage.getItem("tripName");
+
+            // Display the trip name in the designated HTML element
+            if (tripName) {
+                document.getElementById("tripNameDisplay").textContent = tripName;
+            } else {
+                document.getElementById("tripNameDisplay").textContent = "Your Trip";
+            }
+
+            const selectedTripId = localStorage.getItem("selectedTripId");
+
+            if (selectedTripId) {
+                const tripDropdown = document.getElementById("tripDropdown");
+                tripDropdown.value = selectedTripId;  // Set dropdown to the selected trip
+
+                // Load and display the initial trip data if a trip is pre-selected
+                loadTripData(selectedTripId);
+            }
+
+            // Event listener for dropdown change to update the dashboard data
+            document.getElementById('tripDropdown').addEventListener("change", async function (event) {
+                const selectedTripId = event.target.value;
+                if (selectedTripId) {
+                    await loadTripData(selectedTripId);
+                } else {
+                    clearDashboard();
+                }
+            });
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userUID = user.uid;
+                    loadTrips(); // Load trips to populate the dropdown
+                    initializeChart();
+
+                    document.getElementById('tripDropdown').addEventListener('change', async function (event) {
+                        const selectedTripId = event.target.value;
+
+                        if (selectedTripId) {
+                            currentTripId = selectedTripId;
+
+                            // Load and display trip data in the dashboard
+                            await loadTripData(selectedTripId);
+                            updateDashboard();
+                        } else {
+                            // Clear dashboard if no trip is selected
+                            clearDashboard();
+                        }
+                    });
+                } else {
+                    window.location.href = "login.html";
+                }
+            });
+        });
+
+        async function loadTrips() {
+            const tripSelect = document.getElementById('tripDropdown');
+            tripSelect.innerHTML = '<option value="">Select a trip</option>';
+
+            try {
+                if (!auth.currentUser) return;
+                const userUID = auth.currentUser.uid;
+                const tripsRef = collection(db, `users/${userUID}/trips`);
+                const querySnapshot = await getDocs(tripsRef);
+
+                querySnapshot.forEach((doc) => {
+                    const tripData = doc.data();
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.textContent = tripData.name || 'Unnamed Trip';
+                    tripSelect.appendChild(option);
+                });
+
+                // Set dropdown to pre-selected trip from previous page, if available
+                const selectedTripId = localStorage.getItem("selectedTripId");
+                if (selectedTripId) {
+                    tripSelect.value = selectedTripId;
+                    await loadTripData(selectedTripId); // Load initial data
+                }
+            } catch (error) {
+                console.error("Error loading trips:", error);
+            }
+        }
+
+        // Function to update trip display when a trip is selected
+        async function loadTripData(tripId) {
+            try {
+                const tripRef = doc(db, `users/${auth.currentUser.uid}/trips`, tripId);
+                const tripDoc = await getDoc(tripRef);
+
+                if (tripDoc.exists()) {
+                    const tripData = tripDoc.data();
+                    const location = tripData.location;
+
+                    // Display trip name and location
+                    document.getElementById("tripNameDisplay").textContent = tripData.name || "Your Trip";
+                    document.getElementById("weather-location").textContent = location;
+
+                    // Store location in localStorage if needed
+                    localStorage.setItem("location", location);
+
+                    // Update weather, attractions, and currency based on location
+                    fetchWeatherData(location);
+                    fetchAttractionsForLocation(location);
+                    fetchCurrencyForLocation(location);
+                } else {
+                    console.warn("Trip data not found for trip ID:", tripId);
+                }
+            } catch (error) {
+                console.error("Error loading trip data:", error);
+            }
+        }
+
+        // Auth state change listener
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("User is signed in:", user.uid);
+                loadTrips(); // Load trips for the authenticated user
+            } else {
+                console.warn("No user signed in, redirecting to login.");
+                window.location.href = "login.html"; // Redirect if not logged in
+            }
+        });
+
+        // Event listener for trip dropdown change
+        document.getElementById('tripDropdown').addEventListener('change', async (event) => {
+            const selectedTripId = event.target.value;
+
+            if (selectedTripId) {
+                await loadTripData(selectedTripId); // Load selected trip data
+            } else {
+                clearDashboard();
             }
         });
 
@@ -695,13 +864,11 @@
                 });
         }
 
-        function fetchWeatherData(city) {
+        function fetchWeatherData(location) {
             const geoUrl = "http://api.openweathermap.org/geo/1.0/direct";
             const apiKey = "4e1a69304c74566a0ebcf18acbafbc18";
 
-            axios.get(geoUrl, {
-                params: { q: city, appid: apiKey }
-            })
+            axios.get(geoUrl, { params: { q: location, appid: apiKey } })
                 .then(response => {
                     const data = response.data;
                     if (data.length === 0) {
@@ -710,10 +877,49 @@
                     }
                     const lat = data[0].lat;
                     const lon = data[0].lon;
-                    getWeatherForecast(lat, lon, city);
-                    fetchAttractions(lat, lon); // Call fetchAttractions here with the lat and lon
+                    getWeatherForecast(lat, lon);
                 })
                 .catch(error => console.error("Error fetching location data:", error));
+        }
+
+        function fetchAttractionsForLocation(location) {
+            const geoUrl = "http://api.openweathermap.org/geo/1.0/direct";
+            const apiKey = "4e1a69304c74566a0ebcf18acbafbc18";
+
+            axios.get(geoUrl, { params: { q: location, appid: apiKey } })
+                .then(response => {
+                    const data = response.data;
+                    if (data.length === 0) {
+                        console.error("Location not found for attractions.");
+                        return;
+                    }
+                    const lat = data[0].lat;
+                    const lon = data[0].lon;
+                    fetchAttractions(lat, lon); // Calls the Google Places API to get attractions
+                })
+                .catch(error => console.error("Error fetching attractions location data:", error));
+        }
+
+        function fetchCurrencyForLocation(location) {
+            fetchCurrencyByCountry(location)
+                .then(currencyCode => {
+                    if (currencyCode) {
+                        fetchConversionRate(currencyCode); // Fetch and display currency conversion rate
+                    } else {
+                        console.error("Currency not found for the specified country.");
+                    }
+                })
+                .catch(error => console.error("Error fetching currency for location:", error));
+        }
+
+        // Clear the dashboard if no trip is selected
+        function clearDashboard() {
+            document.getElementById("tripNameDisplay").textContent = "Your Trip";
+            document.getElementById("weather-location").textContent = "";
+            document.getElementById("current-temperature").textContent = "";
+            document.getElementById("weather-details").innerHTML = "";
+            document.getElementById("attractionsContainer").innerHTML = "";
+            document.getElementById("result").textContent = "Please input amount and currency";
         }
 
         function fetchAttractions(lat, lon) {
@@ -831,24 +1037,24 @@
             const weatherTable = document.getElementById("weather-details");
             weatherTable.innerText = "";
 
+            // Retrieve the number of days from localStorage
+            const tripDays = parseInt(localStorage.getItem("tripDays")) || 7; // Default to 7 if not found
+
             dailyForecast.forEach((day, index) => {
-                if (index > 6) return;
+                if (index >= tripDays) return; // Limit the rows to the number of selected days
 
                 const row = document.createElement("tr");
 
                 const dayCell = document.createElement("td");
-                const date = new Date(day.dt * 1000);
-                dayCell.textContent = date.toLocaleDateString("en-GB", {
-                    weekday: "short", day: "numeric", month: "short"
-                });
+                dayCell.innerText = `Day ${index + 1}`;
                 row.appendChild(dayCell);
 
                 const minTempCell = document.createElement("td");
-                minTempCell.textContent = `${day.temp.min.toFixed(1)}°C`;
+                minTempCell.innerText = `${day.temp.min.toFixed(1)}°C`;
                 row.appendChild(minTempCell);
 
                 const maxTempCell = document.createElement("td");
-                maxTempCell.textContent = `${day.temp.max.toFixed(1)}°C`;
+                maxTempCell.innerText = `${day.temp.max.toFixed(1)}°C`;
                 row.appendChild(maxTempCell);
 
                 const summaryCell = document.createElement("td");
@@ -859,6 +1065,7 @@
                 weatherTable.appendChild(row);
             });
         }
+
     </script>
 
 </body>

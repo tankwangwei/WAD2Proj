@@ -240,6 +240,13 @@
                 font-size: 16px;
             }
         }
+
+        .error-message {
+            color: red;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: none;
+        }
     </style>
 </head>
 
@@ -315,19 +322,21 @@
             <form class="trip-form mt-4 text-center" id="newTripForm">
                 <div class="form-group mb-3">
                     <input type="text" class="form-control" id="tripName" name="tripName" placeholder="Trip Name"
-                        style="width: 300px;" required>
+                        style="width: 300px;">
                 </div>
                 <div class="form-group mb-3">
                     <input type="text" class="form-control" id="location" name="location" placeholder="Where to?"
-                        style="width: 300px;" required>
+                        style="width: 300px;">
                 </div>
                 <div class="form-group mb-3">
                     <input type="text" class="form-control" id="date-range" name="date-range"
-                        placeholder="Start & End Date" style="width: 300px;" required>
+                        placeholder="Start & End Date" style="width: 300px;">
                 </div>
+                <div class="form-group">
+                    <p class="error-message" id="errorMessage">Please fill in all fields.</p>
+                </div>                
                 <button type="submit" class="btn btn-primary mt-2">Start Planning!</button>
             </form>
-
         </div>
     </div>
 

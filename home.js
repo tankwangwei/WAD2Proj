@@ -61,42 +61,58 @@ onAuthStateChanged(auth, (user) => {
         document.getElementById("newTripForm").addEventListener("submit", async (event) => {
             event.preventDefault(); // Prevent form's default submission behavior
 
+            // Get form fields and error message element
+            const tripName = document.getElementById("tripName").value.trim();
+            const location = document.getElementById("location").value.trim();
+            const dateRange = document.getElementById("date-range").value.trim();
+            const errorMessage = document.getElementById("errorMessage");
+
+            const [startDate, endDate] = dateRange.split(" to ");
+
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const days = Math.min(7, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
+
+            // Store number of days and trip name in localStorage
+            localStorage.setItem("tripDays", days);
+            localStorage.setItem("tripName", tripName);
+
+            // Validate the form fields
+            if (!tripName || !location || !dateRange) {
+                errorMessage.style.display = "block"; // Show error message
+                errorMessage.innerText = "Please fill in all fields."; // Set error text
+                return; // Stop form submission
+            } else {
+                errorMessage.style.display = "none"; // Hide error message if fields are filled
+            }
+
             // Check if already submitting to avoid duplicates
             if (isSubmitting) return;
             isSubmitting = true;
 
-            const tripName = document.getElementById("tripName").value;
-            const location = document.getElementById("location").value;
-            const dateRange = document.getElementById("date-range").value;
-
-            // Split the date range into start and end dates
-            const [startDate, endDate] = dateRange.split(" to ");
-
-            // Generate all dates between start and end dates
-            const tripDates = generateDateRange(startDate, endDate);
-
-            // Create new trip in Firebase
             try {
+                // Create new trip in Firebase
                 const tripRef = await addDoc(collection(db, `users/${userUID}/trips`), {
                     name: tripName,
                     location: location,
-                    dates: tripDates,
+                    dates: generateDateRange(startDate, endDate),
                     createdAt: new Date()
                 });
 
+                // Save the newly created trip ID
+                localStorage.setItem("selectedTripId", tripRef.id);
+
                 console.log("New trip created with ID:", tripRef.id);
 
-                // Redirect to the attractions page with trip ID and location as URL parameters
-                // window.location.href = `attractions.html?tripID=${tripRef.id}&location=${encodeURIComponent(location)}`;
-                window.location.href = `dashboard.html?tripName=${encodeURIComponent(tripName)}&location=${encodeURIComponent(location)}`;
+                // Redirect to the dashboard
+                window.location.href = `dashboard.html`;
             } catch (error) {
                 console.error("Error creating new trip:", error);
             } finally {
                 isSubmitting = false; // Reset the flag
             }
         });
-    } 
-    else {
+    } else {
         // If not logged in, redirect to login page
         window.location.href = "login.html";
     }
