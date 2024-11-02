@@ -343,6 +343,13 @@
         .carousel-button-right {
             right: 10px;
         }
+
+        .small-chart {
+            width: 300px;
+            height: 300px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
     </style>
 </head>
 
@@ -429,20 +436,14 @@
                 </div>
             </section>
 
-            <div class="spending-overview">
-                <h3>Spending Overview</h3>
-                <select id="dateRange" onchange="updateExpenseChart(getFilteredExpenses())">
-                    <option value="today">Today</option>
-                    <option value="week">Past Week</option>
-                    <option value="month">Past Month</option>
-                    <option value="all" selected>All Time</option>
-                </select>
-
-                <!-- Chart Container -->
-                <div class="chart-container">
-                    <canvas id="spendingChart"></canvas>
+            <section class="col-lg-4 col-md-6">
+                <div id="budget-chart-section" class="section-container">
+                    <h2 class="text-center">Budget Overview</h2>
+                    <div class="chart-container">
+                        <canvas id="budgetPieChart" class="small-chart"></canvas>
+                    </div>
                 </div>
-            </div>
+            </section>
 
             <h1 id="tripNameDisplay">Your Trip</h1>
 
@@ -626,9 +627,61 @@
                     fetchWeatherData(location);
                     fetchAttractionsForLocation(location);
                     fetchCurrencyForLocation(location);
+                    const expensesRef = collection(db, `users/${auth.currentUser.uid}/trips/${tripId}/expenses`);
+                    const querySnapshot = await getDocs(expensesRef);
+
+                    const categoryData = {};
+                    querySnapshot.forEach((doc) => {
+                        const expense = doc.data();
+                        const category = expense.category || 'Miscellaneous';
+                        const amount = parseFloat(expense.amount) || 0;
+                        categoryData[category] = (categoryData[category] || 0) + amount;
+                    });
+
+                    updatePieChart(categoryData);
                 }
             } catch (error) {
                 console.error("Error loading trip data:", error);
+            }
+        }
+
+        function updatePieChart(categoryData) {
+            const chartContainer = document.querySelector(".chart-container");
+            const canvas = document.getElementById('budgetPieChart');
+
+            if (Object.keys(categoryData).length === 0) {
+                // If no budget data, display a message
+                canvas.style.display = "none";
+
+                // Create a message element if it doesn't already exist
+                let noDataMessage = document.getElementById('noDataMessage');
+                if (!noDataMessage) {
+                    noDataMessage = document.createElement("p");
+                    noDataMessage.id = "noDataMessage";
+                    noDataMessage.className = "text-center";
+                    noDataMessage.textContent = "A budget has not been planned for this trip";
+                    chartContainer.appendChild(noDataMessage);
+                }
+            } else {
+                // Remove no data message if it exists
+                const noDataMessage = document.getElementById('noDataMessage');
+                if (noDataMessage) {
+                    chartContainer.removeChild(noDataMessage);
+                }
+
+                // Display the chart and update it with data
+                canvas.style.display = "block";
+
+                if (!budgetPieChart) {
+                    initializePieChart();
+                }
+
+                const labels = Object.keys(categoryData);
+                const data = Object.values(categoryData);
+
+                budgetPieChart.data.labels = labels;
+                budgetPieChart.data.datasets[0].data = data;
+                budgetPieChart.update();
             }
         }
 
@@ -653,6 +706,49 @@
                 clearDashboard();
             }
         });
+
+        let budgetPieChart;
+
+        function initializePieChart() {
+            const ctx = document.getElementById('budgetPieChart').getContext('2d');
+            budgetPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
+                        borderColor: 'white',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                font: {
+                                    size: 14
+                                },
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((acc, cur) => acc + cur, 0);
+                                    const percentage = ((value / total) * 100).toFixed(2);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
         const resultElem = document.getElementById("result");
 
@@ -1036,6 +1132,7 @@
             // Example call to displayAttractions with dummy data
             const attractions = Array(20).fill({ name: 'Attraction', photos: [], vicinity: 'Address' });
             displayAttractions(attractions);
+            initializePieChart();
         });
 
 
