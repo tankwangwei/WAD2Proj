@@ -33,6 +33,7 @@ let userUID = null;
 // Existing variables and elements
 let totalBudget = 0;
 let totalSpending = 0;
+let remainingBudget = 0;
 const expenses = [];
 let expenseChart;
 let currentTripId = null;
