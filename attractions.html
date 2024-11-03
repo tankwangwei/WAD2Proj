@@ -5,29 +5,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attractions Search</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script async defer
+    <script
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDK3MEA8WqPihQ2SUBndsYyRldsR9am2rI&libraries=places"></script>
 
 
     <style>
-        #logo {
-            height: 80px;
-            max-height: 100%;
-            width: auto;
-            transition: all 0.3s ease;
-        }
-
         body {
-            margin: 0;
+            margin-left: 10px;
+            margin-left: 10px;
+
+            padding: 0;
+            min-height: 100vh;
+            /* Ensures minimum height is full viewport height */
+            background-image: url('./imgs/ChangiBackground.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            /* Keeps background fixed while scrolling */
         }
 
         .containermain {
-            margin-top: 100px;
-            background-color: rgb(196, 214, 248);
+            margin: 100px auto;
+            /* Auto margins for horizontal centering */
+            padding: 40px;
+            width: 90%;
+            /* Use percentage width instead of calc */
+            max-width: 1200px;
+            /* Maximum width constraint */
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Make text more readable against the semi-transparent background */
+        .containermain h1,
+        .containermain h3 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Style the form area */
+        #searchForm {
+            background-color: rgba(255, 255, 255, 0.9);
+            /* Slightly more opaque white */
             padding: 20px;
-            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 30px;
         }
 
         .attraction-card {
@@ -36,13 +63,103 @@
             border-radius: 5px;
             padding: 15px;
             background-color: #f9f9f9;
+            height: 100%;
+            /* Ensures all cards have same height */
+        }
+
+        .attraction-card img,
+        .card-img-top {
+            width: 100%;
+            height: 250px;
+            /* Fixed height for all images */
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 15px;
         }
 
         .navbar {
-            background-color: rgba(255, 255, 255, 0.8);
             height: 100px;
             padding: 10px 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: none;
+            z-index: 1000;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            background: transparent;
+        }
+
+        .navbar .nav-link {
+            color: white !important;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 0 15px;
+            /* Add consistent padding */
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .navbar .nav-link:hover {
+            color: #f0f0f0 !important;
+        }
+
+        .navbar .container-fluid {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #logo {
+            height: 80px;
+            max-height: 100%;
+            width: auto;
+            margin-right: 50px;
+            /* Add space after logo */
+        }
+
+        /* For mobile responsiveness */
+        @media (max-width: 768px) {
+            .navbar .d-flex {
+                display: none !important;
+            }
+
+            .navbar.show .d-flex {
+                display: flex !important;
+                flex-direction: column;
+            }
+        }
+
+        /* Position the collapsed navbar content below the toggler button on small screens */
+        @media (max-width: 767.98px) {
+            .navbar-collapse {
+                position: absolute;
+                top: 100%;
+                /* Positions it directly below the navbar */
+                right: 15px;
+                /* Aligns it to the right edge of the screen */
+                width: auto;
+                border-radius: 5px;
+                z-index: 1000;
+            }
+
+            .navbar-collapse .navbar-nav .nav-link {
+                color: #333;
+                /* Adjust color to be visible */
+            }
+        }
+
+        /* For larger screens: standard layout without absolute positioning */
+        @media (min-width: 768px) {
+            .navbar-collapse {
+                position: static;
+                background-color: transparent;
+            }
+        }
+
+        #logo {
+            height: 80px;
+            max-height: 100%;
+            width: auto;
+            transition: all 0.3s ease;
         }
 
         .save-icon {
@@ -92,33 +209,149 @@
                 opacity: 0;
             }
         }
-    </style>
+
+        .card-text {
+    text-align: justify;
+    text-justify: inter-word;
+    margin-bottom: 1rem;
+}
+
+/* Specifically target the 'about' paragraph */
+.card-text.about {
+    text-align: justify;
+    text-justify: inter-word;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+/* Maintain left alignment for other card elements */
+.card-title, 
+.card-text:not(.about) {
+    text-align: left;
+
+}
+
+/* Popup Container */
+/* Popup Container */
+.card {
+    position: relative;
+}
+
+.popup-content {
+    display: none;
+    position: absolute;
+    bottom: 100%; /* Position above the card */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    margin-bottom: 10px; /* Space between popup and card */
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Show popup on hover */
+.card:hover .popup-content {
+    display: block;
+}
+
+/* Animation for smooth appearance */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 10px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+/* Add a pointer arrow at the bottom of popup */
+.popup-content::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 10px 10px 0;
+    border-style: solid;
+    border-color: white transparent transparent transparent;
+}
+
+.popup-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.popup-description {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #666;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .popup-content {
+        width: 90%;
+        max-width: 300px;
+    }
+}
+
+</style>
 </head>
 
 <body>
-    <!-- Navbar -->
-    <nav class="navbar fixed-top">
+    <nav class="navbar navbar-expand-md fixed-top">
         <div class="container-fluid d-flex justify-content-between align-items-center">
+            <!-- Logo -->
             <a class="navbar-brand" href="dashboard.html">
                 <img src="./imgs/TripPal Transparent Logo.png" id="logo">
             </a>
-            <ul class="nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="weather.html">Weather</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="currency.html">Currency</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="itinerary.html">Itinerary Builder</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="attractions.html">Destination Planning</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="budget.html">Budgeting</a>
-                </li>
-            </ul>
+
+            <!-- Toggler button for smaller screens -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Collapsible navbar content -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="itinerary.html">Itinerary Builder</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="attractions.html">Attractions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="budget.html">Budget</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="weather.html">Weather</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="currency.html">Currency</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <img src="./imgs/profile.svg" alt="Profile Icon"
+                                style="width: 30px; height: 30px; margin-right: 5px;">
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                            <li><a class="dropdown-item" href="WelcomePage.html">Sign Out</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
 
@@ -130,13 +363,20 @@
 
         <!-- Search Form -->
         <form id="searchForm" class="my-4">
-            <div class="form-group">
-                <label for="location">Enter location (city, state, or country):</label>
-                <input type="text" class="form-control" id="location" placeholder="e.g., New York, Japan" required>
+            <div class="form-group mb-3">
+                <label for="location" class="form-label fw-semibold mb-2">Enter location (city, state, or country):</label>
+                <input 
+                    type="text" 
+                    class="form-control form-control-lg mb-3" 
+                    id="location" 
+                    placeholder="e.g., New York, Japan" 
+                    required
+                >
                 <div id="autocompleteSuggestions"></div>
             </div>
-            <button type="submit" class="btn btn-primary">Search</button>
+            <button type="submit" class="btn btn-primary btn-lg px-4">Search</button>
         </form>
+        
 
         <!-- Attractions Results Section -->
         <div class="attraction mt-5">

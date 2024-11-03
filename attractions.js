@@ -107,13 +107,17 @@ function displayAttractions(attractions) {
                     <p class="card-text">Rating: ${attraction.rating || "N/A"}</p>
                     <p class="card-text">Reviews: ${attraction.user_ratings_total || 0}</p>
                     <p class="card-text">Address: ${attraction.formatted_address || attraction.vicinity}</p>
-                    <p class="card-text about" id="about-${attraction.place_id}">Loading about...</p>
-
+                    
                     <div class="save-icon" onclick="saveActivity('${tripID}', '${attraction.name}', '${attraction.formatted_address || attraction.vicinity}', ${lat}, ${lng}, '${imageUrl}', this)">
                         <span class="icon plus-icon" title="Save Activity">＋</span>
                         <span class="icon checkmark-icon" title="Saved" style="display:none;">✔</span>
                     </div>
 
+                    <!-- Popup Content -->
+                    <div class="popup-content">
+                        <div class="popup-title">${attraction.name}</div>
+                        <div class="popup-description" id="about-${attraction.place_id}">Loading about...</div>
+                    </div>
                 </div>
             </div>
         `;
