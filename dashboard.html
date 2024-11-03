@@ -452,6 +452,10 @@
                     <div class="chart-container">
                         <canvas id="budgetPieChart" class="small-chart"></canvas>
                     </div>
+                    <div id="budgetContainer" class="budget-summary">
+                        <p>Total Budget: <span id="totalBudgetDisplay">$0</span></p>
+                        <p>Remaining Budget: <span id="remainingBudgetDisplay">$0</span></p>
+                    </div>
                 </div>
             </section>
 
@@ -480,6 +484,12 @@
             getDoc
         } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+        // Global variables to hold budget information
+        let totalBudget = 0;
+        let totalSpending = 0;
+        let remainingBudget = 0;
+        let expenses = [];
 
         // Firebase configuration
         const firebaseConfig = {
@@ -666,12 +676,16 @@
                     document.getElementById("tripNameDisplay").textContent = tripData.name || "Your Trip";
                     document.getElementById("weather-location").textContent = location;
 
+                    // Update the pie chart with the expense data
+                    updatePieChart(await calculateCategoryTotals(tripId)); // Fetch category totals for pie chart
+
                     // Fetch and display updated weather, attractions, and currency based on location
                     fetchWeatherData(location);
                     fetchAttractionsForLocation(location);
                     fetchCurrencyForLocation(location);
                     const expensesRef = collection(db, `users/${auth.currentUser.uid}/trips/${tripId}/expenses`);
                     const querySnapshot = await getDocs(expensesRef);
+                    const currencyCode = await fetchCurrencyByCountry(location);
 
                     const categoryData = {};
                     querySnapshot.forEach((doc) => {
@@ -681,11 +695,77 @@
                         categoryData[category] = (categoryData[category] || 0) + amount;
                     });
 
+                    totalBudget = tripData.budget || 0;
+
+                    // Update the displayed budget information
+                    document.getElementById("totalBudgetDisplay").textContent = `$${totalBudget.toFixed(2)}`;
+                    expenses = [];
+                    querySnapshot.forEach((doc) => {
+                        const expense = doc.data();
+                        expenses.push(expense);
+                    });
+
+                    totalSpending = await calculateTotalSpending(tripId); // Function to fetch and sum expenses for the trip
+                    remainingBudget = totalBudget - totalSpending;
+
+                    document.getElementById("remainingBudgetDisplay").textContent = `$${remainingBudget.toFixed(2)}`;
+
+                    if (totalBudget > 0) {
+                        document.getElementById("totalBudgetDisplay").textContent = `$${totalBudget.toFixed(2)}`;
+
+                        totalSpending = await calculateTotalSpending(tripId);
+                        remainingBudget = totalBudget - totalSpending;
+
+                        document.getElementById("remainingBudgetDisplay").textContent = `$${remainingBudget.toFixed(2)}`;
+                        document.getElementById("budgetContainer").style.display = "block";
+                    } else {
+                        document.getElementById("budgetContainer").style.display = "none";
+                    }
+
+                    if (currencyCode) {
+                        totalBudget = tripData.budget || 0;
+                        totalSpending = await calculateTotalSpending(tripId);
+                        remainingBudget = totalBudget - totalSpending;
+
+                        // Update total and remaining budget with currency
+                        document.getElementById("totalBudgetDisplay").textContent = `${totalBudget.toFixed(2)} ${currencyCode}`;
+                        document.getElementById("remainingBudgetDisplay").textContent = `${remainingBudget.toFixed(2)} ${currencyCode}`;
+                    } else {
+                        console.error("Currency not found for the specified country.");
+                    }
+
                     updatePieChart(categoryData);
                 }
             } catch (error) {
                 console.error("Error loading trip data:", error);
             }
+        }
+
+        // Calculate total spending per category for the current trip
+        function calculateCategoryTotals() {
+            const categoryData = {};
+
+            expenses.forEach(expense => {
+                const category = expense.category || 'Miscellaneous';
+                const amount = parseFloat(expense.amount) || 0;
+                categoryData[category] = (categoryData[category] || 0) + amount;
+            });
+
+            return categoryData;
+        }
+
+        // Calculate total spending for the selected trip
+        async function calculateTotalSpending(tripId) {
+            const expensesRef = collection(db, `users/${auth.currentUser.uid}/trips/${tripId}/expenses`);
+            const querySnapshot = await getDocs(expensesRef);
+            let total = 0;
+
+            querySnapshot.forEach((doc) => {
+                const expense = doc.data();
+                total += parseFloat(expense.amount) || 0;
+            });
+
+            return total;
         }
 
         function updatePieChart(categoryData) {
