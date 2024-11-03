@@ -652,6 +652,7 @@
                     fetchCurrencyForLocation(location);
                     const expensesRef = collection(db, `users/${auth.currentUser.uid}/trips/${tripId}/expenses`);
                     const querySnapshot = await getDocs(expensesRef);
+                    const currencyCode = await fetchCurrencyByCountry(location);
 
                     const categoryData = {};
                     querySnapshot.forEach((doc) => {
@@ -686,6 +687,18 @@
                         document.getElementById("budgetContainer").style.display = "block";
                     } else {
                         document.getElementById("budgetContainer").style.display = "none";
+                    }
+
+                    if (currencyCode) {
+                        totalBudget = tripData.budget || 0;
+                        totalSpending = await calculateTotalSpending(tripId);
+                        remainingBudget = totalBudget - totalSpending;
+
+                        // Update total and remaining budget with currency
+                        document.getElementById("totalBudgetDisplay").textContent = `${totalBudget.toFixed(2)} ${currencyCode}`;
+                        document.getElementById("remainingBudgetDisplay").textContent = `${remainingBudget.toFixed(2)} ${currencyCode}`;
+                    } else {
+                        console.error("Currency not found for the specified country.");
                     }
 
                     updatePieChart(categoryData);
