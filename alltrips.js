@@ -30,8 +30,8 @@ async function loadUserItineraries(userId) {
     const itinerariesContainer = document.getElementById("itinerariesContainer");
     itinerariesContainer.innerHTML = ""; 
 
-    const itinerariesRef = collection(db, `users/${userId}/trips`);
-    const snapshot = await getDocs(itinerariesRef);
+    const tripRef = collection(db, `users/${userId}/trips`);
+    const snapshot = await getDocs(tripRef);
 
     if (snapshot.empty) {
         itinerariesContainer.innerHTML = "<p>No itineraries found. Start planning your first trip!</p>";
@@ -40,11 +40,11 @@ async function loadUserItineraries(userId) {
 
     snapshot.forEach((doc) => {
         const itinerary = doc.data();
-        const itineraryId = doc.id;
+        const tripId = doc.id;
         
         // Create a clickable link for each itinerary
         const itineraryLink = document.createElement("a");
-        itineraryLink.href = `dashboard.html?tripID=${itineraryId}`;
+        itineraryLink.href = `dashboard.html?tripID=${tripId}`;
         itineraryLink.className = "list-group-item list-group-item-action";
         itineraryLink.innerHTML = `
             <h5>${itinerary.name}</h5>
