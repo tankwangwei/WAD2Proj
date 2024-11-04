@@ -20,27 +20,17 @@ const auth = getAuth(app);
 let userId;
 
 onAuthStateChanged(auth, (user) => {
-    const tripId = localStorage.getItem("tripId");
-
     if (user) {
-        const userId = user.uid;
-        localStorage.setItem("userId", userId); // Ensure userId is stored for consistent access
-        
-        // Check if tripId exists
-        if (!tripId) {
-            window.location.href = "home.html"; // Redirect to home if trip is not selected
-        }
+        userId = user.uid; // Save user ID for use in Firestore paths
     } else {
-        // Redirect to login if user is not authenticated
+        // If not logged in, redirect to login page
         window.location.href = "login.html";
     }
 });
 
-
 // Get tripID and location from the URL
 const urlParams = new URLSearchParams(window.location.search);
-const tripID = urlParams.get('tripID') || localStorage.getItem("tripId");
-localStorage.setItem("tripId", tripId); // Store for consistent access
+const tripID = urlParams.get('tripID');
 const location = decodeURIComponent(urlParams.get('location'));
 
 // Set the location input field
