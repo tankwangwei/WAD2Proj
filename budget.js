@@ -230,7 +230,13 @@ async function loadTripData(tripId) {
             }
             userUID = user.uid;
         }
-        console.log('Current userUID:', userUID);
+
+        // Ensure currency rates are available
+        if (!currencyRates || Object.keys(currencyRates).length === 0) {
+            console.log('Currency rates not loaded, initializing with EUR only');
+            currencyRates = { "EUR": 1 };
+            selectedCurrency = "EUR";
+        }
 
         // Get trip data including budget
         const tripRef = doc(db, `users/${userUID}/trips`, tripId);
@@ -253,22 +259,20 @@ async function loadTripData(tripId) {
         }
 
         // Set up expenses listener for this trip
-        console.log('Setting up expenses listener for trip:', tripId);
         const expensesRef = collection(db, `users/${userUID}/trips/${tripId}/expenses`);
         const q = query(expensesRef);
 
+        // Clear existing expenses
+        expenses.length = 0;
+        totalSpending = 0;
+
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            console.log('Snapshot received with size:', snapshot.size);
+            console.log('Expenses snapshot received:', snapshot.size, 'documents');
             
             // Clear existing expenses
             expenses.length = 0;
             totalSpending = 0;
             
-            // Debug: Print all documents in snapshot
-            snapshot.forEach((doc) => {
-                console.log('Raw document data:', doc.id, doc.data());
-            });
-        
             snapshot.forEach((doc) => {
                 const expenseData = doc.data();
                 const expense = {
@@ -276,74 +280,36 @@ async function loadTripData(tripId) {
                     ...expenseData
                 };
                 
-                // Detailed logging for each expense
-                console.log('Processing expense:', {
-                    id: expense.id,
-                    amount: expense.amount,
-                    category: expense.category,
-                    date: expense.date,
-                    description: expense.description
-                });
-                
-                // Validate expense category
-                if (!expense.category) {
-                    console.warn('Expense missing category:', expense);
-                } else if (!Object.values(EXPENSE_CATEGORIES).includes(expense.category)) {
-                    console.warn('Invalid category found:', expense.category);
-                    console.log('Valid categories are:', Object.values(EXPENSE_CATEGORIES));
-                }
-
-                // Validate expense amount
-                const amount = Number(expense.amount);
-                if (isNaN(amount)) {
-                    console.warn('Invalid amount found:', expense.amount);
+                // Validate expense data
+                if (typeof expense.amount === 'number' && !isNaN(expense.amount)) {
+                    totalSpending += expense.amount;
                 } else {
-                    totalSpending += amount;
+                    console.warn('Invalid amount in expense:', expense);
                 }
-
+                
                 expenses.push(expense);
             });
-        
-            // Log final state
-            console.log('All loaded expenses:', expenses);
-            console.log('Total spending calculated:', totalSpending);
-            console.log('Current total budget:', totalBudget);
-
-            // Sort expenses by date
+            
+            // Sort expenses by date (most recent first)
             expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
             
-            // Get filtered expenses for the chart
-            const filteredExpenses = getFilteredExpenses();
-            console.log('Filtered expenses for chart:', filteredExpenses);
+            console.log('Updated expenses array:', expenses);
+            console.log('Total spending:', totalSpending);
 
-            // Update UI
+            // Update all UI elements
             updateDashboard();
-            updateExpenseChart(filteredExpenses);
-            updateRecentTransactionsTable();
+            updateExpenseChart(getFilteredExpenses());
+            updateRecentTransactionsTableInCurrency(selectedCurrency);
             
             // Show/hide transactions container
             recentTransactionsContainer.style.display = expenses.length ? 'block' : 'none';
-
-            // Debug: Log final state of chart data
-            if (expenseChart) {
-                console.log('Current chart data:', {
-                    labels: expenseChart.data.labels,
-                    data: expenseChart.data.datasets[0].data,
-                    backgroundColor: expenseChart.data.datasets[0].backgroundColor
-                });
-            }
         });
 
-        console.log('Trip data load complete');
+        // Return unsubscribe function
         return unsubscribe;
 
     } catch (error) {
         console.error("Error in loadTripData:", error);
-        console.error("Error details:", {
-            code: error.code,
-            message: error.message,
-            stack: error.stack
-        });
         alert('Error loading trip data. Please try again.');
     }
 }
@@ -757,32 +723,73 @@ let selectedCurrency = 'EUR'; // Default currency
 async function getCurrencyRates() {
     try {
         const response = await axios.get("http://data.fixer.io/api/latest", {
-            params: { access_key: "c0f555a5661422620003b935f9e77b04" } // Use your API key here
+            params: { access_key: "8aab013fde25f7cfd282b45ea5028b75" }
         });
-        currencyRates = response.data.rates;
-        console.log("Currency rates fetched:", currencyRates); // Debug log
         
-        const currencySelect = document.getElementById("currency");
-        currencySelect.innerHTML = '<option value="">Select Currency</option>';
-        
-        Object.keys(currencyRates).sort().forEach(key => {
-            let option = document.createElement("option");
-            option.value = key;
-            option.textContent = key;
-            currencySelect.appendChild(option);
-        });
+        if (response.data.success) {
+            currencyRates = response.data.rates;
+            console.log("Currency rates fetched successfully");
+            
+            // Populate currency select dropdown
+            const currencySelect = document.getElementById("currency");
+            currencySelect.innerHTML = '<option value="EUR">EUR</option>'; // Add EUR as default
+            
+            Object.keys(currencyRates).sort().forEach(key => {
+                if (key !== "EUR") { // Skip EUR as it's already added
+                    let option = document.createElement("option");
+                    option.value = key;
+                    option.textContent = key;
+                    currencySelect.appendChild(option);
+                }
+            });
+            
+            // Set initial currency
+            selectedCurrency = "EUR";
+            currencySelect.value = "EUR";
+            
+            // Update UI with new rates
+            updateDashboard();
+            if (expenses.length > 0) {
+                updateExpenseChart(getFilteredExpenses());
+                updateRecentTransactionsTableInCurrency(selectedCurrency);
+            }
+        } else {
+            console.error("Failed to fetch currency rates:", response.data.error);
+            handleCurrencyError();
+        }
     } catch (error) {
         console.error("Error fetching currency rates:", error);
+        handleCurrencyError();
     }
 }
 
+function handleCurrencyError() {
+    currencyRates = { "EUR": 1 }; // Set default rate
+    selectedCurrency = "EUR";
+    
+    // Update currency select dropdown with only EUR
+    const currencySelect = document.getElementById("currency");
+    currencySelect.innerHTML = '<option value="EUR">EUR</option>';
+    currencySelect.value = "EUR";
+    
+    // Show error message to user
+    const errorMessage = document.createElement('div');
+    errorMessage.className = 'alert alert-warning';
+    errorMessage.textContent = 'Currency conversion unavailable. Showing amounts in EUR.';
+    errorMessage.style.margin = '10px 0';
+    
+    const dashboardSection = document.getElementById('dashboardSection');
+    dashboardSection.insertBefore(errorMessage, dashboardSection.firstChild);
+}
+
 function convertAmount(amount, currency) {
-    const conversionRate = currencyRates[currency];
-    console.log("Converting amount:", amount, "to currency:", currency, "with rate:", conversionRate); // Debug log
-    if (!conversionRate) {
-        console.warn(`Conversion rate not found for currency: ${currency}`);
-        return amount;
+    // If rates aren't loaded yet or currency is not specified, return original amount
+    if (!currencyRates || !currency || !currencyRates[currency]) {
+        console.log('Currency rates not ready, returning original amount:', amount);
+        return amount.toFixed(2);
     }
+    
+    const conversionRate = currencyRates[currency];
     return (amount * conversionRate).toFixed(2);
 }
 
