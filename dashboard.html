@@ -63,12 +63,13 @@
         }
 
         .rounded-section {
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 25px;
             height: 100%;
             /* Ensures the section takes full height of its container */
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
         }
 
@@ -455,6 +456,8 @@
             color: #333;
             margin-left: 20px;
             /* Space between the forecast and temperature */
+            margin-top: auto;
+            margin-bottom: auto;
         }
     </style>
 
@@ -558,9 +561,8 @@
                 <!-- Weather Section -->
                 <aside class="col-lg-4 col-md-4">
                     <div class="rounded-section">
+                        <h3 class="text-center">Weather Forecast for <span id="weather-location"></span></h3>
                         <div id="weather-section" class="p-3 rounded section-container">
-                            <h3 class="text-center">Weather Forecast for <span id="weather-location"></span></h3>
-
                             <div class="d-flex justify-content-between align-items-start" id="forecast-container">
                                 <!-- Left side: Day 1 Forecast Details -->
                                 <div id="day-one-forecast" class="left-forecast"></div>
@@ -586,7 +588,7 @@
                 <section class="col-lg-4 col-md-4">
                     <div class="rounded-section">
                         <div id="currency-section" class="converter-container section-container">
-                            <h2 class="text-center">Currency Converter</h2>
+                            <h3 class="text-center">Currency Converter</h3>
                             <div id="result" class="result">Please input amount and currency</div>
                         </div>
                     </div>
@@ -1371,19 +1373,28 @@
                 // Clear any existing content
                 forecastContainer.innerHTML = "";
 
-                // Create a container for max and min temperatures on the same line
-                const tempContainer = document.createElement("p");
-                tempContainer.innerHTML = `H: ${dayOneForecast.temp.max.toFixed(1)}°C  L: ${dayOneForecast.temp.min.toFixed(1)}°C`;
+                // Create a label and container for temperatures
+                const tempLabel = document.createElement("p");
+                tempLabel.textContent = "Temperature:";
 
-                // Create an element for the weather description with an icon
+                const tempContainer = document.createElement("p");
+                tempContainer.innerHTML = `H: ${dayOneForecast.temp.max.toFixed(1)}°C L: ${dayOneForecast.temp.min.toFixed(1)}°C`;
+
+                // Create a label and container for weather description
+                const weatherLabel = document.createElement("p");
+                weatherLabel.textContent = "Weather:";
+
                 const description = document.createElement("p");
                 const iconUrl = `http://openweathermap.org/img/wn/${dayOneForecast.weather[0].icon}@2x.png`;
                 description.innerHTML = `<img src="${iconUrl}" alt="${dayOneForecast.weather[0].description}" style="width:30px;"> ${dayOneForecast.weather[0].description}`;
 
-                // Append elements to the forecast container
+                // Append all elements to the forecast container in the desired format
+                forecastContainer.appendChild(tempLabel);
                 forecastContainer.appendChild(tempContainer);
+                forecastContainer.appendChild(weatherLabel);
                 forecastContainer.appendChild(description);
             }
+
 
 
 
