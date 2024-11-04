@@ -515,9 +515,10 @@
                             <select id="tripDropdown" class="form-select me-2">
                                 <option value="">Select a trip</option>
                             </select>
-                            <button class="btn btn-outline-secondary align-middle px-3" onclick="window.location.href='home.html'" style="height: 100%;">+</button>
+                            <button class="btn btn-outline-secondary align-middle px-3"
+                                onclick="window.location.href='home.html'" style="height: 100%;">+</button>
                         </div>
-                    </div>                    
+                    </div>
                     <h5>Places To Go</h5>
                     <div class="attractions-carousel-container mt-5">
                         <!-- Left button -->
@@ -1172,7 +1173,7 @@
 
             function fetchConversionRate(currencyCode) {
                 const url = "http://data.fixer.io/api/latest";
-                // const apiKey = "c0f555a5661422620003b935f9e77b04"; commenting out to save usage
+                const apiKey = "c0f555a5661422620003b935f9e77b04"; // Make sure your API key is correct
 
                 axios.get(url, {
                     params: {
@@ -1183,19 +1184,22 @@
                     .then(response => {
                         const rate = response.data.rates[currencyCode];
                         if (rate) {
-                            resultElem.innerText = `1 EUR = ${rate.toFixed(2)} ${currencyCode}`;
-                            resultElem.style.color = "#0d6efd";
+                            // Adjust the budget to the converted currency
+                            const convertedTotalBudget = totalBudget * rate;
+                            const convertedRemainingBudget = remainingBudget * rate;
+
+                            document.getElementById("totalBudgetDisplay").textContent = `${convertedTotalBudget.toFixed(2)} ${currencyCode}`;
+                            document.getElementById("remainingBudgetDisplay").textContent = `${convertedRemainingBudget.toFixed(2)} ${currencyCode}`;
+                            console.log(`1 EUR = ${rate.toFixed(2)} ${currencyCode}`);
                         } else {
-                            resultElem.innerText = "Conversion rate not available.";
-                            resultElem.style.color = "#dc3545";
+                            console.error("Conversion rate not available.");
                         }
                     })
                     .catch(error => {
                         console.error("Error fetching conversion rate:", error);
-                        resultElem.innerText = "Error loading conversion rate. Please try again later.";
-                        resultElem.style.color = "#dc3545";
                     });
             }
+
 
             function fetchWeatherData(location) {
                 const geoUrl = "http://api.openweathermap.org/geo/1.0/direct";
