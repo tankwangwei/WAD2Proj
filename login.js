@@ -92,6 +92,6 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         localStorage.setItem("userId", user.uid); // Store userId for consistent session
     } else {
-        window.location.href = "login.html"; // Redirect if not authenticated
+        // window.location.href = "login.html"; // Redirect if not authenticated
     }
 });

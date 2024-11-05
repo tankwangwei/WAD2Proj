@@ -868,6 +868,14 @@
         const navbarToggler = document.querySelector('.navbar-toggler');
         const navMenu = document.querySelector('.nav');
 
+        const params = new URLSearchParams(window.location.search);
+        const location = params.get("location");
+
+        if (location) {
+            document.getElementById("city").value = location; // Autofill search bar
+            getGeo(); // Automatically fetch weather data for the autofilled location
+        }
+
         navbarToggler.addEventListener('click', function () {
             navMenu.classList.toggle('show');
         });
