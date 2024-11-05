@@ -16,10 +16,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Prevent multiple submissions with a flag
-let isSubmitting = false;
-let locationDetails = {};
-
 const userUID = localStorage.getItem("userUID");
 
 if (!userUID) {
@@ -33,31 +29,30 @@ document.addEventListener('DOMContentLoaded', function () {
         dateFormat: "Y-m-d",
         minDate: "today"
     });
-
-    // Initialize Google Places Autocomplete
-    const locationInput = document.getElementById("location");
-    const autocomplete = new google.maps.places.Autocomplete(locationInput, { types: ["(regions)"] });
-
-    // Event listener for place selection
-    autocomplete.addListener("place_changed", () => {
-        const place = autocomplete.getPlace();
-        if (place.geometry) {
-            locationDetails = {
-                location: locationInput.value,
-                lat: place.geometry.location.lat(),
-                lng: place.geometry.location.lng()
-            };
-            console.log("Selected Location:", locationDetails);
-        } else {
-            console.log("No geometry details available for the selected place.");
-        }
-    });
 });
 
+// Google Places Autocomplete Initialization
+// window.onload = function () {
+//     let locationEle = document.getElementById("location");
+//     let autocomplete = new google.maps.places.Autocomplete(locationEle);
+
+//     autocomplete.addListener('place_changed', function () {
+//         let place = autocomplete.getPlace();
+//         if (place.geometry) {
+//             let latValue = place.geometry.location.lat();
+//             let lonValue = place.geometry.location.lng();
+//             console.log("Selected Location Latitude:", latValue, "Longitude:", lonValue);
+//         }
+//     });
+// };
+
+// Prevent multiple submissions with a flag
+let isSubmitting = false;
+
 // Ensure initAutocomplete function is invoked correctly
-// initAutocomplete("location", (location) => {
-//     console.log("Selected location:", location);
-// });
+initAutocomplete("location", (location) => {
+    console.log("Selected location:", location);
+});
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -68,10 +63,12 @@ onAuthStateChanged(auth, (user) => {
 
             // Get form fields and error message element
             const tripName = document.getElementById("tripName").value.trim();
+            const location = document.getElementById("location").value.trim();
             const dateRange = document.getElementById("date-range").value.trim();
             const errorMessage = document.getElementById("errorMessage");
 
             const [startDate, endDate] = dateRange.split(" to ");
+
             const start = new Date(startDate);
             const end = new Date(endDate);
             const days = Math.min(7, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
@@ -81,7 +78,7 @@ onAuthStateChanged(auth, (user) => {
             localStorage.setItem("tripName", tripName);
 
             // Validate the form fields
-            if (!tripName || !locationDetails.location || !dateRange) {
+            if (!tripName || !location || !dateRange) {
                 errorMessage.style.display = "block"; // Show error message
                 errorMessage.innerText = "Please fill in all fields."; // Set error text
                 return; // Stop form submission
@@ -97,15 +94,13 @@ onAuthStateChanged(auth, (user) => {
                 // Create new trip in Firebase
                 const tripRef = await addDoc(collection(db, `users/${userUID}/trips`), {
                     name: tripName,
-                    location: locationDetails.location,
-                    lat: locationDetails.lat,
-                    lng: locationDetails.lng,
+                    location: location,
                     dates: generateDateRange(startDate, endDate),
                     createdAt: new Date()
                 });
 
                 // Save the newly created trip ID
-                localStorage.setItem("tripId", tripRef.id);
+                localStorage.setItem("selectedTripId", tripRef.id);
 
                 console.log("New trip created with ID:", tripRef.id);
 

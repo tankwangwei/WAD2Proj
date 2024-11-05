@@ -916,6 +916,7 @@
                 const selectedTripId = event.target.value;
 
                 if (selectedTripId) {
+                    localStorage.setItem("selectedTripId", selectedTripId); // Update localStorage with the new tripId
                     await loadTripData(selectedTripId); // Load selected trip data
                 } else {
                     clearDashboard();

@@ -211,101 +211,103 @@
         }
 
         .card-text {
-    text-align: justify;
-    text-justify: inter-word;
-    margin-bottom: 1rem;
-}
+            text-align: justify;
+            text-justify: inter-word;
+            margin-bottom: 1rem;
+        }
 
-/* Specifically target the 'about' paragraph */
-.card-text.about {
-    text-align: justify;
-    text-justify: inter-word;
-    margin-bottom: 1.5rem;
-    line-height: 1.5;
-}
+        /* Specifically target the 'about' paragraph */
+        .card-text.about {
+            text-align: justify;
+            text-justify: inter-word;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
 
-/* Maintain left alignment for other card elements */
-.card-title, 
-.card-text:not(.about) {
-    text-align: left;
+        /* Maintain left alignment for other card elements */
+        .card-title,
+        .card-text:not(.about) {
+            text-align: left;
 
-}
+        }
 
-/* Popup Container */
-/* Popup Container */
-.card {
-    position: relative;
-}
+        /* Popup Container */
+        /* Popup Container */
+        .card {
+            position: relative;
+        }
 
-.popup-content {
-    display: none;
-    position: absolute;
-    bottom: 100%; /* Position above the card */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 300px;
-    background-color: white;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    margin-bottom: 10px; /* Space between popup and card */
-    animation: fadeIn 0.3s ease-in-out;
-}
+        .popup-content {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            /* Position above the card */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            margin-bottom: 10px;
+            /* Space between popup and card */
+            animation: fadeIn 0.3s ease-in-out;
+        }
 
-/* Show popup on hover */
-.card:hover .popup-content {
-    display: block;
-}
+        /* Show popup on hover */
+        .card:hover .popup-content {
+            display: block;
+        }
 
-/* Animation for smooth appearance */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translate(-50%, 10px);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, 0);
-    }
-}
+        /* Animation for smooth appearance */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 10px);
+            }
 
-/* Add a pointer arrow at the bottom of popup */
-.popup-content::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-width: 10px 10px 0;
-    border-style: solid;
-    border-color: white transparent transparent transparent;
-}
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
 
-.popup-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #333;
-}
+        /* Add a pointer arrow at the bottom of popup */
+        .popup-content::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: white transparent transparent transparent;
+        }
 
-.popup-description {
-    font-size: 0.9rem;
-    line-height: 1.5;
-    color: #666;
-    max-height: 200px;
-    overflow-y: auto;
-}
+        .popup-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
 
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    .popup-content {
-        width: 90%;
-        max-width: 300px;
-    }
-}
+        .popup-description {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #666;
+            max-height: 200px;
+            overflow-y: auto;
+        }
 
-</style>
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .popup-content {
+                width: 90%;
+                max-width: 300px;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -364,19 +366,15 @@
         <!-- Search Form -->
         <form id="searchForm" class="my-4">
             <div class="form-group mb-3">
-                <label for="location" class="form-label fw-semibold mb-2">Enter location (city, state, or country):</label>
-                <input 
-                    type="text" 
-                    class="form-control form-control-lg mb-3" 
-                    id="location" 
-                    placeholder="e.g., New York, Japan" 
-                    required
-                >
+                <label for="location" class="form-label fw-semibold mb-2">Enter location (city, state, or
+                    country):</label>
+                <input type="text" class="form-control form-control-lg mb-3" id="location"
+                    placeholder="e.g., New York, Japan" required>
                 <div id="autocompleteSuggestions"></div>
             </div>
             <button type="submit" class="btn btn-primary btn-lg px-4">Search</button>
         </form>
-        
+
 
         <!-- Attractions Results Section -->
         <div class="attraction mt-5">
