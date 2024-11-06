@@ -22,7 +22,7 @@
         html {
             height: 100vh;
             margin: 0;
-            padding: 0;
+            padding-top: 15px;
             font-family: 'Roboto', sans-serif;
             position: relative;
             /* Prevent scrolling */
@@ -505,25 +505,42 @@
         }
 
         #forecast-container {
-            width: 100%;
-            /* Full width */
-            max-width: 600px;
-            /* Optional max-width for responsiveness */
-            margin: 20px auto;
-            /* Center the container */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .left-forecast {
+            flex: 1;
+            font-size: 1.2rem;
+            /* Increase this value to make it larger */
+            font-weight: 600;
+            color: #333;
+            margin: 0.5rem 0;
+        }
+
+        .right-temperature {
+            flex: 1;
+            text-align: right;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        #weather-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .large-temperature {
-            align-items: center;
-            padding: 5px;
-            /* Padding for content */
-        }
-
-        .bottom-forecast {
-            padding: 20px 20px 0 20px;
-            /* Top, Right, Bottom, Left - removed bottom padding */
-            margin-bottom: 10px;
-            /* Reduced bottom margin */
+            font-size: 2.5rem;
+            /* Adjust the size as needed */
+            font-weight: bold;
+            color: #333;
+            margin-left: 20px;
+            /* Space between the forecast and temperature */
+            margin-top: auto;
+            margin-bottom: auto;
         }
 
         .col-md-6 p-4 {
@@ -698,13 +715,16 @@
             <div class="row">
                 <!-- Weather Section -->
                 <aside class="col-lg-4 col-md-4">
-                    <div onclick="navigateToWeatherPage()" class="rounded-section">
+                    <div class="rounded-section">
                         <h3 class="text-center">Weather Forecast for <span id="weather-location"></span></h3>
-                        <div class="d-flex justify-content-between content-wrapper" id="forecast-container">
-                            <div id="current-temperature" class="large-temperature text-center"></div>
-                            <div id="day-one-forecast" class="bottom-forecast text-center"></div>
+                        <div id="weather-section" class="p-3 rounded section-container">
+                            <div class="d-flex justify-content-between align-items-start" id="forecast-container">
+                                <!-- Left side: Day 1 Forecast Details -->
+                                <div id="day-one-forecast" class="left-forecast"></div>
 
-
+                                <!-- Right side: Current Temperature -->
+                                <div id="current-temperature" class="large-temperature"></div>
+                            </div>
                         </div>
                     </div>
                 </aside>
@@ -1592,13 +1612,10 @@
 
                 // Create a label and container for temperatures
                 const tempLabel = document.createElement("p");
-                tempLabel.textContent = "Min/Max Temperature:";
+                tempLabel.textContent = "Temperature:";
 
-                const lowtempContainer = document.createElement("p");
-                lowtempContainer.innerHTML = `Min: ${dayOneForecast.temp.max.toFixed(1)}°C`;
-
-                const hightempContainer = document.createElement("p");
-                hightempContainer.innerHTML = `Max: ${dayOneForecast.temp.min.toFixed(1)}°C`;
+                const tempContainer = document.createElement("p");
+                tempContainer.innerHTML = `H: ${dayOneForecast.temp.max.toFixed(1)}°C L: ${dayOneForecast.temp.min.toFixed(1)}°C`;
 
                 // Create a label and container for weather description
                 const weatherLabel = document.createElement("p");
@@ -1606,13 +1623,11 @@
 
                 const description = document.createElement("p");
                 const iconUrl = `http://openweathermap.org/img/wn/${dayOneForecast.weather[0].icon}@2x.png`;
-                // Updated style width to 50px
-                description.innerHTML = `<img src="${iconUrl}" alt="${dayOneForecast.weather[0].description}" style="width:50px; height:50px;"> ${dayOneForecast.weather[0].description}`;
+                description.innerHTML = `<img src="${iconUrl}" alt="${dayOneForecast.weather[0].description}" style="width:30px;"> ${dayOneForecast.weather[0].description}`;
 
                 // Append all elements to the forecast container in the desired format
                 forecastContainer.appendChild(tempLabel);
-                forecastContainer.appendChild(lowtempContainer);
-                forecastContainer.appendChild(hightempContainer);
+                forecastContainer.appendChild(tempContainer);
                 forecastContainer.appendChild(weatherLabel);
                 forecastContainer.appendChild(description);
             }
