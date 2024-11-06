@@ -15,24 +15,24 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-let userId;
-let tripId = new URLSearchParams(window.location.search).get('tripId') || localStorage.getItem("tripId");
-console.log("Retrieved tripId from URL or localStorage:", tripId);
-
 let map;
 let directionsService;
 let directionsRenderer;
 let markers = [];
 
-console.log("Initial tripId:", tripId);
+let userId;
 
-if (tripId) {
+let tripId = new URLSearchParams(window.location.search).get("tripId") || localStorage.getItem("tripId");
+let location = new URLSearchParams(window.location.search).get("location") || localStorage.getItem("location");
+
+if (tripId && location) {
     localStorage.setItem("tripId", tripId);
+    localStorage.setItem("location", location);
 } else {
-    // Redirect if no tripId is found
-    console.error("No tripId found. Redirecting to dashboard.");
+    console.error("No tripId or location found. Redirecting to dashboard.");
     window.location.href = "dashboard.html";
 }
+
 
 onAuthStateChanged(auth, (user) => {
     if (user) {

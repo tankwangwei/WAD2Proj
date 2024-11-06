@@ -44,7 +44,7 @@ async function loadUserItineraries(userId) {
         
         // Create a clickable link for each itinerary
         const itineraryLink = document.createElement("a");
-        itineraryLink.href = `dashboard.html?tripID=${tripId}`;
+        itineraryLink.href = `dashboard.html?tripID=${tripId}&location=${encodeURIComponent(itinerary.location)}`;
         itineraryLink.className = "list-group-item list-group-item-action";
         itineraryLink.innerHTML = `
             <h5>${itinerary.name}</h5>

@@ -605,8 +605,9 @@
 
     <script>
         function navigateToAttractionsPage() {
+            const tripID = localStorage.getItem("selectedTripId");
             const location = localStorage.getItem("location");
-            const url = location ? `attractions.html?location=${encodeURIComponent(location)}` : `attractions.html`;
+            const url = location ? `attractions.html?tripID=${tripID}&location=${encodeURIComponent(location)}` : `attractions.html`;
             window.location.href = url;
         }
 
@@ -614,6 +615,18 @@
             const location = localStorage.getItem("location"); // Get location from localStorage or another source
             const url = location ? `weather.html?location=${encodeURIComponent(location)}` : `weather.html`;
             window.location.href = url;
+        }
+
+        function navigateToItineraryBuilder() {
+            const tripId = localStorage.getItem("selectedTripId");
+            const location = localStorage.getItem("location");
+
+            if (tripId && location) {
+                const url = `itinerary.html?tripId=${tripId}&location=${encodeURIComponent(location)}`;
+                window.location.href = url;
+            } else {
+                alert("Please select a trip first.");
+            }
         }
 
     </script>
@@ -632,7 +645,9 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link" href="alltrips.html">All Trips</a></li>
-                <li class="nav-item"><a class="nav-link" href="itinerary.html">Itinerary Builder</a></li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="navigateToItineraryBuilder()">Itinerary Builder</a>
+                </li>
                 <li class="nav-item"><a class="nav-link" href="attractions.html">Attractions</a></li>
                 <li class="nav-item"><a class="nav-link" href="budget.html">Budget</a></li>
                 <li class="nav-item"><a class="nav-link" href="weather.html">Weather</a></li>
@@ -787,13 +802,17 @@
 
             document.addEventListener("DOMContentLoaded", function () {
                 const params = new URLSearchParams(window.location.search);
+                const tripID = params.get("tripID");
                 let location = params.get("location");
 
-                if (location) {
+                if (tripID && location) {
                     // Save the location in localStorage for future use
+                    localStorage.setItem("selectedTripId", tripID);
                     localStorage.setItem("location", location);
-                } else {
-                    // If location parameter isn't in the URL, use the one from localStorage
+                }
+                else {
+                    // Fallback to stored values if parameters are missing
+                    tripID = localStorage.getItem("selectedTripId");
                     location = localStorage.getItem("location");
                 }
 
@@ -825,19 +844,22 @@
                 }
 
                 const selectedTripId = localStorage.getItem("selectedTripId");
+                const tripLocation = localStorage.getItem("location");
 
-                if (selectedTripId) {
-                    const tripDropdown = document.getElementById("tripDropdown");
-                    tripDropdown.value = selectedTripId;  // Set dropdown to the selected trip
+                // if (selectedTripId) {
+                //     const tripDropdown = document.getElementById("tripDropdown");
+                //     tripDropdown.value = selectedTripId;  // Set dropdown to the selected trip
 
-                    // Load and display the initial trip data if a trip is pre-selected
-                    loadTripData(selectedTripId);
-                }
+                //     // Load and display the initial trip data if a trip is pre-selected
+                //     loadTripData(selectedTripId);
+                // }
 
                 // Event listener for dropdown change to update the dashboard data
                 document.getElementById('tripDropdown').addEventListener("change", async function (event) {
                     const selectedTripId = event.target.value;
                     if (selectedTripId) {
+                        localStorage.setItem("selectedTripId", selectedTripId); // Store selected trip
+                        localStorage.setItem("location", location);
                         await loadTripData(selectedTripId);
                     } else {
                         clearDashboard();

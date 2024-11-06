@@ -105,7 +105,9 @@ onAuthStateChanged(auth, (user) => {
                 console.log("New trip created with ID:", tripRef.id);
 
                 // Redirect to the dashboard
-                window.location.href = `dashboard.html`;
+                // window.location.href = `dashboard.html`;
+                window.location.href = `dashboard.html?tripID=${tripRef.id}&location=${encodeURIComponent(location)}`;
+
             } catch (error) {
                 console.error("Error creating new trip:", error);
             } finally {
