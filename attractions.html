@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -92,8 +92,6 @@
             color: white !important;
             font-weight: bold;
             font-size: 1.1rem;
-            padding: 0 15px;
-            /* Add consistent padding */
             position: relative;
             transition: color 0.3s ease;
         }
@@ -102,18 +100,53 @@
             color: #f0f0f0 !important;
         }
 
-        .navbar .container-fluid {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .navbar .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background-color: white;
+            left: 0;
+            bottom: -5px;
+            transition: width 0.4s ease;
+        }
+
+        .navbar .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Position the collapsed navbar content below the toggler button on small screens */
+        @media (max-width: 767.98px) {
+            .navbar-collapse {
+                position: absolute;
+                top: 100%;
+                /* Positions it directly below the navbar */
+                right: 15px;
+                /* Aligns it to the right edge of the screen */
+                width: auto;
+                border-radius: 5px;
+                z-index: 1000;
+            }
+
+            .navbar-collapse .navbar-nav .nav-link {
+                color: #333;
+                /* Adjust color to be visible */
+            }
+        }
+
+        /* For larger screens: standard layout without absolute positioning */
+        @media (min-width: 768px) {
+            .navbar-collapse {
+                position: static;
+                background-color: transparent;
+            }
         }
 
         #logo {
             height: 80px;
             max-height: 100%;
             width: auto;
-            margin-right: 50px;
-            /* Add space after logo */
+            transition: all 0.3s ease;
         }
 
         /* For mobile responsiveness */
@@ -308,6 +341,16 @@
             }
         }
 
+        .navbar-toggler {
+            color: white;
+            border-color: white;
+    
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba%28255, 255, 255, 1%29' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+        }
+
         .background-crop {
             margin-left: 10px;
             margin-left: 10px;
@@ -326,35 +369,21 @@
 <body>
     <nav class="navbar navbar-expand-md fixed-top background-crop">
         <div class="container-fluid d-flex justify-content-between align-items-center">
-            <!-- Logo -->
-            <a class="navbar-brand" href="dashboard.html">
+            <a class="navbar-brand" href="home.html">
                 <img src="./imgs/TripPal Transparent Logo.png" id="logo">
             </a>
-
-            <!-- Toggler button for smaller screens -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
-            <!-- Collapsible navbar content -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="itinerary.html">Itinerary Builder</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="attractions.html">Attractions</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="budget.html">Budget</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="weather.html">Weather</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="currency.html">Currency</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="alltrips.html">All Trips</a></li>
+                    <li class="nav-item"><a class="nav-link" href="itinerary.html">Itinerary Builder</a></li>
+                    <li class="nav-item"><a class="nav-link" href="attractions.html">Attractions</a></li>
+                    <li class="nav-item"><a class="nav-link" href="budget.html">Budget</a></li>
+                    <li class="nav-item"><a class="nav-link" href="weather.html">Weather</a></li>
+                    <li class="nav-item"><a class="nav-link" href="currency.html">Currency</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
