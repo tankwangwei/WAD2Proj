@@ -277,11 +277,9 @@
 
         .attraction-card img {
             width: 100%;
-            height: 180px;
-            /* Keep image height fixed */
+            height: 220px;
+            /* Increased from 180px */
             object-fit: cover;
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
         }
 
         .attraction-card-body {
@@ -324,15 +322,14 @@
         }
 
         .attraction-card {
-            flex: 1 1 30%;
-            /* Allows each card to grow and take equal space */
-            max-width: 30%;
-            /* Sets a maximum width for each card */
-            height: auto;
-            /* Adjust height to fit the content */
-            box-sizing: border-box;
-            /* Ensures padding and border are included in the width */
-            margin: 0;
+            flex: 0 0 calc(40% - 7px);
+            /* Increased from 33.333% to 40% */
+            margin-right: 10px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
         }
 
         #attractionsContainer {
@@ -443,21 +440,45 @@
             font-weight: bold;
         }
 
-        #weather-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        #forecast-container {
+            width: 100%;
+            text-align: center;
         }
 
         .large-temperature {
-            font-size: 2.5rem;
-            /* Adjust the size as needed */
+            font-size: 3.0rem !important;
+            /* Larger current temperature */
             font-weight: bold;
+            margin: 0 0;
+        }
+
+        .bottom-forecast p {
+            font-size: 1.2rem !important;
+            /* Larger text for all paragraph elements */
+            margin: 0.5rem 0;
             color: #333;
-            margin-left: 20px;
-            /* Space between the forecast and temperature */
-            margin-top: auto;
-            margin-bottom: auto;
+        }
+
+        /* Style for the Min/Max Temperature label */
+        .bottom-forecast p:last-child {
+            margin-bottom: -10px;
+            /* Reduced from default */
+        }
+
+        /* Style for the weather icon */
+        .bottom-forecast img {
+            width: 40px;
+            height: 40px;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        /* Style for the header */
+        .weather-header {
+            font-size: 1.8rem !important;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #333;
         }
 
         .background-crop {
@@ -472,38 +493,97 @@
         .navbar-toggler {
             color: white;
             border-color: white;
-    
+
         }
 
         .navbar-toggler-icon {
             background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba%28255, 255, 255, 1%29' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
         }
-        
-        body{
+
+        body {
             padding-top: 30px;
         }
 
         #forecast-container {
-            width: 100%; /* Full width */
-            max-width: 600px; /* Optional max-width for responsiveness */
-            margin: 0 auto; /* Center the container */
+            width: 100%;
+            /* Full width */
+            max-width: 600px;
+            /* Optional max-width for responsiveness */
+            margin: 20px auto;
+            /* Center the container */
         }
 
         .large-temperature {
             align-items: center;
-            padding: 0px; /* Padding for content */
+            padding: 5px;
+            /* Padding for content */
         }
 
         .bottom-forecast {
-            padding: 20px; /* Padding for content */
-            margin-top: 10px; /* Space between the two elements */
-            align-items: center;
+            padding: 20px 20px 0 20px;
+            /* Top, Right, Bottom, Left - removed bottom padding */
+            margin-bottom: 10px;
+            /* Reduced bottom margin */
         }
 
-        .col-md-6 p-4{
+        .col-md-6 p-4 {
             border-top: 0;
         }
 
+        .see-more-btn-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .see-more-btn {
+            background-color: transparent;
+            color: #007bff;
+            border: none;
+            padding: 8px 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .see-more-btn:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        .see-more-btn span {
+            font-size: 16px;
+            margin-left: 4px;
+        }
+
+        .attractions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .see-all-link {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.3s ease;
+        }
+
+        .see-all-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        .see-all-link span {
+            font-size: 1.1em;
+        }
     </style>
 
     <script>
@@ -523,37 +603,37 @@
 </head>
 
 
-    <nav class="navbar navbar-expand-md fixed-top background-crop">
-        <div class="container-fluid d-flex justify-content-between align-items-center">
-            <a class="navbar-brand" href="home.html">
-                <img src="./imgs/TripPal Transparent Logo.png" id="logo">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="alltrips.html">All Trips</a></li>
-                    <li class="nav-item"><a class="nav-link" href="itinerary.html">Itinerary Builder</a></li>
-                    <li class="nav-item"><a class="nav-link" href="attractions.html">Attractions</a></li>
-                    <li class="nav-item"><a class="nav-link" href="budget.html">Budget</a></li>
-                    <li class="nav-item"><a class="nav-link" href="weather.html">Weather</a></li>
-                    <li class="nav-item"><a class="nav-link" href="currency.html">Currency</a></li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <img src="./imgs/profile.svg" alt="Profile Icon"
-                                style="width: 30px; height: 30px; margin-right: 5px;">
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                            <li><a class="dropdown-item" href="index.html">Sign Out</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
+<nav class="navbar navbar-expand-md fixed-top background-crop">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <a class="navbar-brand" href="home.html">
+            <img src="./imgs/TripPal Transparent Logo.png" id="logo">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="alltrips.html">All Trips</a></li>
+                <li class="nav-item"><a class="nav-link" href="itinerary.html">Itinerary Builder</a></li>
+                <li class="nav-item"><a class="nav-link" href="attractions.html">Attractions</a></li>
+                <li class="nav-item"><a class="nav-link" href="budget.html">Budget</a></li>
+                <li class="nav-item"><a class="nav-link" href="weather.html">Weather</a></li>
+                <li class="nav-item"><a class="nav-link" href="currency.html">Currency</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        <img src="./imgs/profile.svg" alt="Profile Icon"
+                            style="width: 30px; height: 30px; margin-right: 5px;">
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                        <li><a class="dropdown-item" href="index.html">Sign Out</a></li>
+                    </ul>
+                </li>
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
 
 <body>
     <div class="container-fluid p-5 ">
@@ -571,7 +651,12 @@
                                 onclick="window.location.href='home.html'" style="height: 100%;">+</button>
                         </div>
                     </div>
-                    <h5>Places To Go</h5>
+                    <div class="attractions-header">
+                        <h5 style="margin: 0">Places To Go</h5>
+                        <a href="#" class="see-all-link" onclick="navigateToAttractionsPage()">
+                            See all attractions <span>→</span>
+                        </a>
+                    </div>
                     <div class="attractions-carousel-container mt-5">
                         <!-- Left button -->
                         <button class="carousel-button carousel-button-left" onclick="goLeft()">&#8249;</button>
@@ -615,11 +700,11 @@
                 <aside class="col-lg-4 col-md-4">
                     <div onclick="navigateToWeatherPage()" class="rounded-section">
                         <h3 class="text-center">Weather Forecast for <span id="weather-location"></span></h3>
-                            <div class="d-flex justify-content-between content-wrapper" id="forecast-container">
-                                <div id="current-temperature" class="large-temperature text-center" ></div>
-                                <div id="day-one-forecast" class="bottom-forecast text-center"></div>
-                
-                            
+                        <div class="d-flex justify-content-between content-wrapper" id="forecast-container">
+                            <div id="current-temperature" class="large-temperature text-center"></div>
+                            <div id="day-one-forecast" class="bottom-forecast text-center"></div>
+
+
                         </div>
                     </div>
                 </aside>
@@ -1327,11 +1412,16 @@
             }
 
             let currentPage = 0;
-            const cardsPerPage = 3;
+            const cardsPerPage = 2;
 
             function displayAttractions(attractions) {
                 const container = document.getElementById('attractionsContainer');
                 container.innerHTML = '';
+
+                container.style.display = 'flex';
+                container.style.transform = 'translateX(0)';
+                container.style.transition = 'transform 0.3s ease';
+
                 attractions.forEach((attraction) => {
                     const card = document.createElement('div');
                     card.classList.add('attraction-card');
@@ -1361,22 +1451,94 @@
                 updateVisibleCards(attractions.length);
             }
 
+            const style = document.createElement('style');
+            style.textContent = `
+    .attractions-carousel-container {
+        position: relative;
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+    }
+
+    #attractionsContainer {
+        display: flex;
+        transition: transform 0.3s ease;
+        width: 100%;
+        gap: 20px;
+        padding: 0 0px;
+    }
+
+    .attraction-card {
+        min-width: calc(50% - 1px); /* Set minimum width */
+        flex: 0 0 calc(50% - 5px); /* Keep cards from growing/shrinking */
+        border-radius: 16px;
+        overflow: hidden;
+        background: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        margin: 0;
+    }
+
+    .attraction-card img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+    }
+
+    .attraction-card-body {
+        padding: 15px;
+    }
+
+    .carousel-button {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: none;
+    }
+
+    .carousel-button-left {
+        left: 0px;
+    }
+
+    .carousel-button-right {
+        right: 0px;
+    }
+`;
+            document.head.appendChild(style);
+
+
+
             function updateVisibleCards(totalCards) {
                 const container = document.getElementById('attractionsContainer');
-                const cards = Array.from(container.children);
-                const start = currentPage * cardsPerPage;
-                const end = Math.min(start + cardsPerPage, totalCards);
+                const cardWidth = 50; // Each card takes 50% of the width
+                const gapWidth = 20; // Gap between cards in pixels
+                const totalWidth = cardWidth + (gapWidth / container.offsetWidth * 100); // Total width including gap as percentage
 
-                console.log(`Displaying cards from ${start} to ${end - 1}, total cards: ${totalCards}`);
+                // Calculate the translation
+                const translateX = -(currentPage * totalWidth);
+                container.style.transform = `translateX(${translateX}%)`;
 
-                cards.forEach((card, index) => {
-                    card.style.display = index >= start && index < end ? 'block' : 'none';
-                });
+                // Update button states
+                const leftButton = document.querySelector('.carousel-button-left');
+                const rightButton = document.querySelector('.carousel-button-right');
 
-                document.querySelector('.carousel-button-left').disabled = currentPage === 0;
-                document.querySelector('.carousel-button-right').disabled = end >= totalCards;
+                if (leftButton && rightButton) {
+                    leftButton.style.display = currentPage === 0 ? 'none' : 'flex';
+                    const maxPage = Math.ceil(totalCards / cardsPerPage) - 1;
+                    rightButton.style.display = currentPage >= maxPage ? 'none' : 'flex';
+                }
             }
-
             // Attach functions to the global window object
             window.goLeft = function () {
                 if (currentPage > 0) {
@@ -1397,6 +1559,8 @@
                 }
             }
 
+
+
             document.addEventListener("DOMContentLoaded", function () {
                 // Example call to displayAttractions with dummy data
                 const attractions = Array(20).fill({ name: 'Attraction', photos: [], vicinity: 'Address' });
@@ -1413,7 +1577,7 @@
                     .then(response => {
                         const data = response.data;
                         document.getElementById("current-temperature").textContent = `${data.current.temp}°C`;
-                        
+
                         // Display Day 1's high, low, and summary (i.e., tomorrow's forecast)
                         const dayOneForecast = data.daily[1];
                         displayDayOneForecast(dayOneForecast);
@@ -1442,7 +1606,8 @@
 
                 const description = document.createElement("p");
                 const iconUrl = `http://openweathermap.org/img/wn/${dayOneForecast.weather[0].icon}@2x.png`;
-                description.innerHTML = `<img src="${iconUrl}" alt="${dayOneForecast.weather[0].description}" style="width:30px;"> ${dayOneForecast.weather[0].description}`;
+                // Updated style width to 50px
+                description.innerHTML = `<img src="${iconUrl}" alt="${dayOneForecast.weather[0].description}" style="width:50px; height:50px;"> ${dayOneForecast.weather[0].description}`;
 
                 // Append all elements to the forecast container in the desired format
                 forecastContainer.appendChild(tempLabel);
