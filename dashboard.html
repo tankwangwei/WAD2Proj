@@ -759,9 +759,9 @@
                     <div class="rounded-section">
                         <div id="currency-section" class="converter-container section-container">
                             <h3 class="text-center">Currency Converter</h3>
-                            <div id="result" class="result">Please input amount and currency</div>
+                            <div id="exchangeRateDisplay" class="text-center mb-3">
+                            </div>
                         </div>
-                    </div>
                 </section>
             </div>
         </div>
@@ -1350,7 +1350,7 @@
 
             function fetchConversionRate(currencyCode) {
                 const url = "http://data.fixer.io/api/latest";
-                const apiKey = "c0f555a5661422620003b935f9e77b04"; // Make sure your API key is correct
+                // const apiKey = "8aab013fde25f7cfd282b45ea5028b75"; // Make sure your API key is correct
 
                 axios.get(url, {
                     params: {
@@ -1368,6 +1368,7 @@
                             document.getElementById("totalBudgetDisplay").textContent = `${convertedTotalBudget.toFixed(2)} ${currencyCode}`;
                             document.getElementById("remainingBudgetDisplay").textContent = `${convertedRemainingBudget.toFixed(2)} ${currencyCode}`;
                             console.log(`1 EUR = ${rate.toFixed(2)} ${currencyCode}`);
+                            exchangeRateDisplay.textContent = `1 EUR = ${rate.toFixed(2)} ${currencyCode}`;
                         } else {
                             console.error("Conversion rate not available.");
                         }
