@@ -674,7 +674,11 @@
             <div class="activities-planned col-md-6 p-4">
                 <div class="rounded-section h-100">
                     <div class="trip-header d-flex align-items-center mb-4">
-                        <h1 id="tripNameDisplay" class="trip-title">sentosa</h1>
+                        <h1 id="tripNameDisplay" class="trip-title"></h1>
+                        <div class="trip-details">
+                            <p id="tripCountryDisplay" class="trip-country">Country: Not specified</p>
+                            <p id="tripDateRangeDisplay" class="trip-date-range">Date Range: Not specified</p>
+                        </div>
                         <div class="d-flex align-items-center ms-auto">
                             <select id="tripDropdown" class="form-select me-2">
                                 <option value="">Select a trip</option>
@@ -933,6 +937,8 @@
 
                         const location = tripData.location;
                         const days = tripData.dates ? tripData.dates.length : 7; // Use dates array length as tripDays
+                        const dates = tripData.dates || [];
+                        const dateRange = dates.length > 0 ? `${dates[0]} to ${dates[dates.length - 1]}` : "Date range not available";
 
                         // Store the calculated days in localStorage
                         localStorage.setItem("tripDays", days);
@@ -942,6 +948,8 @@
 
                         // Display trip name and location
                         document.getElementById("tripNameDisplay").textContent = tripData.name || "Your Trip";
+                        document.getElementById("tripCountryDisplay").textContent = `Country: ${location}`;
+                        document.getElementById("tripDateRangeDisplay").textContent = `Date Range: ${dateRange}`;
                         document.getElementById("weather-location").textContent = location;
 
                         // Update the pie chart with the expense data
