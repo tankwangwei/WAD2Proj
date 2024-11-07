@@ -43,11 +43,11 @@
             padding: 10px 20px;
             box-shadow: none;
             /* Removes the shadow */
-            position: fixed;
             top: 0;
             width: 100%;
             z-index: 1000;
         }
+
 
         #logo {
             height: 80px;
@@ -59,12 +59,9 @@
         /* Styling for the navigation links */
         .navbar .nav-link {
             color: white !important;
-            /* White text */
             font-weight: bold;
-            /* Bold text */
             font-size: 1.1rem;
             position: relative;
-            /* Position relative to use pseudo-elements */
             transition: color 0.3s ease;
         }
 
@@ -72,25 +69,21 @@
             color: #f0f0f0 !important;
         }
 
-        /* Add the underline animation using ::after */
         .navbar .nav-link::after {
             content: '';
             position: absolute;
             width: 0;
-            /* Start with no width */
             height: 2px;
-            /* Line height */
             background-color: white;
-            /* Line color */
             left: 0;
-            bottom: -5px;
-            /* Position it slightly below the text */
-            transition: width 0.3s ease;
-            /* Smooth animation */
+            bottom: 0px;
+            transition: width 0.4s ease;
         }
 
         .navbar .nav-link:hover::after {
             width: 100%;
+            bottom: 0; 
+
             /* Expand the line to full width on hover */
         }
 
@@ -100,6 +93,8 @@
             /* Distinct color for the active page */
             font-weight: bold;
             /* Make the active link bold */
+            bottom: 0; 
+
         }
 
         /* Add underline to the active link */
@@ -108,7 +103,10 @@
             /* Make the underline match the active color */
             width: 100%;
             /* Show the underline for the active link */
+            bottom: 0; 
+
         }
+
 
         .btns a {
             margin: 10px;
@@ -337,21 +335,62 @@
             }
         }
 
-        /* First, remove or comment out your original media queries for the navbar */
+        .navbar .nav-item.dropdown {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-        /* Then add these new styles */
-        @media (max-width: 919px) {
-            .navbar {
-                height: auto;
-                padding: 5px;
+        @media (max-width: 767.98px) {
+
+            /* Ensure consistent spacing */
+            .navbar-nav {
+                align-items: center;
             }
 
-            /* Hide original nav menu */
-            .navbar .nav {
-                display: none;
+            .navbar-collapse {
+                background-color: rgba(0, 0, 0, 0.5);
+                border-radius: 10px;
+                padding: 10px;
+                margin-top: 10px;
+                backdrop-filter: blur(1px);
+                -webkit-backdrop-filter: blur(1px);
             }
 
-            /* Show hamburger button */
+            .navbar-nav .nav-link {
+                color: white !important;
+                padding: 10px 0;
+            }
+
+            .navbar-nav .nav-link:hover {
+                color: rgba(255, 255, 255, 0.8) !important;
+            }
+
+            .navbar-nav .nav-link::after {
+                background-color: white;
+            }
+
+            .dropdown-menu {
+                background-color: rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                border: none;
+            }
+
+            .dropdown-item {
+                color: white !important;
+                text-align: center;
+            }
+
+            .dropdown-item:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: rgba(255, 255, 255, 0.8) !important;
+            }
+
+            .navbar-toggler-icon {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+            }
+
             .navbar-toggler {
                 display: block;
                 background-color: transparent;
@@ -360,29 +399,11 @@
                 color: white;
                 border-radius: 4px;
             }
+        }
 
-            .navbar-toggler-icon {
-                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-                display: block;
-                width: 30px;
-                height: 30px;
-            }
-
-            /* Style for the expanded menu */
-            .navbar .nav.show {
-                display: flex;
-                flex-direction: column;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: rgba(0, 0, 0, 0.9);
-                padding: 1rem;
-                text-align: center;
-            }
-
-            .navbar .nav-item {
-                margin: 0.5rem 0;
+        @media (min-width: 768px) {
+            .navbar-collapse {
+                background-color: transparent !important;
             }
         }
 
@@ -479,14 +500,84 @@
             overflow: hidden;
         }
 
+        @media (max-width: 767.98px) {
+
+            /* Remove the old navbar styles */
+            .navbar-nav {
+                text-align: center;
+            }
+
+            /* Style for collapsed navbar */
+            .navbar-collapse {
+                background-color: rgba(0, 0, 0, 0.5);
+                /* Reduced opacity from 0.8 to 0.5 */
+                /* Translucent black background */
+                border-radius: 10px;
+                margin-top: 10px;
+                backdrop-filter: blur(1px);
+                -webkit-backdrop-filter: blur(1px);
+
+            }
+
+            .navbar-nav .nav-link {
+                color: white !important;
+                /* White text */
+            }
+
+            .navbar-nav .nav-link:hover {
+                color: rgba(255, 255, 255, 0.8) !important;
+                /* Slightly dimmed white on hover */
+            }
+
+            .navbar-nav .nav-link::after {
+                background-color: white;
+                /* White underline */
+            }
+
+            .navbar.background-crop {
+                background-image: none;
+                background-color: transparent;
+            }
+
+            .dropdown-menu {
+                background-color: rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                border: none;
+            }
+
+            .dropdown-item {
+                color: white !important;
+                text-align: center;
+            }
+
+            .dropdown-item:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: rgba(255, 255, 255, 0.8) !important;
+            }
+
+            /* White hamburger icon */
+            .navbar-toggler-icon {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+            }
 
 
+            .navbar-toggler {
+                border: 2px solid white !important;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .navbar-collapse {
+                background-color: transparent !important;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-md fixed-top background-crop">
-        <div class="container-fluid d-flex justify-content-between align-items-center">
+    <nav class="navbar navbar-expand-md fixed-top">
+        <div class="container-fluid d-flex justify-content-between align-items-center" style="padding: 12px 12px;">
             <!-- Logo -->
             <a class="navbar-brand" href="dashboard.html">
                 <img src="./imgs/TripPal Transparent Logo.png" id="logo">
@@ -884,7 +975,7 @@
     // Add this to your existing JavaScript
     document.addEventListener('DOMContentLoaded', function () {
         const navbarToggler = document.querySelector('.navbar-toggler');
-        const navMenu = document.querySelector('.nav');
+        const navMenu = document.querySelector('.navbar-collapse');
 
         const params = new URLSearchParams(window.location.search);
         const location = params.get("location");

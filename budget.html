@@ -112,6 +112,18 @@
             background: transparent;
         }
 
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+        }
+
+        .navbar-toggler {
+            border: 2px solid white !important;
+        }
+
+        #navbarNav {
+            text-align: center;
+        }
+
         .navbar .nav-link {
             color: white !important;
             font-weight: bold;
@@ -137,6 +149,8 @@
 
         .navbar .nav-link:hover::after {
             width: 100%;
+            bottom: 0; 
+
         }
 
         /* Main content */
@@ -201,6 +215,81 @@
         .transaction-history td {
             color: #333;
         }
+
+        .navbar .nav-item.dropdown {
+            display: flex;
+            align-items: center;
+        }
+
+        @media (max-width: 767.98px) {
+
+            /* Ensure consistent spacing */
+            .navbar-nav {
+                align-items: center;
+            }
+
+            .navbar-collapse {
+                background-color: rgba(0, 0, 0, 0.5);
+                border-radius: 10px;
+                padding: 10px;
+                margin-top: 10px;
+                backdrop-filter: blur(1px);
+                -webkit-backdrop-filter: blur(1px);
+            }
+
+            .navbar-nav .nav-link {
+                color: white !important;
+                padding: 10px 0;
+            }
+
+            .navbar-nav .nav-link:hover {
+                color: rgba(255, 255, 255, 0.8) !important;
+                bottom: 0; 
+
+            }
+
+            .navbar-nav .nav-link::after {
+                background-color: white;
+                bottom: 0; 
+
+            }
+
+            .dropdown-menu {
+                background-color: rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                border: none;
+            }
+
+            .dropdown-item {
+                color: white !important;
+                text-align: center;
+            }
+
+            .dropdown-item:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: rgba(255, 255, 255, 0.8) !important;
+            }
+
+            .navbar-toggler-icon {
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+            }
+
+            .navbar-toggler {
+                display: block;
+                background-color: transparent;
+                border: 1px solid white;
+                padding: 8px;
+                color: white;
+                border-radius: 4px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .navbar-collapse {
+                background-color: transparent !important;
+            }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
@@ -209,7 +298,7 @@
 
 <body>
     <nav class="navbar navbar-expand-md fixed-top">
-        <div class="container-fluid d-flex justify-content-between align-items-center">
+        <div class="container-fluid d-flex justify-content-between align-items-center" style="padding: 12px 12px;">
             <!-- Logo -->
             <a class="navbar-brand" href="dashboard.html">
                 <img src="./imgs/TripPal Transparent Logo.png" id="logo">
@@ -224,6 +313,9 @@
             <!-- Collapsible navbar content -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="alltrips.html">All Trips</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="itinerary.html">Itinerary Builder</a>
                     </li>
@@ -341,7 +433,7 @@
                 <option value="today">Today</option>
                 <option value="week">Past Week</option>
                 <option value="month">Past Month</option>
-                <option value="all" selected>All Time</option> 
+                <option value="all" selected>All Time</option>
             </select>
 
             <!-- Chart Container -->
