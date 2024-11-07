@@ -17,18 +17,20 @@ const auth = getAuth(app);
 
 let userId;
 
+localStorage.removeItem("selectedTripId");
+
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         userId = user.uid;
         await loadUserItineraries(userId);
     } else {
-        window.location.href = "login.html"; 
+        window.location.href = "login.html";
     }
 });
 
 async function loadUserItineraries(userId) {
     const itinerariesContainer = document.getElementById("itinerariesContainer");
-    itinerariesContainer.innerHTML = ""; 
+    itinerariesContainer.innerHTML = "";
 
     const tripRef = collection(db, `users/${userId}/trips`);
     const snapshot = await getDocs(tripRef);
@@ -41,15 +43,21 @@ async function loadUserItineraries(userId) {
     snapshot.forEach((doc) => {
         const itinerary = doc.data();
         const tripId = doc.id;
-        
+
         // Create a clickable link for each itinerary
         const itineraryLink = document.createElement("a");
-        itineraryLink.href = `dashboard.html?tripID=${tripId}&location=${encodeURIComponent(itinerary.location)}`;
+        itineraryLink.href = `#`; // Use '#' to prevent immediate navigation
         itineraryLink.className = "list-group-item list-group-item-action";
         itineraryLink.innerHTML = `
             <h5>${itinerary.name}</h5>
             <p>${itinerary.location} - Created on: ${itinerary.createdAt?.toDate ? itinerary.createdAt.toDate().toLocaleDateString() : "Date not available"}</p>
         `;
+
+        // Add a click event to navigate to dashboard.html with parameters
+        itineraryLink.addEventListener('click', () => {
+            localStorage.setItem("selectedTripId", tripId);
+            window.location.href = `dashboard.html?tripID=${tripId}&location=${encodeURIComponent(itinerary.location)}`;
+        });
 
         itinerariesContainer.appendChild(itineraryLink);
     });

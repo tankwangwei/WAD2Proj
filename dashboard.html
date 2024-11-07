@@ -417,6 +417,7 @@
             font-weight: bold;
             /* Make the amount bold for readability */
         }
+
         #forecast-container {
             display: flex;
             justify-content: space-between;
@@ -766,7 +767,8 @@
 
             document.addEventListener("DOMContentLoaded", function () {
                 const params = new URLSearchParams(window.location.search);
-                let location = params.get("location");
+                const tripID = params.get("tripID");
+                const location = params.get("location");
 
                 if (location) {
                     // Save the location in localStorage for future use
@@ -803,7 +805,7 @@
                     document.getElementById("tripNameDisplay").textContent = "Your Trip";
                 }
 
-                const selectedTripId = localStorage.getItem("selectedTripId");
+                const selectedTripId = params.get("tripID") || localStorage.getItem("selectedTripId");
 
                 if (selectedTripId) {
                     const tripDropdown = document.getElementById("tripDropdown");
@@ -815,9 +817,9 @@
 
                 // Event listener for dropdown change to update the dashboard data
                 document.getElementById('tripDropdown').addEventListener("change", async function (event) {
-                    const selectedTripId = event.target.value;
+                    const selectedTripId = this.value;
                     if (selectedTripId) {
-                        await loadTripData(selectedTripId);
+                        loadTripData(selectedTripId);
                     } else {
                         clearDashboard();
                     }
