@@ -15,13 +15,13 @@
     <style>
         body,
         html {
-            height: 100%;
+            height: 10vh;
             margin: 0;
+            padding-top: 15px;
             font-family: 'Roboto', sans-serif;
+            position: relative;
+            background-attachment: fixed;
             background-image: url('./imgs/cloud.jpg');
-            background-size: cover;
-            background-position: center;
-
         }
 
         #main {
@@ -33,6 +33,7 @@
             color: black;
             padding-top: 120px;
             margin-bottom: 30px;
+            overflow: auto;
         }
 
         .navbar {
@@ -466,11 +467,25 @@
             width: 100% !important;
             height: 100% !important;
         }
+
+        .background-crop {
+            height: 100vh 10%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            position: fixed;
+            background-attachment: fixed;
+            background-image: url('./imgs/cloud.jpg');
+            overflow: hidden;
+        }
+
+
+
     </style>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-md fixed-top">
+    <nav class="navbar navbar-expand-md fixed-top background-crop">
         <div class="container-fluid d-flex justify-content-between align-items-center">
             <!-- Logo -->
             <a class="navbar-brand" href="dashboard.html">
@@ -486,6 +501,9 @@
             <!-- Collapsible navbar content -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="alltrips.html">All Trips</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="itinerary.html">Itinerary Builder</a>
                     </li>
@@ -522,20 +540,20 @@
 
             <div class="input-group search-bar">
                 <input type="text" class="form-control" id="city" placeholder="Enter city name">
-                <button class="btn btn-primary" id="get">Get Weather</button>
+                <button type="button" class="btn btn-primary" id="get">Get Weather</button>
             </div>
 
             <div class="loading-spinner" id="loadingSpinner"></div>
 
             <p id="errorMessage"></p>
             <div class="row">
-                <div class="col-md-5 d-flex flex-column align-items-center text-center">
+                <div class="col-xl-5 d-flex flex-column align-items-center text-center">
                     <p id="location" class="text-center"></p>
                     <p id="temperature" class="text-center"></p>
                     <div id="humidityCardsContainer" class="humidity-cards-container"></div>
                 </div>
-                <div class="col-md-7">
-                    <div class="graph-container">
+                <div class="col-xl-7 align-items-right">
+                    <div class="graph-container size-relative">
                         <canvas id="temperatureChart"></canvas>
                     </div>
                 </div>
