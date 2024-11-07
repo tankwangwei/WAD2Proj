@@ -971,38 +971,6 @@
         return iconMap[summary.toLowerCase()]
     }
 
-    // Hamburger menu functionality
-    // Add this to your existing JavaScript
-    document.addEventListener('DOMContentLoaded', function () {
-        const navbarToggler = document.querySelector('.navbar-toggler');
-        const navMenu = document.querySelector('.navbar-collapse');
-
-        const params = new URLSearchParams(window.location.search);
-        const location = params.get("location");
-
-        if (location) {
-            document.getElementById("city").value = location; // Autofill search bar
-            getGeo(); // Automatically fetch weather data for the autofilled location
-        }
-
-        navbarToggler.addEventListener('click', function () {
-            navMenu.classList.toggle('show');
-        });
-
-        // Close menu when clicking outside
-        document.addEventListener('click', function (event) {
-            if (!navMenu.contains(event.target) && !navbarToggler.contains(event.target)) {
-                navMenu.classList.remove('show');
-            }
-        });
-
-        // Close menu when window is resized above breakpoint
-        window.addEventListener('resize', function () {
-            if (window.innerWidth > 919) {
-                navMenu.classList.remove('show');
-            }
-        });
-    });
 
 
 </script>
