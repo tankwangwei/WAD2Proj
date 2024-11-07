@@ -32,19 +32,21 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Google Places Autocomplete Initialization
-// window.onload = function () {
-//     let locationEle = document.getElementById("location");
-//     let autocomplete = new google.maps.places.Autocomplete(locationEle);
+let latValue, lonValue;
 
-//     autocomplete.addListener('place_changed', function () {
-//         let place = autocomplete.getPlace();
-//         if (place.geometry) {
-//             let latValue = place.geometry.location.lat();
-//             let lonValue = place.geometry.location.lng();
-//             console.log("Selected Location Latitude:", latValue, "Longitude:", lonValue);
-//         }
-//     });
-// };
+window.onload = function () {
+    let locationEle = document.getElementById("location");
+    let autocomplete = new google.maps.places.Autocomplete(locationEle);
+
+    autocomplete.addListener('place_changed', function () {
+        let place = autocomplete.getPlace();
+        if (place.geometry) {
+            latValue = place.geometry.location.lat();
+            lonValue = place.geometry.location.lng();
+            console.log("Selected Location Latitude:", latValue, "Longitude:", lonValue);
+        }
+    });
+};
 
 // Prevent multiple submissions with a flag
 let isSubmitting = false;
@@ -96,13 +98,19 @@ onAuthStateChanged(auth, (user) => {
                     name: tripName,
                     location: location,
                     dates: generateDateRange(startDate, endDate),
-                    createdAt: new Date()
+                    createdAt: new Date(),
+                    latitude: latValue,
+                    longitude: lonValue
                 });
 
                 // Save the newly created trip ID
                 localStorage.setItem("selectedTripId", tripRef.id);
 
                 console.log("New trip created with ID:", tripRef.id);
+
+                // Set a flag to indicate a new trip was created
+                console.log("Setting showBudgetModal flag to true");
+                localStorage.setItem("showBudgetModal", "true");
 
                 // Redirect to the dashboard
                 // window.location.href = `dashboard.html`;

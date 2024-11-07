@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -16,6 +16,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 let userId;
+let itineraries = []; // Store all itineraries to filter later
 
 localStorage.removeItem("selectedTripId");
 
@@ -40,25 +41,88 @@ async function loadUserItineraries(userId) {
         return;
     }
 
-    snapshot.forEach((doc) => {
-        const itinerary = doc.data();
-        const tripId = doc.id;
+    // Populate the itineraries array with fetched data
+    itineraries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    displayItineraries(itineraries);
+}
 
-        // Create a clickable link for each itinerary
+// Display itineraries based on the given list
+function displayItineraries(itinerariesList) {
+    const itinerariesContainer = document.getElementById("itinerariesContainer");
+    itinerariesContainer.innerHTML = "";
+
+    itinerariesList.forEach(itinerary => {
+        const itineraryItem = document.createElement("div");
+        itineraryItem.className = "list-group-item d-flex justify-content-between align-items-center";
+
         const itineraryLink = document.createElement("a");
-        itineraryLink.href = `#`; // Use '#' to prevent immediate navigation
-        itineraryLink.className = "list-group-item list-group-item-action";
+        itineraryLink.href = `#`;
+        itineraryLink.className = "list-group-item-action flex-grow-1";
         itineraryLink.innerHTML = `
             <h5>${itinerary.name}</h5>
             <p>${itinerary.location} - Created on: ${itinerary.createdAt?.toDate ? itinerary.createdAt.toDate().toLocaleDateString() : "Date not available"}</p>
         `;
-
-        // Add a click event to navigate to dashboard.html with parameters
         itineraryLink.addEventListener('click', () => {
-            localStorage.setItem("selectedTripId", tripId);
-            window.location.href = `dashboard.html?tripID=${tripId}&location=${encodeURIComponent(itinerary.location)}`;
+            localStorage.setItem("selectedTripId", itinerary.id);
+            window.location.href = `dashboard.html?tripID=${itinerary.id}&location=${encodeURIComponent(itinerary.location)}`;
         });
 
-        itinerariesContainer.appendChild(itineraryLink);
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "btn btn-danger btn-sm";
+        deleteButton.textContent = "Delete";
+        deleteButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteTrip(itinerary.id, itineraryItem);
+        });
+
+        itineraryItem.appendChild(itineraryLink);
+        itineraryItem.appendChild(deleteButton);
+        itinerariesContainer.appendChild(itineraryItem);
     });
 }
+
+// Function to delete a trip
+async function deleteTrip(tripId, itineraryItem) {
+    try {
+        await deleteDoc(doc(db, `users/${userId}/trips`, tripId));
+        
+        // Remove the item from the main itineraries array
+        itineraries = itineraries.filter(itinerary => itinerary.id !== tripId);
+
+        // Reapply the search filter to display updated results
+        const searchTerm = document.getElementById("searchBar").value.toLowerCase();
+        const filteredItineraries = itineraries.filter(itinerary => 
+            itinerary.name.toLowerCase().includes(searchTerm) || 
+            itinerary.location.toLowerCase().includes(searchTerm)
+        );
+        displayItineraries(filteredItineraries);
+
+        // Show the toast manually
+        const deleteToast = document.getElementById('deleteToast');
+        deleteToast.classList.add('show'); // Add 'show' class to display the toast
+
+        // Hide the toast automatically after 3 seconds
+        setTimeout(() => {
+            deleteToast.classList.remove('show');
+        }, 3000); // Toast will be visible for 3 seconds
+
+        // Close the toast when the close button is clicked
+        const closeButton = deleteToast.querySelector('.btn-close');
+        closeButton.addEventListener('click', () => {
+            deleteToast.classList.remove('show');
+        });
+
+    } catch (error) {
+        console.error("Error deleting trip: ", error);
+    }
+}
+
+// Filter itineraries based on search input
+document.getElementById("searchBar").addEventListener("input", (event) => {
+    const searchTerm = event.target.value.toLowerCase();
+    const filteredItineraries = itineraries.filter(itinerary =>
+        itinerary.name.toLowerCase().includes(searchTerm) ||
+        itinerary.location.toLowerCase().includes(searchTerm)
+    );
+    displayItineraries(filteredItineraries);
+});
