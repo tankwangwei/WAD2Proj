@@ -378,7 +378,7 @@
         h2,
         h3 {
             color: #333;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             font-weight: bold;
         }
 
@@ -417,7 +417,6 @@
             font-weight: bold;
             /* Make the amount bold for readability */
         }
-
         #forecast-container {
             display: flex;
             justify-content: space-between;
@@ -440,45 +439,21 @@
             font-weight: bold;
         }
 
-        #forecast-container {
-            width: 100%;
-            text-align: center;
+        #weather-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .large-temperature {
-            font-size: 3.0rem !important;
-            /* Larger current temperature */
+            font-size: 2.5rem;
+            /* Adjust the size as needed */
             font-weight: bold;
-            margin: 0 0;
-        }
-
-        .bottom-forecast p {
-            font-size: 1.2rem !important;
-            /* Larger text for all paragraph elements */
-            margin: 0.5rem 0;
             color: #333;
-        }
-
-        /* Style for the Min/Max Temperature label */
-        .bottom-forecast p:last-child {
-            margin-bottom: -10px;
-            /* Reduced from default */
-        }
-
-        /* Style for the weather icon */
-        .bottom-forecast img {
-            width: 40px;
-            height: 40px;
-            vertical-align: middle;
-            margin-right: 6px;
-        }
-
-        /* Style for the header */
-        .weather-header {
-            font-size: 1.8rem !important;
-            font-weight: bold;
-            margin-bottom: 1.5rem;
-            color: #333;
+            margin-left: 20px;
+            /* Space between the forecast and temperature */
+            margin-top: auto;
+            margin-bottom: auto;
         }
 
         .background-crop {
@@ -605,9 +580,8 @@
 
     <script>
         function navigateToAttractionsPage() {
-            const tripID = localStorage.getItem("selectedTripId");
             const location = localStorage.getItem("location");
-            const url = location ? `attractions.html?tripID=${tripID}&location=${encodeURIComponent(location)}` : `attractions.html`;
+            const url = location ? `attractions.html?location=${encodeURIComponent(location)}` : `attractions.html`;
             window.location.href = url;
         }
 
@@ -615,18 +589,6 @@
             const location = localStorage.getItem("location"); // Get location from localStorage or another source
             const url = location ? `weather.html?location=${encodeURIComponent(location)}` : `weather.html`;
             window.location.href = url;
-        }
-
-        function navigateToItineraryBuilder() {
-            const tripId = localStorage.getItem("selectedTripId");
-            const location = localStorage.getItem("location");
-
-            if (tripId && location) {
-                const url = `itinerary.html?tripId=${tripId}&location=${encodeURIComponent(location)}`;
-                window.location.href = url;
-            } else {
-                alert("Please select a trip first.");
-            }
         }
 
     </script>
@@ -645,9 +607,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link" href="alltrips.html">All Trips</a></li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="navigateToItineraryBuilder()">Itinerary Builder</a>
-                </li>
+                <li class="nav-item"><a class="nav-link" href="itinerary.html">Itinerary Builder</a></li>
                 <li class="nav-item"><a class="nav-link" href="attractions.html">Attractions</a></li>
                 <li class="nav-item"><a class="nav-link" href="budget.html">Budget</a></li>
                 <li class="nav-item"><a class="nav-link" href="weather.html">Weather</a></li>
@@ -734,7 +694,7 @@
             <div class="row">
                 <!-- Weather Section -->
                 <aside class="col-lg-4 col-md-4">
-                    <div onclick="navigateToWeatherPage()" class="rounded-section">
+                    <div class="rounded-section">
                         <h3 class="text-center">Weather Forecast for <span id="weather-location"></span></h3>
                         <div id="weather-section" class="p-3 rounded section-container">
                             <div class="d-flex justify-content-between align-items-start" id="forecast-container">
@@ -763,9 +723,9 @@
                     <div class="rounded-section">
                         <div id="currency-section" class="converter-container section-container">
                             <h3 class="text-center">Currency Converter</h3>
-                            <div id="exchangeRateDisplay" class="text-center mb-3">
-                            </div>
+                            <div id="result" class="result">Please input amount and currency</div>
                         </div>
+                    </div>
                 </section>
             </div>
         </div>
@@ -806,17 +766,13 @@
 
             document.addEventListener("DOMContentLoaded", function () {
                 const params = new URLSearchParams(window.location.search);
-                const tripID = params.get("tripID");
                 let location = params.get("location");
 
-                if (tripID && location) {
+                if (location) {
                     // Save the location in localStorage for future use
-                    localStorage.setItem("selectedTripId", tripID);
                     localStorage.setItem("location", location);
-                }
-                else {
-                    // Fallback to stored values if parameters are missing
-                    tripID = localStorage.getItem("selectedTripId");
+                } else {
+                    // If location parameter isn't in the URL, use the one from localStorage
                     location = localStorage.getItem("location");
                 }
 
@@ -848,22 +804,19 @@
                 }
 
                 const selectedTripId = localStorage.getItem("selectedTripId");
-                const tripLocation = localStorage.getItem("location");
 
-                // if (selectedTripId) {
-                //     const tripDropdown = document.getElementById("tripDropdown");
-                //     tripDropdown.value = selectedTripId;  // Set dropdown to the selected trip
+                if (selectedTripId) {
+                    const tripDropdown = document.getElementById("tripDropdown");
+                    tripDropdown.value = selectedTripId;  // Set dropdown to the selected trip
 
-                //     // Load and display the initial trip data if a trip is pre-selected
-                //     loadTripData(selectedTripId);
-                // }
+                    // Load and display the initial trip data if a trip is pre-selected
+                    loadTripData(selectedTripId);
+                }
 
                 // Event listener for dropdown change to update the dashboard data
                 document.getElementById('tripDropdown').addEventListener("change", async function (event) {
                     const selectedTripId = event.target.value;
                     if (selectedTripId) {
-                        localStorage.setItem("selectedTripId", selectedTripId); // Store selected trip
-                        localStorage.setItem("location", location);
                         await loadTripData(selectedTripId);
                     } else {
                         clearDashboard();
@@ -1358,7 +1311,7 @@
 
             function fetchConversionRate(currencyCode) {
                 const url = "http://data.fixer.io/api/latest";
-                // const apiKey = "8aab013fde25f7cfd282b45ea5028b75"; // Make sure your API key is correct
+                const apiKey = "c0f555a5661422620003b935f9e77b04"; // Make sure your API key is correct
 
                 axios.get(url, {
                     params: {
@@ -1376,7 +1329,6 @@
                             document.getElementById("totalBudgetDisplay").textContent = `${convertedTotalBudget.toFixed(2)} ${currencyCode}`;
                             document.getElementById("remainingBudgetDisplay").textContent = `${convertedRemainingBudget.toFixed(2)} ${currencyCode}`;
                             console.log(`1 EUR = ${rate.toFixed(2)} ${currencyCode}`);
-                            exchangeRateDisplay.textContent = `1 EUR = ${rate.toFixed(2)} ${currencyCode}`;
                         } else {
                             console.error("Conversion rate not available.");
                         }
