@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, getDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -15,660 +15,717 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// Global variables
 let map;
-let directionsService;
-let directionsRenderer;
 let markers = [];
+let activities = [];
+let tripDates = [];
+let weatherData = {};
+let allPlaces = [];
+let currentSearchQuery = ""; // To store the current search query
+let currentSearchResults = []; // To store the current search results
+let userId, tripId, location;
 
-let userId;
+const WEATHER_API_KEY = "4e1a69304c74566a0ebcf18acbafbc18";
 
+// Get trip and location from URL or localStorage
 const urlParams = new URLSearchParams(window.location.search);
-const tripId = urlParams.get("tripId") || localStorage.getItem("tripId");
-const location = urlParams.get("location") || localStorage.getItem("location");
+tripId = urlParams.get("tripId") || localStorage.getItem("tripId");
+location = urlParams.get("location") || localStorage.getItem("location");
 
 if (!tripId || !location) {
     console.error("Missing tripId or location. Redirecting to dashboard.");
     window.location.href = "dashboard.html";
 } else {
-    // Ensure values are synchronized in localStorage
-    if (!localStorage.getItem("tripId")) {
-        localStorage.setItem("tripId", tripId);
-    }
-    if (!localStorage.getItem("location")) {
-        localStorage.setItem("location", location);
-    }
-
-    console.log("Trip and location loaded:", { tripId, location });
+    localStorage.setItem("tripId", tripId);
+    localStorage.setItem("location", location);
 }
-
-
-
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
         userId = user.uid;
-        localStorage.setItem("userId", userId); // Ensure userId is stored for consistent access
-        console.log("User authenticated, userId:", userId);
-
-        // Call `initItinerary` directly after authentication
-        if (tripId) {
-            console.log("Calling initItinerary with tripId:", tripId);
-            initItinerary(tripId, userId);
-        } else {
-            console.error("No tripId found. Redirecting to dashboard.");
-            window.location.href = "dashboard.html";
-        }
+        localStorage.setItem("userId", userId);
+        initItinerary();
     } else {
-        // Redirect to login if user is not authenticated
         window.location.href = "login.html";
     }
 });
 
+// Initialise itinerary
+async function initItinerary() {
+    const tripSnapshot = await getDocs(collection(db, `users/${userId}/trips`));
+    const tripData = tripSnapshot.docs.find((doc) => doc.id === tripId)?.data();
 
-
-async function initItinerary(tripId, userId) {
-    const tripRef = doc(db, `users/${userId}/trips`, tripId);
-    const tripSnapshot = await getDoc(tripRef);
-
-    if (tripSnapshot.exists()) {
-        const tripData = tripSnapshot.data();
-        // const location = { lat: tripData.lat, lng: tripData.lng };
-
-        const location = tripData.latitude && tripData.longitude
-            ? { lat: tripData.latitude, lng: tripData.longitude }
-            : null;
-
-        if (location && !isNaN(location.lat) && !isNaN(location.lng)) {
-            initMap(location);
-        } else {
-            console.error("Invalid location data. Ensure trip data includes valid latitude and longitude.");
-            alert("Unable to load map due to missing location data.");
-        }
-
-        if (tripData.dates && tripData.dates.length > 0) {
-            loadFullItinerary(tripData.dates);
-        } else {
-            console.error("Trip does not contain valid dates.");
-            alert("Unable to load itinerary. Please ensure the trip has valid dates.");
-        }
-        
-
-        // initMap(location);
-        displayCalendar(tripData.dates);
-        loadSavedActivities();
-        // loadFullItinerary(tripData.dates);
-        loadPlaces(location);
-    } else {
-        console.error("Trip data not found.");
-        window.location.href = "alltrips.html";
-    }
-}
-
-function initMap(location) {
-    console.log("Initializing map with location:", location);
-    directionsService = new google.maps.DirectionsService();
-    directionsRenderer = new google.maps.DirectionsRenderer();
-
-    map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 13,
-        center: location
-    });
-    directionsRenderer.setMap(map);
-
-    loadMapMarkers(location);
-}
-
-// Load and display full itinerary
-async function loadFullItinerary(dates) {
-    for (const date of dates) {
-        const dayRef = doc(db, `users/${userId}/trips/${tripId}/itinerary`, date);
-        const daySnapshot = await getDoc(dayRef);
-        if (daySnapshot.exists()) {
-            displayDayItinerary(date, daySnapshot.data().activities);
-        }
-    }
-}
-
-// Display a day's itinerary in the calendar
-function displayDayItinerary(date, activities) {
-    const dateContainer = document.querySelector(`.date-container[data-date="${date}"] .activity-dropzone`);
-    dateContainer.innerHTML = ""; // Clear existing activities
-
-    activities.forEach(activity => {
-        const activityEl = document.createElement("div");
-        activityEl.className = "activity-item";
-        activityEl.textContent = activity.name;
-        dateContainer.appendChild(activityEl);
-    });
-}
-
-// Save daily itinerary order
-async function saveDayItinerary(date, activities) {
-    const dayRef = doc(db, `users/${userId}/trips/${tripId}/itinerary`, date);
-    const activitiesData = activities.map(activity => ({
-        id: activity.id,
-        name: activity.name,
-        time: activity.time || null,  // optional: add time for each activity
-    }));
-    await setDoc(dayRef, { activities: activitiesData });
-}
-
-function loadPlaces(location) {
-    if (!location || isNaN(location.lat) || isNaN(location.lng)) {
-        console.error("Invalid location provided for places search:", location);
-        alert("Unable to load places. Please check the trip's location data.");
+    if (!tripData) {
+        console.error("Trip not found.");
+        window.location.href = "dashboard.html";
         return;
     }
 
-    console.log("Loading places around location:", location);
+    const { latitude, longitude, dates } = tripData;
+    tripDates = dates;
+    const locationCoords = { lat: latitude, lng: longitude };
 
-    const placesService = new google.maps.places.PlacesService(document.createElement('div'));
+    await fetchWeather(locationCoords);
+    initMap(locationCoords);
+    displayCalendar(dates);
+    loadPlaces(locationCoords);
+    loadSavedActivities();
+    loadItinerary();
+}
+
+// Fetch weather data
+async function fetchWeather(locationCoords) {
+    try {
+        const response = await fetch(
+            `https://api.openweathermap.org/data/2.5/onecall?lat=${locationCoords.lat}&lon=${locationCoords.lng}&exclude=minutely,hourly&units=metric&appid=${WEATHER_API_KEY}`
+        );
+        const data = await response.json();
+        weatherData = data.daily.reduce((acc, day) => {
+            const date = new Date(day.dt * 1000).toISOString().split("T")[0];
+            acc[date] = {
+                temp: day.temp.day,
+                weather: day.weather[0].description,
+            };
+            return acc;
+        }, {});
+    } catch (error) {
+        console.error("Error fetching weather:", error);
+    }
+}
+
+// Initialise map
+function initMap(locationCoords) {
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: locationCoords,
+        zoom: 13,
+    });
+}
+
+// Search places in search bar
+function searchPlaces() {
+    const query = document.getElementById("searchInput").value.trim();
+    currentSearchQuery = query; // Update the current search query
+
+    if (!query) {
+        // If the search query is empty, reset to the original allPlaces
+        displayPlaces(allPlaces);
+        addMarkers(allPlaces);
+        currentSearchResults = allPlaces; // Reset search results
+        return;
+    }
+
+    const service = new google.maps.places.PlacesService(map);
 
     const request = {
-        location: new google.maps.LatLng(location.lat, location.lng),
-        radius: '10000',
-        type: ['tourist_attraction', 'hotel', 'restaurant', 'cafe', 'bar', 'store']
+        query: query,
+        location: map.getCenter(), // Ensure search is centered around the trip location
+        radius: "50000",
+        fields: ["name", "geometry", "formatted_address", "rating", "photos", "place_id", "user_ratings_total"],
     };
 
-    placesService.nearbySearch(request, (results, status) => {
+    service.textSearch(request, (results, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
+            // Update the places list and map markers with the search results
+            currentSearchResults = results; // Store the search results
             displayPlaces(results);
+            addMarkers(results);
         } else {
-            console.error("Error retrieving places:", status);
-            alert("Unable to retrieve places. Please try again later.");
+            console.error("Error during search:", status);
+            alert("No results found. Try a different search query.");
         }
     });
 }
 
-// Display places with draggable and save options
-function displayPlaces(places) {
-    console.log("Displaying places:", places);
+// Load places in general (placelist)
+function loadPlaces(locationCoords) {
+    const placesService = new google.maps.places.PlacesService(map);
+    const request = {
+        location: new google.maps.LatLng(locationCoords.lat, locationCoords.lng),
+        radius: "50000",
+        type: ["tourist_attraction"],
+    };
 
+    //, "restaurant", "cafe", "lodging", "store", "bar"
+
+    placesService.nearbySearch(request, (results, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+            // Store all valid places
+            allPlaces = results.filter((place) => {
+                const location = place.geometry?.location;
+                return location && !isNaN(location.lat()) && !isNaN(location.lng());
+            });
+
+            displayPlaces(allPlaces); // Show all places
+            addMarkers(allPlaces);   // Add all markers
+        } else {
+            console.error("Error loading places:", status);
+        }
+    });
+}
+
+// Display places in placeslist
+function displayPlaces(places) {
     const placesList = document.getElementById("placesList");
     placesList.innerHTML = "";
 
-    places.forEach(place => {
+    places.forEach((place) => {
+        const photoUrl = place.photos
+            ? place.photos[0].getUrl({ maxWidth: 100 })
+            : "https://via.placeholder.com/100x100?text=No+Image";
+
         const placeEl = document.createElement("div");
         placeEl.classList.add("place-item", "card", "p-2", "m-2");
-        placeEl.setAttribute("draggable", "true");
-        placeEl.dataset.placeData = JSON.stringify(place);
 
-        const photoUrl = place.photos ? place.photos[0].getUrl({ maxWidth: 400 }) : 'https://via.placeholder.com/400x300?text=No+Image';
-
-        placeEl.innerHTML = `
-            <img src="${photoUrl}" alt="${place.name}" class="card-img-top" style="width: 100%; height: auto;">
-            <div class="card-body">
-                <h5 class="card-title">${place.name}</h5>
-                <p class="card-text">${place.vicinity || "Address not available"}</p>
-                <small>Rating: ${place.rating || "N/A"} | Reviews: ${place.user_ratings_total || 0}</small>
-        <button class="save-btn" onclick="savePlace('${place.place_id}', '${place.name}', '${place.vicinity}')">Save</button>
-            </div>
-        `;
-
-        placeEl.addEventListener("dragstart", (event) => {
-            event.dataTransfer.setData("text/plain", JSON.stringify(place));
+        // Event listener to display more details when clicking the card
+        placeEl.addEventListener("click", () => {
+            displayPlaceDetails(place.place_id);
         });
 
+        placeEl.innerHTML = `
+            <div class="row">
+                <div class="col-3">
+                    <img src="${photoUrl}" alt="${place.name}" class="img-fluid">
+                </div>
+                <div class="col-9">
+                    <h5>${place.name}</h5>
+                    <p>${place.vicinity || "No address available"}</p>
+                    <p>Rating: ${place.rating || "N/A"} (${place.user_ratings_total || 0} reviews)</p>
+                    <button onclick="savePlace('${place.place_id}', '${place.name}')">Save</button>
+                </div>
+            </div>
+        `;
         placesList.appendChild(placeEl);
     });
 }
 
-function displayCalendar(dates) {
-    const calendar = document.getElementById("calendar");
-    calendar.innerHTML = "";
+// Place details when click on one
+function displayPlaceDetails(placeId) {
+    const placesService = new google.maps.places.PlacesService(map);
 
-    dates.forEach(date => {
-        const dateContainer = document.createElement("div");
-        dateContainer.classList.add("date-container");
-        dateContainer.dataset.date = date;
+    placesService.getDetails({ placeId }, (place, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+            // Create the carousel if photos are available
+            let carouselHTML = "";
+            if (place.photos && place.photos.length > 0) {
+                const photos = place.photos.slice(0, 5); // Limit to the first 5 photos
+                carouselHTML = `
+                    <div id="placePhotosCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            ${photos
+                        .map((photo, index) => `
+                                <div class="carousel-item ${index === 0 ? "active" : ""}">
+                                    <img src="${photo.getUrl({ maxWidth: 800 })}" class="d-block w-100" alt="Photo ${index + 1}">
+                                </div>
+                            `)
+                        .join("")}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#placePhotosCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#placePhotosCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                `;
+            } else {
+                carouselHTML = `<p>No photos available for this location.</p>`;
+            }
 
-        dateContainer.innerHTML = `
-            <h6>${new Date(date).toLocaleDateString()}</h6>
-            <div class="activity-dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-        `;
+            // Display the place details
+            const placesListContainer = document.getElementById("placesList");
+            placesListContainer.innerHTML = `
+                <button id="backToList" class="btn btn-secondary mb-3">Back to List</button>
+                ${carouselHTML}
+                <h3 class="mt-4">${place.name}</h3>
+                <p><strong>Rating:</strong> ${place.rating || "N/A"} (${place.user_ratings_total || 0} reviews)</p>
+                <p><strong>Address:</strong> ${place.formatted_address || "Not available"}</p>
+                <p><strong>Opening Hours:</strong> ${place.opening_hours?.weekday_text?.join(", ") || "Not available"
+                }</p>
+                <p><strong>Phone:</strong> ${place.formatted_phone_number || "Not available"}</p>
+                <p><strong>Website:</strong> <a href="${place.website}" target="_blank">${place.website || "Not available"}</a></p>
+                <p><strong>Description:</strong> ${place.editorial_summary?.overview || "No description available."
+                }</p>
+            `;
 
-        dateContainer.addEventListener("click", () => loadActivitiesForDate(date));
-        calendar.appendChild(dateContainer);
+            // Add back button functionality
+            document.getElementById("backToList").addEventListener("click", () => {
+                // Restore search results or all places
+                if (currentSearchQuery && currentSearchResults.length > 0) {
+                    displayPlaces(currentSearchResults); // Restore search results
+                    addMarkers(currentSearchResults);
+                } else {
+                    displayPlaces(allPlaces); // Default to all places
+                    addMarkers(allPlaces);
+                }
+
+                // Restore the search input
+                document.getElementById("searchInput").value = currentSearchQuery;
+            });
+
+            // Highlight the marker on the map
+            highlightMarker(place.geometry.location);
+        } else {
+            console.error("Error fetching place details:", status);
+        }
     });
 }
 
-// Allow dropping of activities into the calendar's drop zones
-function allowDrop(event) {
-    event.preventDefault();
+
+
+let selectedMarker = null;
+
+function highlightMarker(location) {
+    if (selectedMarker) {
+        selectedMarker.setIcon(null); // Reset icon
+    }
+
+    selectedMarker = markers.find(marker =>
+        marker.getPosition().lat() === location.lat() &&
+        marker.getPosition().lng() === location.lng()
+    );
+
+    if (selectedMarker) {
+        selectedMarker.setIcon("http://maps.google.com/mapfiles/ms/icons/green-dot.png");
+        map.setCenter(selectedMarker.getPosition());
+    } else {
+        console.warn("Marker not found for the selected location.");
+    }
 }
 
-function drag(event) {
-    event.dataTransfer.setData("activityId", event.target.dataset.activityId);
-}
+function addMarkers(places) {
+    clearMarkers();
 
-// Handle drop event for drag-and-drop functionality
-function drop(event) {
-    event.preventDefault();
-    const activityId = event.dataTransfer.getData("activityId");
-    const date = event.target.closest(".date-container")?.dataset.date;
+    places.forEach((place) => {
+        const location = place.geometry?.location;
 
-    if (date) {
-        const activity = getActivityById(activityId);
-        if (activity) {
-            addActivityToDate(date, activity);
+        if (location && !isNaN(location.lat()) && !isNaN(location.lng())) {
+            const marker = new google.maps.Marker({
+                position: location,
+                map: map,
+                title: place.name,
+            });
+            markers.push(marker);
+        } else {
+            console.warn(`Invalid marker position for place: ${place.name}`);
         }
-    }
+    });
 }
 
-// Add activity to a specific date and save the order
-function addActivityToDate(date, activity) {
-    const dateContainer = document.querySelector(`.date-container[data-date="${date}"] .activity-dropzone`);
-    const activityEl = document.createElement("div");
-    activityEl.className = "activity-item";
-    activityEl.textContent = activity.name;
-    dateContainer.appendChild(activityEl);
 
-    // Save the updated order
-    const activities = Array.from(dateContainer.children).map(el => ({
-        id: el.dataset.activityId,
-        name: el.textContent
-    }));
-    saveDayItinerary(date, activities);
+
+function clearMarkers() {
+    markers.forEach((marker) => marker.setMap(null));
+    markers = [];
+    selectedMarker = null; // Reset highlighted marker
 }
 
-// Remove an activity from the itinerary and the database
-async function removeActivity(activityId) {
-    try {
-        await deleteDoc(doc(db, `users/${userId}/trips/${tripId}/activities`, activityId));
-        const date = document.querySelector(".date-container.active")?.dataset.date;
-        loadActivitiesForDate(date);
-    } catch (error) {
-        console.error("Error removing activity:", error);
-    }
+function updateMapMarkers(places) {
+    // Clear existing markers
+    markers.forEach(marker => marker.setMap(null));
+    markers = [];
+
+    // Add new markers for the filtered places
+    places.forEach(place => {
+        const marker = new google.maps.Marker({
+            position: { lat: place.lat, lng: place.lng },
+            map: map,
+            title: place.name
+        });
+        markers.push(marker);
+    });
 }
+
 
 async function loadSavedActivities() {
     const savedActivitiesContainer = document.getElementById("savedActivities");
     savedActivitiesContainer.innerHTML = "";
 
-    // Fetch saved activities from Firebase
-    const snapshot = await getDocs(collection(db, `users/${userId}/trips/${tripId}/activities`));
-    snapshot.forEach((doc) => {
-        const activity = doc.data();
-        const activityId = doc.id;
+    try {
+        const snapshot = await getDocs(collection(db, `users/${userId}/trips/${tripId}/activities`));
+        snapshot.forEach((doc) => {
+            const activity = doc.data();
+            const activityId = doc.id;
 
-        // Create a draggable element for each activity
-        const activityEl = document.createElement("div");
-        activityEl.classList.add("activity-item", "card", "p-2", "m-2");
-        activityEl.setAttribute("draggable", "true");
-        activityEl.dataset.activityId = activityId;
-        activityEl.dataset.activityData = JSON.stringify(activity); // Store activity data for drag-and-drop
-
-        activityEl.innerHTML = `
-            <h6>${activity.name}</h6>
-            <p>${activity.address}</p>
-            <small>Rating: ${activity.rating || "N/A"} | Reviews: ${activity.reviews || 0}</small>
-            <button class="remove-btn" onclick="removeActivity('${activityId}')">Remove</button>
-        `;
-
-        // Add drag event listener
-        activityEl.addEventListener("dragstart", (event) => {
-            event.dataTransfer.setData("text/plain", JSON.stringify(activity));
+            // Only display activities not already in the calendar
+            if (!isActivityInCalendar(activityId)) {
+                const activityEl = createActivityCard(activityId, activity.name, true, "savedActivities");
+                savedActivitiesContainer.appendChild(activityEl);
+            }
         });
-
-        savedActivitiesContainer.appendChild(activityEl);
-    });
-}
-
-// Load map markers based on places around the location
-function loadMapMarkers(location) {
-    const placesService = new google.maps.places.PlacesService(map);
-    const request = {
-        location: new google.maps.LatLng(location.lat, location.lng),
-        radius: '10000',
-        type: ['tourist_attraction', 'hotel', 'restaurant', 'cafe', 'bar', 'store']
-    };
-
-    placesService.nearbySearch(request, (results, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK) {
-            displayMarkers(results);
-        }
-    });
-}
-
-// Display map markers for each place
-function displayMarkers(places) {
-    clearMarkers();
-
-    places.forEach((place, index) => {
-        const marker = new google.maps.Marker({
-            position: place.geometry.location,
-            map: map,
-            title: place.name,
-            label: `${index + 1}`
-        });
-
-        markers.push(marker);
-    });
-}
-
-function clearMarkers() {
-    markers.forEach(marker => marker.setMap(null));
-    markers = [];
-    // directionsRenderer.setDirections({ routes: [] });
-}
-
-// Save a place as an activity to the selected date in the database
-async function savePlace(place) {
-    const dateContainer = document.querySelector(".date-container.active");
-    const date = dateContainer ? dateContainer.dataset.date : null;
-
-    if (date) {
-        try {
-            await addDoc(collection(db, `users/${userId}/trips/${tripId}/activities`), {
-                name: place.name,
-                address: place.vicinity || placeData.formatted_address,
-                lat: place.geometry.location.lat(),
-                lng: place.geometry.location.lng(),
-                type: place.types[0],
-                rating: placeData.rating || "N/A",
-                reviews: placeData.user_ratings_total || 0,
-                date: date
-            });
-            loadActivitiesForDate(date);
-        } catch (error) {
-            console.error("Error adding activity:", error);
-        }
-    } else {
-        alert("Select a date to save the activity to.");
+    } catch (error) {
+        console.error("Error loading saved activities:", error);
     }
 }
 
+
+function createActivityCard(activityId, name, isRemovable = false, source = "savedActivities", date = null) {
+    const activityEl = document.createElement("div");
+    activityEl.classList.add("activity-item", "card", "p-2", "m-2");
+    activityEl.draggable = true;
+    activityEl.dataset.activityId = activityId;
+
+    // Dragstart event listener
+    activityEl.addEventListener("dragstart", (event) => {
+        event.dataTransfer.setData("activityId", activityId);
+        event.dataTransfer.setData("source", source);
+        if (date) {
+            event.dataTransfer.setData("sourceDate", date);
+        }
+    });
+
+    // Include the Remove Button for both Saved Activities and Calendar
+    const removeHandler = source === "calendar" 
+        ? `removeActivityFromCalendar('${activityId}', '${date}')` 
+        : `removeActivity('${activityId}')`;
+
+    activityEl.innerHTML = `
+        <span>${name}</span>
+        ${isRemovable ? `<button class="btn btn-sm btn-danger mt-2" onclick="${removeHandler}">Remove</button>` : ""}
+    `;
+
+    return activityEl;
+}
+
+
+
+function savePlace(placeId, name) {
+    const activity = { id: placeId, name };
+    activities.push(activity);
+    addDoc(collection(db, `users/${userId}/trips/${tripId}/activities`), activity).then(() => {
+        loadSavedActivities();
+    });
+}
+
+async function removeActivity(activityId) {
+    try {
+        // Remove the activity from the database
+        await deleteDoc(doc(db, `users/${userId}/trips/${tripId}/activities`, activityId));
+
+        // Refresh the Saved Activities section
+        loadSavedActivities();
+
+        console.log(`Activity ${activityId} removed successfully.`);
+    } catch (error) {
+        console.error(`Error removing activity ${activityId}:`, error);
+    }
+}
+
+
+function displayCalendar(dates) {
+    const calendar = document.getElementById("calendar");
+    calendar.innerHTML = "";
+
+    dates.forEach((date) => {
+        const weather = weatherData[date]
+            ? `${weatherData[date].temp}°C, ${weatherData[date].weather}`
+            : "No weather data";
+
+        const dateContainer = document.createElement("div");
+        dateContainer.classList.add("card", "p-3", "mb-3");
+        dateContainer.dataset.date = date;
+
+        // Allow dragover and drop
+        dateContainer.addEventListener("dragover", (event) => event.preventDefault());
+        dateContainer.addEventListener("drop", (event) => handleDrop(event, date));
+
+        dateContainer.innerHTML = `
+            <h6>${new Date(date).toLocaleDateString()}</h6>
+            <p>${weather}</p>
+            <div class="activity-dropzone"></div>
+        `;
+        // ondrop="drop(event)" ondragover="allowDrop(event)"
+
+        calendar.appendChild(dateContainer);
+    });
+
+    // Load itinerary data for each date
+    loadItinerary();
+}
+
+// Fetch & display itinerary for specific dates
+async function loadItinerary() {
+    try {
+        const itinerarySnapshot = await getDocs(collection(db, `users/${userId}/trips/${tripId}/itinerary`));
+        itinerarySnapshot.forEach(doc => {
+            const date = doc.id;
+            const itineraryData = doc.data();
+            populateDateActivities(date, itineraryData.activities || []);
+        });
+    } catch (error) {
+        console.error("Error loading itinerary:", error);
+    }
+}
+
+function populateDateActivities(date, activities) {
+    const dropzone = document.querySelector(`[data-date="${date}"] .activity-dropzone`);
+    dropzone.innerHTML = ""; // Clear existing activities
+
+    activities.forEach((activity) => {
+        const activityEl = createActivityCard(activity.id, activity.name, true, "calendar", date);
+        dropzone.appendChild(activityEl);
+    });
+
+    // Enable reordering within the date
+    enableReorderingWithinDate(dropzone);
+}
+
+
+function enableReorderingWithinDate(dropzone) {
+    if (!window.Sortable) {
+        console.error("Sortable.js is not loaded.");
+        return;
+    }
+
+    const sortable = new Sortable(dropzone, {
+        animation: 150,
+        onEnd: async (evt) => {
+            const date = evt.from.closest(".card").dataset.date;
+            const updatedOrder = Array.from(evt.from.children).map((child) => ({
+                id: child.dataset.activityId,
+                name: child.querySelector("span").textContent,
+            }));
+
+            await updateActivitiesOrderForDate(date, updatedOrder);
+        },
+    });
+}
+
+
+async function updateActivitiesOrderForDate(date, activities) {
+    try {
+        const dateRef = doc(db, `users/${userId}/trips/${tripId}/itinerary`, date);
+        await setDoc(dateRef, { activities });
+    } catch (error) {
+        console.error("Error updating activity order:", error);
+    }
+}
+
+async function addActivityToDate(date, activityId) {
+    try {
+        const activityDoc = await getDoc(doc(db, `users/${userId}/trips/${tripId}/activities`, activityId));
+        if (!activityDoc.exists()) {
+            console.error("Activity not found:", activityId);
+            return;
+        }
+
+        const activity = activityDoc.data();
+
+        // Update the itinerary for the target date
+        const dateRef = doc(db, `users/${userId}/trips/${tripId}/itinerary`, date);
+        const dateSnapshot = await getDoc(dateRef);
+        const currentActivities = dateSnapshot.exists() ? dateSnapshot.data().activities || [] : [];
+
+        // Add activity if not already present
+        if (!currentActivities.some((act) => act.id === activityId)) {
+            currentActivities.push({ id: activityId, name: activity.name });
+            await setDoc(dateRef, { activities: currentActivities });
+        }
+
+        // Add the activity to the Calendar UI
+        const dropzone = document.querySelector(`[data-date="${date}"] .activity-dropzone`);
+        const activityEl = createActivityCard(activityId, activity.name, true, "calendar", date);
+        dropzone.appendChild(activityEl);
+
+        // Remove the activity from the Saved Activities container
+        const savedActivitiesContainer = document.getElementById("savedActivities");
+        const savedActivity = savedActivitiesContainer.querySelector(`[data-activity-id="${activityId}"]`);
+        if (savedActivity) savedActivity.remove();
+    } catch (error) {
+        console.error("Error adding activity to date:", error);
+    }
+}
+
+
+async function handleDrop(event, targetDate) {
+    event.preventDefault();
+
+    const activityId = event.dataTransfer.getData("activityId");
+    const source = event.dataTransfer.getData("source");
+
+    if (activityId) {
+        if (source === "calendar" && !targetDate) {
+            // Move activity back to saved activities
+            await removeActivityFromCalendar(activityId);
+        } else if (source === "calendar") {
+            const sourceDate = event.dataTransfer.getData("sourceDate");
+            if (sourceDate !== targetDate) {
+                await moveActivityBetweenDates(activityId, sourceDate, targetDate);
+            }
+        } else if (source === "savedActivities") {
+            await addActivityToDate(targetDate, activityId);
+        }
+    }
+}
+
+
+async function moveActivityBetweenDates(activityId, sourceDate, targetDate) {
+    if (sourceDate === targetDate) return; // No action if the same date
+
+    try {
+        // Remove activity from source date
+        if (sourceDate) {
+            await removeActivityFromDate(sourceDate, activityId);
+        }
+
+        // Add activity to target date
+        await addActivityToDate(targetDate, activityId);
+    } catch (error) {
+        console.error("Error moving activity:", error);
+    }
+}
+
+async function removeActivityFromDate(date, activityId) {
+    if (!date) return;
+
+    try {
+        const dateRef = doc(db, `users/${userId}/trips/${tripId}/itinerary`, date);
+        const dateSnapshot = await getDoc(dateRef);
+
+        if (dateSnapshot.exists()) {
+            const activities = dateSnapshot.data().activities || [];
+            const updatedActivities = activities.filter((activity) => activity.id !== activityId);
+
+            await setDoc(dateRef, { activities: updatedActivities });
+
+            // Refresh the calendar
+            loadItinerary();
+        }
+    } catch (error) {
+        console.error("Error removing activity from date:", error);
+    }
+}
+
+async function removeActivityFromCalendar(activityId) {
+    try {
+        // Find the activity in the calendar
+        const itinerarySnapshot = await getDocs(collection(db, `users/${userId}/trips/${tripId}/itinerary`));
+        let activityFound = false;
+
+        itinerarySnapshot.forEach(async (doc) => {
+            const date = doc.id;
+            const activities = doc.data().activities || [];
+
+            // Check if the activity exists in the specific date
+            if (activities.some((act) => act.id === activityId)) {
+                activityFound = true;
+
+                // Remove the activity from this date
+                const updatedActivities = activities.filter((act) => act.id !== activityId);
+                await setDoc(doc.ref, { activities: updatedActivities });
+
+                // Refresh the calendar view
+                loadItinerary();
+            }
+        });
+
+        if (!activityFound) {
+            console.warn(`Activity with ID ${activityId} was not found in the calendar.`);
+        }
+
+        // Optionally, restore to Saved Activities container
+        const savedActivitiesContainer = document.getElementById("savedActivities");
+        if (!isActivityInSavedActivities(activityId)) {
+            const activityDoc = await getDoc(doc(db, `users/${userId}/trips/${tripId}/activities`, activityId));
+            if (activityDoc.exists()) {
+                const activity = activityDoc.data();
+                const activityEl = createActivityCard(activityId, activity.name, false, "savedActivities");
+                savedActivitiesContainer.appendChild(activityEl);
+            }
+        }
+    } catch (error) {
+        console.error("Error removing activity from calendar:", error);
+    }
+}
+
+// Helper function to check if an activity is already in the Saved Activities container
+function isActivityInSavedActivities(activityId) {
+    const savedActivitiesContainer = document.getElementById("savedActivities");
+    return Array.from(savedActivitiesContainer.children).some(
+        (child) => child.dataset.activityId === activityId
+    );
+}
+
+
+function isActivityInCalendar(activityId) {
+    const dropzones = document.querySelectorAll(".activity-dropzone");
+    return Array.from(dropzones).some((dropzone) =>
+        Array.from(dropzone.children).some((child) => child.dataset.activityId === activityId)
+    );
+}
+
+
+function allowDrop(event) {
+    event.preventDefault();
+}
+
+function drop(event) {
+    event.preventDefault();
+
+    // Extract activity and target date information
+    const activityId = event.dataTransfer.getData("activityId");
+    const sourceDate = event.dataTransfer.getData("sourceDate");
+    const targetDate = event.target.closest(".card")?.dataset.date;
+
+    handleDrop(event, targetDate || null);
+}
+
+function allowDrag(event, activityId, sourceDate) {
+    event.dataTransfer.setData("activityId", activityId);
+    event.dataTransfer.setData("sourceDate", sourceDate);
+}
+
+
+// Expose functions globally
+window.savePlace = savePlace;
 window.allowDrop = allowDrop;
 window.drop = drop;
-window.savePlace = savePlace;
+window.allowDrag = allowDrag;
 window.removeActivity = removeActivity;
-
-// async function saveActivityToDate(activityData, date) {
-//     try {
-//         await addDoc(collection(db, `users/${userId}/trips/${tripId}/activities`), {
-//             ...activityData,
-//             date: date
-//         });
-//         loadActivitiesForDate(date);
-//     } catch (error) {
-//         console.error("Error saving activity:", error);
-//     }
-// }
-
-// async function loadTripData() {
-//     const tripRef = doc(db, `users/${userId}/trips`, tripId);
-//     const tripSnapshot = await getDoc(tripRef);
-
-//     if (tripSnapshot.exists()) {
-//         const tripData = tripSnapshot.data();
-//         displayCalendar(tripData.dates);
-//         loadPlaces(tripData.location);
-//         loadSavedActivities();
-//     } else {
-//         console.error("Trip not found.");
-//         window.location.href = "alltrips.html";
-//     }
-// }
-
-// Calendar dates with droppable zones for activities
+window.searchPlaces = searchPlaces;
+window.removeActivityFromCalendar = removeActivityFromCalendar;
 
 
-// async function loadMapMarkers() {
-//     const snapshot = await getDocs(collection(db, `users/${userId}/trips/${tripId}/activities`));
-//     snapshot.forEach((doc) => {
-//         const activity = doc.data();
-//         const marker = new google.maps.Marker({
-//             position: { lat: activity.lat, lng: activity.lng },
-//             map,
-//             title: activity.name
-//         });
-
-//         const infowindow = new google.maps.InfoWindow({
-//             content: `<h5>${activity.name}</h5><p>${activity.address}</p><small>Type: ${activity.type}</small>`
-//         });
-
-//         marker.addListener("click", () => {
-//             infowindow.open(map, marker);
-//         });
-
-//         markers.push(marker);
-//     });
-// }
-
-
-
-// Load activities for the selected date and update map markers
-// async function loadActivitiesForDate(date) {
-//     clearMarkers();
-//     const activitiesSnapshot = await getDocs(collection(db, `users/${userId}/trips/${tripId}/activities`));
-//     const activities = [];
-
-//     activitiesSnapshot.forEach(doc => {
-//         const activity = doc.data();
-//         if (activity.date === date) {
-//             activities.push({ ...activity, id: doc.id });
-//         }
-//     });
-
-//     displayMarkers(activities);
-// }
-
-// // Display markers and connect them with a route on the map
-// function displayMarkers(activities) {
-//     const waypoints = [];
-
-//     activities.forEach((activity, index) => {
-//         const position = { lat: activity.lat, lng: activity.lng };
-//         const marker = new google.maps.Marker({
-//             position,
-//             label: `${index + 1}`,
-//             map,
-//             title: activity.name
-//         });
-
-//         markers.push(marker);
-
-//         // Collect waypoints for the route
-//         if (index > 0) {
-//             waypoints.push({
-//                 location: position,
-//                 stopover: true
-//             });
-//         }
-//     });
-
-//     // Show route connecting all activities in order
-//     if (activities.length > 1) {
-//         const origin = { lat: activities[0].lat, lng: activities[0].lng };
-//         const destination = { lat: activities[activities.length - 1].lat, lng: activities[activities.length - 1].lng };
-
-//         directionsService.route(
-//             {
-//                 origin,
-//                 destination,
-//                 waypoints,
-//                 travelMode: google.maps.TravelMode.DRIVING
-//             },
-//             (response, status) => {
-//                 if (status === google.maps.DirectionsStatus.OK) {
-//                     directionsRenderer.setDirections(response);
-//                 } else {
-//                     console.error("Directions request failed due to ", status);
-//                 }
-//             }
-//         );
-//     }
-// }
-
-// // Clear previous markers and route
-// function clearMarkers() {
-//     markers.forEach(marker => marker.setMap(null));
-//     markers = [];
-//     directionsRenderer.setDirections({ routes: [] });
-// }
-
-// // Firebase functions to save and remove activities
-// async function savePlace(place) {
-//     const date = document.querySelector(".date-container.active")?.dataset.date;
-
-//     if (date) {
-//         try {
-//             await addDoc(collection(db, `users/${userId}/trips/${tripId}/activities`), {
-//                 name: place.name,
-//                 address: place.vicinity,
-//                 lat: place.geometry.location.lat(),
-//                 lng: place.geometry.location.lng(),
-//                 type: place.types[0],
-//                 date: date
-//             });
-//             loadActivitiesForDate(date);
-//         } catch (error) {
-//             console.error("Error adding activity:", error);
-//         }
-//     } else {
-//         alert("Select a date to save the activity to.");
-//     }
-// }
-
-// function initCalendar() {
-//     const calendarEl = document.getElementById("calendar");
-//     const calendar = new FullCalendar.Calendar(calendarEl, {
-//         initialView: "dayGridMonth",
-//         editable: true,
-//         droppable: true,
-//         events: [],
-
-//         // When an activity is dropped on the calendar
-//         drop: (info) => {
-//             const activityData = JSON.parse(info.draggedEl.dataset.activityData);
-//             calendar.addEvent({
-//                 title: activityData.name,
-//                 start: info.date,
-//                 extendedProps: {
-//                     activityId: activityData.id,
-//                     type: activityData.type,
-//                     address: activityData.address
-//                 }
-//             });
-
-//             // Save the activity date to Firebase (update itinerary)
-//             saveActivityToItinerary(activityData, info.date);
-//         }
-//     });
-//     calendar.render();
-// }
-
-// async function saveActivityToItinerary(activity, date) {
-//     try {
-//         // Save updated activity data to Firebase under the itinerary date
-//         const itineraryRef = doc(db, `users/${userId}/trips/${tripId}/itinerary`, activity.id);
-//         await setDoc(itineraryRef, {
-//             ...activity,
-//             scheduledDate: date.toISOString().split("T")[0] // Format as YYYY-MM-DD
-//         });
-//         console.log("Activity added to itinerary.");
-//     } catch (error) {
-//         console.error("Error saving to itinerary:", error);
-//     }
-// }
-
-// function filterMarkers(type) {
-//     markers.forEach(marker => {
-//         if (marker.getTitle().toLowerCase().includes(type.toLowerCase())) {
-//             marker.setMap(map);
-//         } else {
-//             marker.setMap(null);
-//         }
-//     });
-// }
-
-// let selectedFilters = [];
 
 // function applyFilters() {
-//     const filteredActivities = activityList.filter(activity => selectedFilters.includes(activity.type));
-//     displayActivityList(filteredActivities);
-//     filterMarkers(selectedFilters);
+//     // Get all selected filter buttons
+//     const selectedFilters = Array.from(document.querySelectorAll('.filter-btn.active'))
+//         .map(button => button.getAttribute('data-category'));
+
+//     if (selectedFilters.length === 0) {
+//         // If no filters are selected, display all places
+//         displayPlaces(allPlaces);
+//         addMarkers(allPlaces);
+//         return;
+//     }
+
+//     // Filter places based on selected categories
+//     const filteredPlaces = allPlaces.filter(place =>
+//         selectedFilters.some(filter => (place.types || []).includes(filter))
+//     );
+
+//     // Update the places list and map markers
+//     displayPlaces(filteredPlaces);
+//     addMarkers(filteredPlaces);
 // }
 
 // function clearFilters() {
-//     selectedFilters = [];
-//     displayActivityList(activityList);
-//     filterMarkers([]);
+//     document.querySelectorAll(".filter-btn").forEach((button) => button.classList.remove("active"));
+//     displayPlaces(allPlaces); // Reset places list
+//     addMarkers(allPlaces);    // Reset markers
 // }
 
-// function displayActivityList(activities) {
-//     const activityListContainer = document.getElementById("activityList");
-//     activityListContainer.innerHTML = "";
-
-//     activities.forEach(activity => {
-//         const card = document.createElement("div");
-//         card.classList.add("card", "col-md-3", "m-2");
-//         card.innerHTML = `
-//             <div class="card-body">
-//                 <h5 class="card-title">${activity.name}</h5>
-//                 <p class="card-text">${activity.address}</p>
-//                 <small>Rating: ${activity.rating || "N/A"} | Reviews: ${activity.reviews || 0}</small>
-//             </div>
-//         `;
-//         activityListContainer.appendChild(card);
-//     });
+// function toggleFilter(button) {
+//     button.classList.toggle("active");
 // }
 
-// // Display saved activities on map
-// async function loadActivities() {
-//     const savedActivitiesRef = collection(db, "savedActivities");
-//     const querySnapshot = await getDocs(savedActivitiesRef);
+// // Add event listeners for filters
+// document.querySelectorAll(".filter-btn").forEach((button) => {
+//     button.addEventListener("click", () => toggleFilter(button));
+// });
 
-//     const bounds = new google.maps.LatLngBounds();
-
-//     querySnapshot.forEach(docSnapshot => {
-//         const activity = docSnapshot.data();
-
-//         const lat = parseFloat(activity.lat);
-//         const lng = parseFloat(activity.lng);
-//         if (!isNaN(lat) && !isNaN(lng)) {
-//             displayActivity(activity, docSnapshot.id);  // Render each activity
-
-//             // Add marker to the map
-//             const marker = new google.maps.Marker({
-//                 position: { lat: lat, lng: lng },  // Ensure these are numbers
-//                 map: map,
-//                 title: activity.name
-//             });
-
-//             bounds.extend({ lat: lat, lng: lng });
-//         } else {
-//             console.error(`Invalid lat/lng for activity: ${activity.name}`);
-//         }
-//     });
-
-//     // Adjust the map to fit all markers
-//     map.fitBounds(bounds);
-// }
-
-// function displayActivity(activity, id) {
-//     const activityCard = document.createElement('div');
-//     activityCard.classList.add('col-md-4', 'activity-card');
-
-//     activityCard.innerHTML = `
-//       <h5>${activity.name}</h5>
-//       <p>Address: ${activity.address}</p>
-//       <button class="btn btn-danger" onclick="removeActivity('${id}')">Remove</button>
-//     `;
-
-//     activitiesContainer.appendChild(activityCard);
-// }
-
-// // Remove activity from Firestore and update the list
-// async function removeActivity(id) {
-//     try {
-//         await deleteDoc(doc(db, "savedActivities", id));
-//         location.reload();  // Reload the page to refresh the list of activities and map
-//     } catch (error) {
-//         console.error("Error removing document: ", error);
-//     }
-// }
-
-// window.onload = initMap;
-// window.removeActivity = removeActivity;
+// window.applyFilters = applyFilters;
+// window.clearFilters = clearFilters;
+// window.toggleFilter = toggleFilter;
