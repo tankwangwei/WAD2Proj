@@ -64,8 +64,7 @@
         }
 
         .rounded-section {
-            padding: 25px;
-            height: 100%;
+            padding: 10px;
             /* Ensures the section takes full height of its container */
             background-color: rgba(255, 255, 255, 0.8);
             border-radius: 10px;
@@ -73,7 +72,6 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
         }
-
 
         #main {
             position: fixed;
@@ -438,7 +436,7 @@
 
         h5 {
             color: #333;
-            margin-bottom: 2rem;
+            margin-bottom: 15px;
             font-weight: 600;
         }
 
@@ -449,66 +447,40 @@
             max-width: 500px;
             /* Maximum width to prevent it from growing too large */
             max-height: 500px;
+            display: none;
             /* Maximum height to limit its size */
             /* Give more space to the chart container */
         }
 
+        #budgetContainer {
+            justify-content: center;
+            width: 100%;
+        }
+
+        #budgetContainer .text-center {
+            margin: 0 10px;
+            /* Optional: Adjust spacing between Total Budget and Remaining */
+        }
+
         .budget-summary {
-            flex: 1;
-            /* Reduce space for the budget summary */
-            text-align: left;
-        }
-
-        .budget-summary p {
-            margin-bottom: 10px;
-        }
-
-        .budget-summary span {
-            display: block;
-            /* Forces each amount to appear on a new line */
-            font-size: 28px;
-            /* Increase font size for emphasis */
-            font-weight: bold;
-            /* Make the amount bold for readability */
-        }
-
-        #forecast-container {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            gap: 20px;
+            /* Smaller gap to bring elements closer */
         }
 
-        .left-forecast {
-            flex: 1;
-            font-size: 1.2rem;
-            /* Increase this value to make it larger */
-            font-weight: 600;
-            color: #333;
-            margin: 0.5rem 0;
+        .budget-summary .label {
+            font-size: 1rem;
+            color: #666;
+            margin: 0;
+            text-align: center;
         }
 
-        .right-temperature {
-            flex: 1;
-            text-align: right;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        #weather-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .large-temperature {
-            font-size: 2.5rem;
-            /* Adjust the size as needed */
+        .budget-summary .amount {
+            font-size: 1.5rem;
+            /* Increase font size to match larger chart */
             font-weight: bold;
             color: #333;
-            margin-left: 20px;
-            /* Space between the forecast and temperature */
-            margin-top: auto;
-            margin-bottom: auto;
+            text-align: center;
         }
 
         .background-crop {
@@ -546,39 +518,34 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 0;
+            margin: 0;
         }
 
         .left-forecast {
-            flex: 1;
-            font-size: 1.2rem;
-            /* Increase this value to make it larger */
-            font-weight: 600;
-            color: #333;
-            margin: 0.5rem 0;
+            margin-right: 10px;
+            /* Adjust as needed to control spacing between left and right sections */
         }
 
-        .right-temperature {
-            flex: 1;
+        #current-temperature {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+        }
+
+        #high-low-temperature {
+            font-size: 1rem;
+            color: #666;
+            margin: 0;
+        }
+
+        .right-forecast {
             text-align: right;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        #weather-container {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-        }
-
-        .large-temperature {
-            font-size: 2.5rem;
-            /* Adjust the size as needed */
-            font-weight: bold;
-            color: #333;
-            margin-left: 20px;
-            /* Space between the forecast and temperature */
-            margin-top: auto;
-            margin-bottom: auto;
+            gap: 5px;
+            /* Controls the spacing between the icon and text */
         }
 
         .col-md-6 p-4 {
@@ -718,10 +685,10 @@
     <div class="container-fluid p-5 ">
         <div class="row g-4 d-flex align-items-stretch">
             <!-- Left column: Activities Planned -->
-            <div class="activities-planned col-md-6 p-4">
+            <div class="activities-planned p-4">
                 <div class="rounded-section h-100">
                     <div class="trip-header d-flex align-items-center mb-4">
-                        <h1 id="tripNameDisplay" class="trip-title"></h1>
+                        <h1 id="tripNameDisplay" class="trip-title" style="display: none;"></h1>
                         <div class="trip-details">
                             <p id="tripCountryDisplay" class="trip-country">Country: Not specified</p>
                             <p id="tripDateRangeDisplay" class="trip-date-range">Date Range: Not specified</p>
@@ -735,7 +702,7 @@
                         </div>
                     </div>
                     <div class="attractions-header">
-                        <h5 style="margin: 0">Places To Go</h5>
+                        <h5 style="margin: 0">Top Attractions in <span id="attraction-location"></span></h5>
                         <a href="#" class="see-all-link" onclick="navigateToAttractionsPage()">
                             See all attractions <span>→</span>
                         </a>
@@ -750,72 +717,95 @@
                     </div>
                 </div>
             </div>
-
-            <div class="col-md-6 p-4">
-                <div class="rounded-section h-100">
-                    <div id="budget-chart-section" class="section-container">
-                        <!-- Centered Header -->
-                        <h3 class="text-center">Budget Overview</h3>
-
-                        <!-- Flex container for chart and summary -->
-                        <div class="d-flex align-items-center justify-content-between mt-4">
-                            <div class="chart-container me-4">
-                                <canvas id="budgetPieChart" class="small-chart"></canvas>
-                            </div>
-                            <div id="budgetContainer" class="budget-summary text-start">
-                                <p>Total Budget:<br>
-                                    <span id="totalBudgetDisplay">$0</span>
-                                </p>
-                                <p>Remaining Budget:<br>
-                                    <span id="remainingBudgetDisplay">$0</span>
-                                </p>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div class="container-fluid">
             <div class="row">
+                <!-- Destination Section -->
+                <div class="col-lg-4 col-md-4">
+                    <div id="destination-section" class="p-3 rounded-section">
+                        <h5 class="text-center">Destination</h5>
+
+                        <!-- First Row -->
+                        <div class="row">
+                            <div class="col-4">
+                                <p>Location:</p>
+                                <p id="destination-location">--</p>
+                            </div>
+                            <div class="col-4">
+                                <p>Distance:</p>
+                                <p id="destination-distance">-- km</p>
+                            </div>
+                        </div>
+
+                        <!-- Second Row -->
+                        <div class="row mt-2">
+                            <div class="col-4">
+                                <p>Time:</p>
+                                <p id="destination-time">-- mins</p>
+                            </div>
+                            <div class="col-4">
+                                <p>Status:</p>
+                                <p id="destination-status">--</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Weather Section -->
                 <aside class="col-lg-4 col-md-4">
-                    <div class="rounded-section">
-                        <h3 class="text-center">Weather Forecast for <span id="weather-location"></span></h3>
-                        <div id="weather-section" class="p-3 rounded section-container">
-                            <div class="d-flex justify-content-between align-items-start" id="forecast-container">
-                                <!-- Left side: Day 1 Forecast Details -->
-                                <div id="day-one-forecast" class="left-forecast"></div>
-
-                                <!-- Right side: Current Temperature -->
-                                <div id="current-temperature" class="large-temperature"></div>
+                    <div onclick="navigateToWeatherPage()" id="weather-section" class="p-3 rounded-section">
+                        <h5 class="text-center">Weather Forecast for <span id="weather-location"></span></h5>
+                        <div id="forecast-container" class="d-flex justify-content-between align-items-center">
+                            <!-- Left side for temperature and high/low values -->
+                            <div id="left-forecast" class="left-forecast">
+                                <p id="current-temperature" class="large-temperature">--°C</p>
+                                <p id="high-low-temperature">H: --°C L: --°C</p>
+                            </div>
+                            <!-- Right side for weather icon and description -->
+                            <div id="right-forecast" class="right-forecast text-center">
+                                <img id="weather-icon" src="" alt="Weather icon" style="width: 30px;" />
+                                <p id="weather-description">--</p>
                             </div>
                         </div>
                     </div>
                 </aside>
 
-
-
-                <!-- Attractions Section
-            <section class="col-lg-4 col-md-6">
-                <div id="attractions-section" class="p-3 rounded section-container">
-                    <h2 class="text-center">Top Attractions</h2>
-                    <div id="attractionsContainer" class="row"></div>
-                </div>
-            </section> -->
-
-                <!-- Currency Converter Section -->
-                <section class="col-lg-4 col-md-4">
-                    <div class="rounded-section">
-                        <div id="currency-section" class="converter-container section-container">
-                            <h3 class="text-center">Currency Converter</h3>
-                            <div id="result" class="result">Please input amount and currency</div>
+                <!-- Budget Section -->
+                <div class="col-lg-4 col-md-4">
+                    <div id="budget-chart-section" class="rounded-section">
+                        <h5 class="text-center">Budget Overview</h5>
+                        <div class="d-flex align-items-center justify-content-between mt-4">
+                            <div id="budgetContainer" class="budget-summary d-flex">
+                                <div class="text-center me-5">
+                                    <p class="label">Total Budget</p>
+                                    <span id="totalBudgetDisplay" class="amount"></span>
+                                </div>
+                                <div class="text-center">
+                                    <p class="label">Remaining</p>
+                                    <span id="remainingBudgetDisplay" class="amount"></span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="budgetPieChart" class="small-chart"></canvas>
+                            </div>
                         </div>
                     </div>
-                </section>
+                </div>
             </div>
         </div>
+
+
+
+        <!-- Currency Converter Section
+        </section class="col-lg-4 col-md-4">
+            <div class="rounded-section">
+                <div id="currency-section" class="converter-container section-container">
+                    <h3 class="text-center">Currency Converter</h3>
+                        <div id="result" class="result">Please input amount and currency</div>
+                </div>
+            </div>
+        </section> -->
 
         <div class="modal fade" id="budgetPromptModal" tabindex="-1" aria-labelledby="budgetPromptLabel"
             aria-hidden="true">
@@ -893,6 +883,7 @@
                 if (location) {
                     console.log("Location:", location);
                     document.getElementById("weather-location").textContent = location;
+                    document.getElementById("attraction-location").textContent = location;
                     fetchWeatherData(location);
                     fetchCurrencyByCountry(location)
                         .then(currencyCode => {
@@ -1025,6 +1016,7 @@
                         document.getElementById("tripCountryDisplay").textContent = `Country: ${location}`;
                         document.getElementById("tripDateRangeDisplay").textContent = `Date Range: ${dateRange}`;
                         document.getElementById("weather-location").textContent = location;
+                        document.getElementById("attraction-location").textContent = location;
 
                         // Update the pie chart with the expense data
                         updatePieChart(await calculateCategoryTotals(tripId)); // Fetch category totals for pie chart
@@ -1512,6 +1504,7 @@
             function clearDashboard() {
                 document.getElementById("tripNameDisplay").textContent = "Your Trip";
                 document.getElementById("weather-location").textContent = "";
+                document.getElementById("attraction-location").textContent = "";
                 document.getElementById("current-temperature").textContent = "";
                 document.getElementById("weather-details").innerHTML = "";
                 document.getElementById("attractionsContainer").innerHTML = "";
@@ -1689,7 +1682,6 @@
                 displayAttractions(attractions);
                 initializePieChart();
             });
-
             function getWeatherForecast(lat, lon) {
                 const weatherUrl = "https://api.openweathermap.org/data/3.0/onecall";
                 const apiKey = "4e1a69304c74566a0ebcf18acbafbc18";
@@ -1708,37 +1700,23 @@
                     .catch(error => console.error("Error fetching weather data:", error));
             }
             function displayDayOneForecast(dayOneForecast) {
-                const forecastContainer = document.getElementById("day-one-forecast");
+                // Set the current temperature
+                const currentTempElement = document.getElementById("current-temperature");
+                currentTempElement.textContent = `${dayOneForecast.temp.day.toFixed(1)}°C`;
 
-                // Clear any existing content
-                forecastContainer.innerHTML = "";
+                // Set high and low temperatures
+                const highLowTempElement = document.getElementById("high-low-temperature");
+                highLowTempElement.textContent = `H: ${dayOneForecast.temp.max.toFixed(1)}°C L: ${dayOneForecast.temp.min.toFixed(1)}°C`;
 
-                // Create a label and container for temperatures
-                const tempLabel = document.createElement("p");
-                tempLabel.textContent = "Temperature:";
-
-                const tempContainer = document.createElement("p");
-                tempContainer.innerHTML = `H: ${dayOneForecast.temp.max.toFixed(1)}°C L: ${dayOneForecast.temp.min.toFixed(1)}°C`;
-
-                // Create a label and container for weather description
-                const weatherLabel = document.createElement("p");
-                weatherLabel.textContent = "Weather:";
-
-                const description = document.createElement("p");
+                // Set the weather icon and description
                 const iconUrl = `http://openweathermap.org/img/wn/${dayOneForecast.weather[0].icon}@2x.png`;
-                description.innerHTML = `<img src="${iconUrl}" alt="${dayOneForecast.weather[0].description}" style="width:30px;"> ${dayOneForecast.weather[0].description}`;
+                const iconElement = document.getElementById("weather-icon");
+                iconElement.src = iconUrl;
+                iconElement.alt = dayOneForecast.weather[0].description;
 
-                // Append all elements to the forecast container in the desired format
-                forecastContainer.appendChild(tempLabel);
-                forecastContainer.appendChild(tempContainer);
-                forecastContainer.appendChild(weatherLabel);
-                forecastContainer.appendChild(description);
+                const descriptionElement = document.getElementById("weather-description");
+                descriptionElement.textContent = dayOneForecast.weather[0].description;
             }
-
-
-
-
-
         </script>
 
         <script>
