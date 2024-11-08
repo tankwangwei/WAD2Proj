@@ -16,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
         body,
@@ -28,6 +28,11 @@
             position: relative;
             /* Prevent scrolling */
             background-image: url('./imgs/changibackground.jpg');
+        }
+
+        .container-fluid {
+            position: relative;
+            z-index: 1;
         }
 
         .carousel {
@@ -440,6 +445,11 @@
             font-weight: 600;
         }
 
+        h6 {
+            color: #333;
+            font-weight: 600;
+        }
+
         .chart-container {
             flex: 2;
             width: 100%;
@@ -682,17 +692,22 @@
 </nav>
 
 <body>
-    <div class="container-fluid p-5 ">
+    <div class="container-fluid mt-5">
+        <div class="trip-details">
+            <h1 id="tripCountryDisplay" class="trip-country text-center"></h1>
+            <h6 class="trip-date-range text-center">
+                <i class="fas fa-calendar-alt"></i> <!-- Static calendar icon -->
+                <span id="tripDateRangeDisplay"></span> <!-- Dynamic date range text -->
+            </h6>
+        </div>
+    </div>
+    <div class="container-fluid p-3">
         <div class="row g-4 d-flex align-items-stretch">
             <!-- Left column: Activities Planned -->
             <div class="activities-planned p-4">
                 <div class="rounded-section h-100">
                     <div class="trip-header d-flex align-items-center mb-4">
                         <h1 id="tripNameDisplay" class="trip-title" style="display: none;"></h1>
-                        <div class="trip-details">
-                            <p id="tripCountryDisplay" class="trip-country">Country: Not specified</p>
-                            <p id="tripDateRangeDisplay" class="trip-date-range">Date Range: Not specified</p>
-                        </div>
                         <div class="d-flex align-items-center ms-auto">
                             <select id="tripDropdown" class="form-select me-2">
                                 <option value="">Select a trip</option>
@@ -1013,8 +1028,8 @@
 
                         // Display trip name and location
                         document.getElementById("tripNameDisplay").textContent = tripData.name || "Your Trip";
-                        document.getElementById("tripCountryDisplay").textContent = `Country: ${location}`;
-                        document.getElementById("tripDateRangeDisplay").textContent = `Date Range: ${dateRange}`;
+                        document.getElementById("tripCountryDisplay").textContent = `${location}`;
+                        document.getElementById("tripDateRangeDisplay").textContent = `${dateRange}`;
                         document.getElementById("weather-location").textContent = location;
                         document.getElementById("attraction-location").textContent = location;
 
