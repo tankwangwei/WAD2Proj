@@ -685,7 +685,7 @@
                     <a class="nav-link" href="alltrips.html">All Trips</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="itinerary.html">Itinerary Builder</a>
+                    <a class="nav-link" id="itineraryBuilderLink" href="#">Itinerary Builder</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="attractions.html">Attractions</a>
@@ -877,13 +877,18 @@
                 const tripID = params.get("tripID");
                 const location = params.get("location");
 
-                if (location) {
-                    // Save the location in localStorage for future use
+                if (tripID && location) {
+                    localStorage.setItem("selectedTripId", tripID);
                     localStorage.setItem("location", location);
-                } else {
-                    // If location parameter isn't in the URL, use the one from localStorage
-                    location = localStorage.getItem("location");
                 }
+
+                // if (location) {
+                //     // Save the location in localStorage for future use
+                //     localStorage.setItem("location", location);
+                // } else {
+                //     // If location parameter isn't in the URL, use the one from localStorage
+                //     location = localStorage.getItem("location");
+                // }
 
                 if (location) {
                     console.log("Location:", location);
@@ -1736,30 +1741,44 @@
 
         </script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const navbarToggler = document.querySelector('.navbar-toggler');
-        const navbarCollapse = document.querySelector('.navbar-collapse');
-    
-        // Update aria-expanded when navbar is shown/hidden
-        navbarCollapse.addEventListener('show.bs.collapse', function() {
-            navbarToggler.setAttribute('aria-expanded', 'true');
-        });
-    
-        navbarCollapse.addEventListener('hide.bs.collapse', function() {
-            navbarToggler.setAttribute('aria-expanded', 'false');
-        });
-        
-        // Add click handler to close menu when clicking outside
-        document.addEventListener('click', function(event) {
-            const isClickInside = navbarCollapse.contains(event.target) || navbarToggler.contains(event.target);
-            if (!isClickInside && navbarCollapse.classList.contains('show')) {
-                const bsCollapse = new bootstrap.Collapse(navbarCollapse);
-                bsCollapse.hide();
-            }
-        });
-    });
-    </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const navbarToggler = document.querySelector('.navbar-toggler');
+                const navbarCollapse = document.querySelector('.navbar-collapse');
+
+                // Update aria-expanded when navbar is shown/hidden
+                navbarCollapse.addEventListener('show.bs.collapse', function () {
+                    navbarToggler.setAttribute('aria-expanded', 'true');
+                });
+
+                navbarCollapse.addEventListener('hide.bs.collapse', function () {
+                    navbarToggler.setAttribute('aria-expanded', 'false');
+                });
+
+                // Add click handler to close menu when clicking outside
+                document.addEventListener('click', function (event) {
+                    const isClickInside = navbarCollapse.contains(event.target) || navbarToggler.contains(event.target);
+                    if (!isClickInside && navbarCollapse.classList.contains('show')) {
+                        const bsCollapse = new bootstrap.Collapse(navbarCollapse);
+                        bsCollapse.hide();
+                    }
+                });
+            });
+
+
+
+            document.getElementById("itineraryBuilderLink").addEventListener("click", function () {
+                const tripId = localStorage.getItem("selectedTripId");
+                const location = localStorage.getItem("location");
+
+                if (tripId && location) {
+                    window.location.href = `itinerary.html?tripId=${tripId}&location=${encodeURIComponent(location)}`;
+                } else {
+                    alert("Please select a trip first!");
+                }
+            });
+
+        </script>
 
 </body>
 

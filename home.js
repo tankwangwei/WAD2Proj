@@ -105,7 +105,10 @@ onAuthStateChanged(auth, (user) => {
 
                 // Save the newly created trip ID
                 localStorage.setItem("selectedTripId", tripRef.id);
-
+                localStorage.setItem("location", location);
+                localStorage.setItem("tripName", tripName); 
+                localStorage.setItem("tripDays", days);
+                
                 console.log("New trip created with ID:", tripRef.id);
 
                 // Set a flag to indicate a new trip was created

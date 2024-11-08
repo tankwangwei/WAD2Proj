@@ -22,16 +22,26 @@ let markers = [];
 
 let userId;
 
-let tripId = new URLSearchParams(window.location.search).get("tripId") || localStorage.getItem("tripId");
-let location = new URLSearchParams(window.location.search).get("location") || localStorage.getItem("location");
+const urlParams = new URLSearchParams(window.location.search);
+const tripId = urlParams.get("tripId") || localStorage.getItem("tripId");
+const location = urlParams.get("location") || localStorage.getItem("location");
 
-if (tripId && location) {
-    localStorage.setItem("tripId", tripId);
-    localStorage.setItem("location", location);
-} else {
-    console.error("No tripId or location found. Redirecting to dashboard.");
+if (!tripId || !location) {
+    console.error("Missing tripId or location. Redirecting to dashboard.");
     window.location.href = "dashboard.html";
+} else {
+    // Ensure values are synchronized in localStorage
+    if (!localStorage.getItem("tripId")) {
+        localStorage.setItem("tripId", tripId);
+    }
+    if (!localStorage.getItem("location")) {
+        localStorage.setItem("location", location);
+    }
+
+    console.log("Trip and location loaded:", { tripId, location });
 }
+
+
 
 
 onAuthStateChanged(auth, (user) => {
@@ -62,12 +72,31 @@ async function initItinerary(tripId, userId) {
 
     if (tripSnapshot.exists()) {
         const tripData = tripSnapshot.data();
-        const location = { lat: tripData.lat, lng: tripData.lng };
+        // const location = { lat: tripData.lat, lng: tripData.lng };
+
+        const location = tripData.latitude && tripData.longitude
+            ? { lat: tripData.latitude, lng: tripData.longitude }
+            : null;
+
+        if (location && !isNaN(location.lat) && !isNaN(location.lng)) {
+            initMap(location);
+        } else {
+            console.error("Invalid location data. Ensure trip data includes valid latitude and longitude.");
+            alert("Unable to load map due to missing location data.");
+        }
+
+        if (tripData.dates && tripData.dates.length > 0) {
+            loadFullItinerary(tripData.dates);
+        } else {
+            console.error("Trip does not contain valid dates.");
+            alert("Unable to load itinerary. Please ensure the trip has valid dates.");
+        }
         
-        initMap(location);
+
+        // initMap(location);
         displayCalendar(tripData.dates);
         loadSavedActivities();
-        loadFullItinerary(tripData.dates);
+        // loadFullItinerary(tripData.dates);
         loadPlaces(location);
     } else {
         console.error("Trip data not found.");
@@ -90,7 +119,7 @@ function initMap(location) {
 }
 
 // Load and display full itinerary
-async function loadFullItinerary() {
+async function loadFullItinerary(dates) {
     for (const date of dates) {
         const dayRef = doc(db, `users/${userId}/trips/${tripId}/itinerary`, date);
         const daySnapshot = await getDoc(dayRef);
@@ -125,6 +154,12 @@ async function saveDayItinerary(date, activities) {
 }
 
 function loadPlaces(location) {
+    if (!location || isNaN(location.lat) || isNaN(location.lng)) {
+        console.error("Invalid location provided for places search:", location);
+        alert("Unable to load places. Please check the trip's location data.");
+        return;
+    }
+
     console.log("Loading places around location:", location);
 
     const placesService = new google.maps.places.PlacesService(document.createElement('div'));
@@ -140,6 +175,7 @@ function loadPlaces(location) {
             displayPlaces(results);
         } else {
             console.error("Error retrieving places:", status);
+            alert("Unable to retrieve places. Please try again later.");
         }
     });
 }
