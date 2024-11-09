@@ -684,6 +684,7 @@
         .standard-height {
             min-height: 150px;
         }
+
     </style>
 
     <script>
@@ -721,6 +722,27 @@
 
     </script>
 </head>
+
+<div class="modal fade" id="budgetPromptModal" tabindex="-1" aria-labelledby="budgetPromptLabel" aria-hidden="true"
+    data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="budgetPromptLabel">Create a Budget</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                You have created a new trip! To get started, we recommend creating a budget to manage your
+                expenses.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Later</button>
+                <button type="button" class="btn btn-primary" onclick="redirectToBudgetPage()">Create
+                    Budget</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <nav class="navbar navbar-expand-md fixed-top">
@@ -875,26 +897,6 @@
             </div>
         </div>
 
-        <div class="modal fade" id="budgetPromptModal" tabindex="-1" aria-labelledby="budgetPromptLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="budgetPromptLabel">Create a Budget</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        You have created a new trip! To get started, we recommend creating a budget to manage your
-                        expenses.
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Later</button>
-                        <button type="button" class="btn btn-primary" onclick="redirectToBudgetPage()">Create
-                            Budget</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -1038,10 +1040,29 @@
                 });
 
                 console.log("Checking for showBudgetModal flag:", localStorage.getItem("showBudgetModal"));
+
                 if (localStorage.getItem("showBudgetModal") === "true") {
-                    const budgetModal = new bootstrap.Modal(document.getElementById("budgetPromptModal"));
-                    budgetModal.show();
-                    localStorage.removeItem("showBudgetModal"); // Clear the flag after showing the modal
+                    const budgetModalElement = document.getElementById("budgetPromptModal");
+
+                    if (budgetModalElement) {
+                        const budgetModal = new bootstrap.Modal(budgetModalElement);
+                        budgetModal.show();
+
+                        // Ensure modal cleanup after closing
+                        budgetModalElement.addEventListener("hidden.bs.modal", () => {
+                            document.body.classList.remove("modal-open");
+                            document.body.style.overflow = "";
+
+                            // Remove lingering backdrop if present
+                            const backdrop = document.querySelector(".modal-backdrop");
+                            if (backdrop) {
+                                backdrop.remove();
+                            }
+                        });
+
+                        // Clear the flag after displaying the modal
+                        localStorage.removeItem("showBudgetModal");
+                    }
                 }
             });
 
