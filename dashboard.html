@@ -519,6 +519,15 @@
             text-align: center;
         }
 
+        #currency-section .result{
+            font-size: 1.5rem;
+            /* Increase font size to match larger chart */
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin-top: 30px;
+        }
+
         .background-crop {
             height: 100vh 10%;
             margin: 0;
@@ -783,7 +792,7 @@
 
             <!-- Budget Section -->
             <div class="col-lg-4 col-md-4">
-                <div id="budget-chart-section" class="rounded-section standard-height">
+                <div id="budget-chart-section" class="p-3 rounded-section standard-height">
                     <h5 class="text-center">Budget Overview</h5>
                     <div class="d-flex align-items-center justify-content-between mt-4">
                         <div id="budgetContainer" class="budget-summary d-flex">
@@ -805,7 +814,7 @@
 
             <!-- Currency Section -->
             <div class="col-lg-4 col-md-4">
-                <div id="currency-section" class="rounded-section standard-height">
+                <div id="currency-section" class="p-3 rounded-section standard-height">
                     <h5 class="text-center">Currency Converter</h5>
                     <div id="result" class="result"></div>
                 </div>
@@ -1479,7 +1488,7 @@
 
         function fetchConversionRate(currencyCode) {
             const url = "http://data.fixer.io/api/latest";
-            const apiKey = "8c39e399733555303209d70743eecdc0"; // Make sure your API key is correct
+            const apiKey = ""; // Make sure your API key is correct
 
             axios.get(url, {
                 params: {
