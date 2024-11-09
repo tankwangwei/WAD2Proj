@@ -31,11 +31,54 @@ onAuthStateChanged(auth, (user) => {
 // Get tripID and location from the URL
 const urlParams = new URLSearchParams(window.location.search);
 const tripID = urlParams.get('tripID');
+console.log('Initial tripID from URL:', tripID, 'Type:', typeof tripID);
 const location = decodeURIComponent(urlParams.get('location'));
 
 // Set the location input field
 const locationInput = document.getElementById("location");
 locationInput.value = location;
+
+function checkTripID(tripID) {
+    // Remove any existing alerts first
+    const existingAlert = document.querySelector('.alert');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+
+    // Check if tripID exists and is valid
+    if (!tripID || tripID === "null" || tripID === "undefined") {
+        // Create main alert div
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-warning alert-dismissible fade show';
+        alert.setAttribute('role', 'alert');
+
+        // Create text node
+        const textNode = document.createTextNode('Please create or select a trip before saving attractions! ');
+        alert.appendChild(textNode);
+
+        // Create link
+        const link = document.createElement('a');
+        link.href = 'home.html';
+        link.className = 'alert-link';
+        link.textContent = 'Go to Trips';
+        alert.appendChild(link);
+
+        // Create close button
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'btn-close';
+        closeButton.setAttribute('data-bs-dismiss', 'alert');
+        closeButton.setAttribute('aria-label', 'Close');
+        alert.appendChild(closeButton);
+
+        // Insert alert at the top of the main container
+        const container = document.querySelector('body > div') || document.body;
+        container.insertBefore(alert, container.firstChild);
+        
+        return false;
+    }
+    return true;
+}
 
 // Automatically search for attractions on page load if location is defined
 document.addEventListener("DOMContentLoaded", () => {
@@ -144,6 +187,12 @@ async function fetchAttractionSummary(attractionName, elementId) {
 }
 
 async function saveActivity(tripID, name, address, lat, lng, imageUrl, iconElement) {
+
+    if (!tripID || tripID === "null" || tripID === "undefined") {
+        checkTripID(tripID);
+        return;
+    }
+    
     try {
         // Check if activity already exists in Firestore
         const activitiesRef = collection(db, `users/${userId}/trips/${tripID}/activities`);

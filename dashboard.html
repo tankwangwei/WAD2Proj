@@ -652,10 +652,18 @@
 
     <script>
         function navigateToAttractionsPage() {
-            const location = localStorage.getItem("location");
-            const url = location ? `attractions.html?location=${encodeURIComponent(location)}` : `attractions.html`;
-            window.location.href = url;
-        }
+    const tripId = localStorage.getItem("selectedTripId");
+    const location = localStorage.getItem("location");
+
+    if (tripId && location) {
+        window.location.href = `attractions.html?tripID=${tripId}&location=${encodeURIComponent(location)}`;
+    } else {
+        // Show alert and redirect to home page
+        alert("Please create a trip first!");
+        window.location.href = 'home.html';
+    }
+}
+
 
         function navigateToWeatherPage() {
             const location = localStorage.getItem("location"); // Get location from localStorage or another source
@@ -694,7 +702,7 @@
                     <a class="nav-link" href="alltrips.html">All Trips</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="itineraryBuilderLink" href="#">Itinerary Builder</a>
+                    <a class="nav-link" href="#" onclick="navigateToAttractionsPage()">Itinerary</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="attractions.html">Attractions</a>
@@ -887,10 +895,26 @@
         const db = getFirestore(app);
         const auth = getAuth();
 
+        function updateNavLinks() {
+            const tripId = localStorage.getItem("selectedTripId");
+            const location = localStorage.getItem("location");
+
+            // Update attractions link
+            const attractionsLink = document.querySelector('a[href="attractions.html"]');
+            if (attractionsLink) {
+                attractionsLink.href = tripId ?
+                    `attractions.html?tripID=${tripId}&location=${encodeURIComponent(location)}` :
+                    'attractions.html';
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             const params = new URLSearchParams(window.location.search);
             const tripID = params.get("tripID");
             const location = params.get("location");
+
+            updateNavLinks();
+
 
             if (tripID && location) {
                 localStorage.setItem("selectedTripId", tripID);
@@ -1035,6 +1059,8 @@
                     console.log("Updated tripDays to:", days); // Confirm days is set correctly
 
                     localStorage.setItem("location", location);
+                    updateNavLinks();
+
 
                     // Display trip name and location
                     document.getElementById("tripNameDisplay").textContent = tripData.name || "Your Trip";
@@ -1784,12 +1810,23 @@
 
         // Update background image when the dropdown value changes
         const dropdown = document.getElementById("tripDropdown");
-        dropdown.addEventListener("change", function () {
-            const selectedLocation = dropdown.value;
-            console.log("Dropdown changed to:", selectedLocation); // Debugging
-            if (selectedLocation) {
-                localStorage.setItem("location", selectedLocation); // Store new location in local storage
-                fetchCoverPhoto(selectedLocation); // Fetch and set the background image
+        dropdown.addEventListener("change", async function () { // Make it async
+            const selectedTripId = this.value;
+
+            if (selectedTripId) {
+                localStorage.setItem("selectedTripId", selectedTripId);
+                await loadTripData(selectedTripId);
+
+                // Get location from the selected trip's data to update background
+                const location = localStorage.getItem("location");
+                if (location) {
+                    fetchCoverPhoto(location);
+                }
+
+                // Update all navigation links
+                updateNavLinks();
+            } else {
+                clearDashboard();
             }
         });
 
