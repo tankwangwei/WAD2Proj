@@ -5,85 +5,279 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Itinerary Builder</title>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.7/index.global.min.js"></script>
     <script
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyANkqga9sPdT-FswrT7iznPiPhh18XywbA&libraries=places"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.7/index.global.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <style>
-        .container {
+        .navbar {
+            height: 100px;
+            padding: 10px 20px;
+            box-shadow: none;
+            z-index: 1000;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            background: transparent;
+        }
+
+        .navbar .nav-link {
+            color: white !important;
+            font-weight: bold;
+            font-size: 1.1rem;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .navbar .nav-link:hover {
+            color: #f0f0f0 !important;
+        }
+
+        .navbar .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background-color: white;
+            left: 0;
+            bottom: -5px;
+            transition: width 0.4s ease;
+        }
+
+        .navbar .nav-link:hover::after {
+            width: 100%;
+        }
+
+        #logo {
+            height: 80px;
+            max-height: 100%;
+            width: auto;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
             display: flex;
+            flex-direction: column;
         }
 
-        #calendar,
-        #placesList,
-        #savedActivities {
-            margin: 10px;
-            padding: 10px;
+        .full-row {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            margin-top: 80px; /* Ensure it appears below the fixed navbar */
+            z-index: 1; /* Keeps it above the rest of the content */
+        }
+
+
+        .container-fluid {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+        }
+
+        .column {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #ffffff;
+        }
+
+        #calendar {
+            margin-top: 20px;
+            height: auto;
+        }
+
+        .map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .place-item {
             border: 1px solid #ddd;
-        }
-
-        .date-container {
+            padding: 10px;
             margin-bottom: 10px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            background-color: #f9f9f9;
-        }
-
-        .activity-dropzone {
-            min-height: 50px;
-            background-color: #eaeaea;
-            padding: 5px;
-        }
-
-        .place-item,
-        .activity-item {
             cursor: grab;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .place-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin-right: 10px;
+            border-radius: 5px;
+        }
+
+        .place-item-content {
+            display: flex;
+            align-items: center;
+        }
+
+        .place-item-details {
+            flex: 1;
+        }
+
+        .place-item button {
+            margin-top: 5px;
+            width: 100%;
+        }
+
+        #savedActivities {
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        #savedActivities h5 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        #savedActivities .activity-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            background-color: #ffffff;
+            cursor: grab;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .activity-item button {
+            margin-left: 10px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
         }
     </style>
 </head>
 
 <body>
+    <nav class="navbar navbar-expand-md fixed-top bg-dark">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <!-- Logo -->
+            <a class="navbar-brand" href="dashboard.html">
+                <img src="./imgs/TripPal Transparent Logo.png" id="logo" style="height: 80px; width: auto;">
+            </a>
+
+            <!-- Toggler button for smaller screens -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Collapsible navbar content -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="alltrips.html">All Trips</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="itinerary.html">Itinerary Builder</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="attractions.html">Attractions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="budget.html">Budget</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="weather.html">Weather</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="currency.html">Currency</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <img src="./imgs/profile.svg" alt="Profile Icon"
+                                style="width: 30px; height: 30px; margin-right: 5px;">
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                            <li><a class="dropdown-item" href="index.html">Sign Out</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="full-row">
+        <h1>Itinerary Builder</h1>
+        <p>Start building your itinerary by selecting activities and arranging them into your desired schedule.</p>
+    </div>
+
     <div class="container-fluid">
-        <div class="row">
-            <!-- Saved Activities -->
-            <div class="col-md-3">
-                <div id="savedActivities">
-                    <h5>Saved Activities</h5>
-                    <!-- List of saved activities will go here -->
-                </div>
+        <!-- Saved Activities & Calendar -->
+
+        <div class="column">
+            <h5>Saved Activities</h5>
+            <div id="savedActivities" class="p-3 mb-3 bg-light">
+                <!-- Populated dynamically -->
+            </div>
+            <div id="calendar"></div>
+        </div>
+
+        <!-- Places List -->
+        <div class="column">
+            <div id="placesSearch" class="mb-3">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search for places..."
+                    oninput="searchPlaces()" />
             </div>
 
-            <!-- Calendar and Weather -->
-            <div class="col-md-6">
-                <div id="calendar">
-                    <h5>Itinerary Calendar</h5>
-                    <!-- Calendar with drag-and-drop for activities -->
-                </div>
+            <div id="placesList">
+                <!-- Populated dynamically -->
             </div>
 
-            <div class="col-md-6">
-                <div id="placesFilters">
-                    <button data-filter="all" class="filter-btn active">All</button>
-                    <button data-filter="site" class="filter-btn">Sites</button>
-                    <button data-filter="hotel" class="filter-btn">Hotels</button>
-                    <button data-filter="shop" class="filter-btn">Shops</button>
-                    <button data-filter="food" class="filter-btn">Food</button>
-                    <button data-filter="cafe" class="filter-btn">Cafe</button>
-                    <button data-filter="drink" class="filter-btn">Drinks</button>
-                </div>
-                <div id="placesList">
-                    <!-- List of places fetched from Google Places API will be displayed here -->
-                </div>
-            </div>
+            <div id="placeDetails" class="p-3 bg-light border rounded">
+                <!-- Place details will be populated here dynamically -->
+            </div>            
+        </div>
 
-            <!-- Map -->
-            <div class="col-md-3">
-                <div id="map" style="height: 400px;"></div>
-            </div>
+        <!-- Map -->
+        <div class="column">
+            <div id="map" class="map"></div>
         </div>
 
     </div>
 
     <script type="module" src="itinerary.js"></script>
+
+    <script>
+        // Script to ensure tripId and location are passed to navbar links
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tripId = urlParams.get("tripId");
+            const location = urlParams.get("location");
+
+            if (tripId && location) {
+                document.querySelectorAll(".nav-link").forEach(link => {
+                    const href = new URL(link.href);
+                    href.searchParams.set("tripId", tripId);
+                    href.searchParams.set("location", location);
+                    link.href = href.toString();
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
