@@ -795,8 +795,7 @@
             <div class="col-lg-4 col-md-4">
                 <div id="currency-section" class="rounded-section standard-height">
                     <h5 class="text-center">Currency Converter</h5>
-                    <div id="result" class="result">Please input amount and currency</div>
-                    <!-- Additional elements for the converter could be added here -->
+                    <div id="result" class="result"></div>
                 </div>
             </div>
         </div>
@@ -1468,6 +1467,7 @@
                         document.getElementById("totalBudgetDisplay").textContent = `${convertedTotalBudget.toFixed(2)} ${currencyCode}`;
                         document.getElementById("remainingBudgetDisplay").textContent = `${convertedRemainingBudget.toFixed(2)} ${currencyCode}`;
                         console.log(`1 EUR = ${rate.toFixed(2)} ${currencyCode}`);
+                        resultElem.innerText = `1 EUR = ${rate.toFixed(2)} ${currencyCode}`
                     } else {
                         console.error("Conversion rate not available.");
                     }
