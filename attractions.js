@@ -28,6 +28,82 @@ onAuthStateChanged(auth, (user) => {
     }
 });
 
+function clearExistingAlerts() {
+    const existingAlerts = document.querySelectorAll('.alert');
+    existingAlerts.forEach(alert => alert.remove());
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    let location = urlParams.get("location");
+
+    // If the location parameter is null, set it to an empty string
+    if (!location || location === "null" || location === null) {
+        location = "";
+    }
+
+    const locationInput = document.getElementById("location");
+    locationInput.value = decodeURIComponent(location);
+
+    // Verify trip ID
+    const tripID = getCurrentTripId();
+    checkTripID(tripID);
+
+    // Automatically search for attractions if location has a valid value
+    if (location.trim() !== "") {
+        setTimeout(() => {
+            searchAttractionsByText(location, displayAttractions);
+        }, 0);
+    }
+
+    // Add click handlers to all navbar links
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', clearExistingAlerts);
+    });
+
+    // For the itinerary builder specifically
+    const itineraryLink = document.getElementById("itineraryBuilderLink");
+    if (itineraryLink) {
+        itineraryLink.addEventListener("click", function(e) {
+            clearExistingAlerts();
+            const tripId = localStorage.getItem("selectedTripId");
+            const location = localStorage.getItem("location");
+
+            if (tripId && location) {
+                window.location.href = `itinerary.html?tripId=${tripId}&location=${encodeURIComponent(location)}`;
+            } else {
+                alert("Please select a trip first!");
+            }
+        });
+    }
+});
+
+function initializeTripId() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlTripId = urlParams.get('tripID');
+    const storedTripId = localStorage.getItem("selectedTripId");
+    
+    // Use URL tripID if available, otherwise use stored tripID
+    currentTripId = urlTripId || storedTripId;
+    
+    console.log('Initialized tripID:', currentTripId);
+    
+    if (!currentTripId) {
+        showTripAlert();
+        return false;
+    }
+    
+    // Set the location input field if available
+    const location = decodeURIComponent(urlParams.get('location') || localStorage.getItem("location") || "");
+    const locationInput = document.getElementById("location");
+    if (locationInput && location) {
+        locationInput.value = location;
+    }
+    
+    return true;
+}
+
 // Get tripID and location from the URL
 const urlParams = new URLSearchParams(window.location.search);
 const tripID = urlParams.get('tripID');
@@ -79,28 +155,18 @@ function checkTripID(tripID) {
     }
     return true;
 }
-
-// Automatically search for attractions on page load if location is defined
-document.addEventListener("DOMContentLoaded", () => {
+function getCurrentTripId() {
     const urlParams = new URLSearchParams(window.location.search);
-    let location = urlParams.get("location");
+    const urlTripId = urlParams.get('tripID');
+    const storedTripId = localStorage.getItem("selectedTripId");
+    
+    console.log('Trip ID from URL:', urlTripId);
+    console.log('Trip ID from localStorage:', storedTripId);
+    console.log('Using Trip ID:', urlTripId || storedTripId);
+    
+    return urlTripId || storedTripId;
+}
 
-    // If the location parameter is null, set it to an empty string
-    if (!location || location === "null" || location === null) {
-        location = "";
-    }
-
-    const locationInput = document.getElementById("location");
-    locationInput.value = decodeURIComponent(location);
-
-    // Automatically search for attractions if location has a valid value
-    if (location.trim() !== "") {
-        // Directly trigger the attraction search without button click
-        setTimeout(() => {
-            searchAttractionsByText(location, displayAttractions);
-        }, 0);
-    }
-});
 
 // Initialize autocomplete
 initAutocomplete("location", (selectedLocation) => {
@@ -130,6 +196,9 @@ function displayAttractions(attractions) {
         displayNoAttractionsMessage();
         return;
     }
+
+    const currentTripId = getCurrentTripId();
+    console.log('Current Trip ID in displayAttractions:', currentTripId); // Debug log
 
     attractions.forEach(attraction => {
         const attractionCard = document.createElement('div');
@@ -188,11 +257,15 @@ async function fetchAttractionSummary(attractionName, elementId) {
 
 async function saveActivity(tripID, name, address, lat, lng, imageUrl, iconElement) {
 
-    if (!tripID || tripID === "null" || tripID === "undefined") {
-        checkTripID(tripID);
+    const currentTripId = getCurrentTripId();
+    console.log('Trip ID passed to saveActivity:', tripID);
+    console.log('Current Trip ID from getCurrentTripId:', currentTripId);
+
+    if (!currentTripId || currentTripId === "null" || currentTripId === "undefined") {
+        checkTripID(currentTripId);
         return;
     }
-    
+
     try {
         // Check if activity already exists in Firestore
         const activitiesRef = collection(db, `users/${userId}/trips/${tripID}/activities`);
@@ -237,3 +310,14 @@ function showNotification(message, cardElement) {
 }
 
 window.saveActivity = saveActivity;
+
+document.getElementById("itineraryBuilderLink").addEventListener("click", function () {
+    const tripId = localStorage.getItem("selectedTripId");
+    const location = localStorage.getItem("location");
+
+    if (tripId && location) {
+        window.location.href = `itinerary.html?tripId=${tripId}&location=${encodeURIComponent(location)}`;
+    } else {
+        alert("Please select a trip first!");
+    }
+});
