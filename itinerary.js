@@ -25,8 +25,7 @@ let allPlaces = [];
 let currentSearchQuery = ""; // To store the current search query
 let currentSearchResults = []; // To store the current search results
 let userId, tripId, location;
-
-const WEATHER_API_KEY = "4e1a69304c74566a0ebcf18acbafbc18";
+let selectedMarker = null;
 
 // Get trip and location from URL or localStorage
 const urlParams = new URLSearchParams(window.location.search);
@@ -45,6 +44,8 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         userId = user.uid;
         localStorage.setItem("userId", userId);
+
+        populateTripDropdown();
         initItinerary();
     } else {
         window.location.href = "login.html";
@@ -53,46 +54,122 @@ onAuthStateChanged(auth, (user) => {
 
 // Initialise itinerary
 async function initItinerary() {
-    const tripSnapshot = await getDocs(collection(db, `users/${userId}/trips`));
-    const tripData = tripSnapshot.docs.find((doc) => doc.id === tripId)?.data();
+    try {
+        const tripSnapshot = await getDocs(collection(db, `users/${userId}/trips`));
+        const tripData = tripSnapshot.docs.find((doc) => doc.id === tripId)?.data();
 
-    if (!tripData) {
-        console.error("Trip not found.");
-        window.location.href = "dashboard.html";
-        return;
+        if (!tripData) {
+            console.error("Trip not found.");
+            window.location.href = "dashboard.html";
+            return;
+        }
+
+        const { name, location, latitude, longitude, dates } = tripData;
+
+        if (!latitude || !longitude) {
+            console.error("Latitude or Longitude is missing in tripData:", tripData);
+            return;
+        }
+
+        // Update the header with trip info
+        document.getElementById("trip-name").textContent = name;
+        document.getElementById("trip-location").textContent = location;
+
+        tripDates = dates;
+        const locationCoords = { lat: latitude, lng: longitude };
+
+        await fetchWeather(latitude, longitude);
+        initMap(locationCoords);
+        displayCalendar(dates);
+        loadPlaces(locationCoords);
+        loadSavedActivities();
+        loadItinerary();
+    } catch (error) {
+        console.error("Error initializing itinerary:", error);
     }
+}
 
-    const { latitude, longitude, dates } = tripData;
-    tripDates = dates;
-    const locationCoords = { lat: latitude, lng: longitude };
+async function populateTripDropdown() {
+    try {
+        const tripSelector = document.getElementById("tripSelector");
+        tripSelector.innerHTML = '<option value="" disabled selected>Select a Trip</option>';
 
-    await fetchWeather(locationCoords);
-    initMap(locationCoords);
-    displayCalendar(dates);
-    loadPlaces(locationCoords);
-    loadSavedActivities();
-    loadItinerary();
+        const tripSnapshot = await getDocs(collection(db, `users/${userId}/trips`));
+        tripSnapshot.forEach((doc) => {
+            const tripData = doc.data();
+            tripSelector.innerHTML += `<option value="${doc.id}">${tripData.name} (${tripData.location})</option>`;
+        });
+
+        // Add event listener for dropdown change
+        tripSelector.addEventListener("change", async (event) => {
+            tripId = event.target.value;
+            localStorage.setItem("tripId", tripId);
+
+            const tripDoc = await getDoc(doc(db, `users/${userId}/trips/${tripId}`));
+            const tripData = tripDoc.data();
+
+            document.getElementById("trip-name").textContent = tripData.name;
+            document.getElementById("trip-location").textContent = tripData.location;
+
+            // Update the dashboard link dynamically
+            const dashboardLink = document.querySelector('a[href*="dashboard.html"]');
+            if (dashboardLink) {
+                dashboardLink.href = `dashboard.html?tripId=${tripId}&location=${encodeURIComponent(tripData.location)}`;
+            }
+
+            // Reinitialize itinerary with the new trip
+            await initItinerary();
+        });
+    } catch (error) {
+        console.error("Error populating trip dropdown:", error);
+    }
 }
 
 // Fetch weather data
-async function fetchWeather(locationCoords) {
+async function fetchWeather(lat, lon) {
+    const weatherUrl = "https://api.openweathermap.org/data/3.0/onecall";
+    const apiKey = "4e1a69304c74566a0ebcf18acbafbc18";
+
+    if (!lat || !lon) {
+        console.error("Latitude or Longitude is missing. Cannot fetch weather data.");
+        return;
+    }
+
+    const params = {
+        lat: lat,
+        lon: lon,
+        appid: apiKey,
+        units: "metric",
+        exclude: "minutely,hourly"
+    };
+
     try {
-        const response = await fetch(
-            `https://api.openweathermap.org/data/2.5/onecall?lat=${locationCoords.lat}&lon=${locationCoords.lng}&exclude=minutely,hourly&units=metric&appid=${WEATHER_API_KEY}`
-        );
-        const data = await response.json();
+        console.log("Fetching weather data with params:", params);
+        const response = await axios.get(weatherUrl, { params });
+        const data = response.data;
+
+        console.log("Weather data fetched successfully:", data);
+
         weatherData = data.daily.reduce((acc, day) => {
             const date = new Date(day.dt * 1000).toISOString().split("T")[0];
             acc[date] = {
-                temp: day.temp.day,
-                weather: day.weather[0].description,
+                highTemp: day.temp.max.toFixed(1),
+                lowTemp: day.temp.min.toFixed(1),
+                icon: day.weather[0].icon,
+                description: day.weather[0].description,
             };
             return acc;
         }, {});
     } catch (error) {
-        console.error("Error fetching weather:", error);
+        console.error("Error fetching weather data:", error.message);
+        if (error.response) {
+            console.error("Response status:", error.response.status);
+            console.error("Response data:", error.response.data);
+        }
     }
 }
+
+
 
 // Initialise map
 function initMap(locationCoords) {
@@ -167,56 +244,47 @@ function loadPlaces(locationCoords) {
 // Display places in placeslist
 function displayPlaces(places) {
     const placesList = document.getElementById("placesList");
-    placesList.innerHTML = ""; // Clear the list
+    placesList.innerHTML = "";
 
     places.forEach((place) => {
         const photoUrl = place.photos
             ? place.photos[0].getUrl({ maxWidth: 100 })
             : "https://via.placeholder.com/100x100?text=No+Image";
 
-        // Wrapper for the card and button
-        const placeWrapper = document.createElement("div");
-        placeWrapper.classList.add("mb-3", "place-wrapper");
-
-        // Card for the place details
         const placeEl = document.createElement("div");
-        placeEl.classList.add("place-item", "card", "p-3");
+        placeEl.classList.add("place-wrapper", "mb-3");
 
-        // Add click event to navigate to place details
-        placeEl.addEventListener("click", () => {
+        // Card structure
+        placeEl.innerHTML = `
+            <div class="place-item">
+                <div class="row">
+                    <div class="col-3">
+                        <img src="${photoUrl}" alt="${place.name}" class="img-fluid">
+                    </div>
+                    <div class="col-9">
+                        <h5>${place.name}</h5>
+                        <p>${place.vicinity || "No address available"}</p>
+                        <p>Rating: ${place.rating || "N/A"} (${place.user_ratings_total || 0} reviews)</p>
+                    </div>
+                </div>
+            </div>
+            <button 
+                class="save-button btn btn-primary" 
+                onclick="savePlace('${place.place_id}', '${place.name}', event)"
+            >
+                Save
+            </button>
+        `;
+
+        // Event listener for navigating to Place Details (attached to the card, excluding the Save button)
+        placeEl.querySelector(".place-item").addEventListener("click", () => {
             displayPlaceDetails(place.place_id);
         });
 
-        placeEl.innerHTML = `
-            <div class="row">
-                <div class="col-3">
-                    <img src="${photoUrl}" alt="${place.name}" class="img-fluid rounded">
-                </div>
-                <div class="col-9">
-                    <h5>${place.name}</h5>
-                    <p>${place.vicinity || "No address available"}</p>
-                    <p>Rating: ${place.rating || "N/A"} (${place.user_ratings_total || 0} reviews)</p>
-                </div>
-            </div>
-        `;
-
-        // Create the Save button
-        const saveButton = document.createElement("button");
-        saveButton.classList.add("btn", "btn-primary", "save-button", "w-100");
-        saveButton.textContent = "Save";
-        saveButton.addEventListener("click", (e) => {
-            e.stopPropagation(); // Prevent triggering card's click event
-            savePlace(place.place_id, place.name); // Save the place
-        });
-
-        // Append the card and button to the wrapper
-        placeWrapper.appendChild(placeEl);
-        placeWrapper.appendChild(saveButton);
-
-        // Append the wrapper to the list
-        placesList.appendChild(placeWrapper);
+        placesList.appendChild(placeEl);
     });
 }
+
 
 
 
@@ -296,7 +364,7 @@ function displayPlaceDetails(placeId) {
 
 
 
-let selectedMarker = null;
+
 
 function highlightMarker(location) {
     if (selectedMarker) {
@@ -316,6 +384,27 @@ function highlightMarker(location) {
     }
 }
 
+async function fetchMissingPlace(placeId) {
+    console.log("Fetching place details for placeId:", placeId);
+
+    const service = new google.maps.places.PlacesService(map);
+
+    service.getDetails({ placeId }, (place, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+            console.log("Fetched missing place:", place);
+
+            // Only add the marker, no need to highlight it
+            addMarkers([place]);
+        } else if (status === google.maps.places.PlacesServiceStatus.INVALID_REQUEST) {
+            console.error(`Invalid 'placeId': ${placeId}. Skipping this activity.`);
+        } else {
+            console.error(`Error fetching place details for placeId ${placeId}:`, status);
+        }
+    });
+}
+
+
+// Function for adding markers directly based on activities remains unchanged
 function addMarkers(places) {
     clearMarkers();
 
@@ -326,39 +415,49 @@ function addMarkers(places) {
             const marker = new google.maps.Marker({
                 position: location,
                 map: map,
-                title: place.name,
+                title: place.place_id, // Use place ID as the marker title
             });
-            markers.push(marker);
+
+            markers.push(marker); // Add marker to the markers array
+            marker.addListener("click", () => {
+                if (selectedMarker) selectedMarker.setIcon(null);
+                marker.setIcon("http://maps.google.com/mapfiles/ms/icons/green-dot.png");
+                selectedMarker = marker;
+                map.setCenter(marker.getPosition());
+            });
         } else {
             console.warn(`Invalid marker position for place: ${place.name}`);
         }
     });
+
+    console.log("Markers added:", markers.map((m) => m.title)); // Log all marker titles (place IDs)
 }
-
-
 
 function clearMarkers() {
     markers.forEach((marker) => marker.setMap(null));
     markers = [];
-    selectedMarker = null; // Reset highlighted marker
+
+    // Reset selectedMarker safely
+    if (selectedMarker) {
+        selectedMarker.setMap(null);
+        selectedMarker = null;
+    }
 }
 
-function updateMapMarkers(places) {
-    // Clear existing markers
-    markers.forEach(marker => marker.setMap(null));
-    markers = [];
 
-    // Add new markers for the filtered places
-    places.forEach(place => {
+// Ensure markers persist across general map updates
+function updateMapMarkers(places) {
+    clearMarkers();
+
+    places.forEach((place) => {
         const marker = new google.maps.Marker({
             position: { lat: place.lat, lng: place.lng },
             map: map,
-            title: place.name
+            title: place.name,
         });
         markers.push(marker);
     });
 }
-
 
 async function loadSavedActivities() {
     const savedActivitiesContainer = document.getElementById("savedActivities");
@@ -370,7 +469,8 @@ async function loadSavedActivities() {
             const activity = doc.data();
             const activityId = doc.id;
 
-            // Only display activities not already in the calendar
+            console.log("Saved activity loaded:", { id: activityId, name: activity.name, placeId: activity.placeId });
+
             if (!isActivityInCalendar(activityId)) {
                 const activityEl = createActivityCard(activityId, activity.name, true, "savedActivities");
                 savedActivitiesContainer.appendChild(activityEl);
@@ -380,6 +480,38 @@ async function loadSavedActivities() {
         console.error("Error loading saved activities:", error);
     }
 }
+
+
+// async function loadSavedActivities() {
+//     const savedActivitiesContainer = document.getElementById("savedActivities");
+//     savedActivitiesContainer.innerHTML = "";
+
+//     try {
+//         const snapshot = await getDocs(collection(db, `users/${userId}/trips/${tripId}/activities`));
+//         snapshot.forEach((doc) => {
+//             const activity = doc.data();
+//             const activityId = doc.id;
+
+//             console.log("Saved activity loaded:", { id: activityId, name: activity.name });
+
+//             // // Check if the activity already has a marker
+//             // const markerExists = markers.some(marker => marker.title === activityId);
+
+//             // if (!markerExists) {
+//             //     console.warn(`Marker for activity ID ${activityId} not found. Fetching place details.`);
+//             //     fetchMissingPlace(activityId); // Fetch marker for missing place
+//             // }
+
+//             // Only display activities not already in the calendar
+//             if (!isActivityInCalendar(activityId)) {
+//                 const activityEl = createActivityCard(activityId, activity.name, true, "savedActivities");
+//                 savedActivitiesContainer.appendChild(activityEl);
+//             }
+//         });
+//     } catch (error) {
+//         console.error("Error loading saved activities:", error);
+//     }
+// }
 
 
 function createActivityCard(activityId, name, isRemovable = false, source = "savedActivities", date = null) {
@@ -398,8 +530,8 @@ function createActivityCard(activityId, name, isRemovable = false, source = "sav
     });
 
     // Include the Remove Button for both Saved Activities and Calendar
-    const removeHandler = source === "calendar" 
-        ? `removeActivityFromDate('${date}', '${activityId}')` 
+    const removeHandler = source === "calendar"
+        ? `removeActivityFromDate('${date}', '${activityId}')`
         : `removeActivity('${activityId}')`;
 
     activityEl.innerHTML = `
@@ -410,15 +542,49 @@ function createActivityCard(activityId, name, isRemovable = false, source = "sav
     return activityEl;
 }
 
+function savePlace(placeId, name, event) {
+    event.stopPropagation(); // Prevent click propagation
 
+    if (!placeId) {
+        console.error(`Cannot save place without placeId for ${name}`);
+        return;
+    }
 
-function savePlace(placeId, name) {
-    const activity = { id: placeId, name };
-    activities.push(activity);
-    addDoc(collection(db, `users/${userId}/trips/${tripId}/activities`), activity).then(() => {
-        loadSavedActivities();
-    });
+    const activity = { id: placeId, name, placeId };
+    addDoc(collection(db, `users/${userId}/trips/${tripId}/activities`), activity)
+        .then(() => {
+            console.log(`Place saved: ${name} with placeId: ${placeId}`);
+            loadSavedActivities(); // Refresh saved activities
+        })
+        .catch(error => console.error("Error saving place:", error));
 }
+
+
+async function updateActivitiesWithPlaceId() {
+    const activitiesRef = collection(db, `users/${userId}/trips/${tripId}/activities`);
+    const snapshot = await getDocs(activitiesRef);
+    const placesService = new google.maps.places.PlacesService(map);
+
+    for (const doc of snapshot.docs) {
+        const activity = doc.data();
+        if (!activity.placeId) {
+            console.warn(`Updating activity without placeId: ${activity.name}`);
+            const request = { query: activity.name, fields: ["place_id"] };
+
+            placesService.textSearch(request, async (results, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
+                    const placeId = results[0].place_id;
+                    console.log(`Found placeId for ${activity.name}: ${placeId}`);
+                    await updateDoc(doc.ref, { placeId });
+                } else {
+                    console.error(`Failed to fetch placeId for activity: ${activity.name}`);
+                }
+            });
+        }
+    }
+}
+
+
 
 async function removeActivity(activityId) {
     try {
@@ -435,14 +601,29 @@ async function removeActivity(activityId) {
 }
 
 
-function displayCalendar(dates) {
+// Event listener removed from calendar dates (for filtering markers)
+async function displayCalendar(dates) {
     const calendar = document.getElementById("calendar");
     calendar.innerHTML = "";
 
-    dates.forEach((date) => {
-        const weather = weatherData[date]
-            ? `${weatherData[date].temp}°C, ${weatherData[date].weather}`
-            : "No weather data";
+    for (const date of dates) {
+        const weatherDataForDate = weatherData[date]; // Use pre-fetched weather data
+
+        // Build weather display if data exists
+        const weatherDisplay = weatherDataForDate
+            ? `
+                <div class="weather-details">
+                    <img 
+                        src="http://openweathermap.org/img/wn/${weatherDataForDate.icon}@2x.png" 
+                        alt="${weatherDataForDate.description}" 
+                        class="weather-icon" 
+                    />
+                    <span class="high-low-temp">
+                        H: ${weatherDataForDate.highTemp}°C L: ${weatherDataForDate.lowTemp}°C
+                    </span>
+                </div>
+              `
+            : `<p>No weather data</p>`;
 
         const dateContainer = document.createElement("div");
         dateContainer.classList.add("card", "p-3", "mb-3");
@@ -454,17 +635,17 @@ function displayCalendar(dates) {
 
         dateContainer.innerHTML = `
             <h6>${new Date(date).toLocaleDateString()}</h6>
-            <p>${weather}</p>
+            ${weatherDisplay}
             <div class="activity-dropzone"></div>
         `;
-        // ondrop="drop(event)" ondragover="allowDrop(event)"
 
         calendar.appendChild(dateContainer);
-    });
+    }
 
     // Load itinerary data for each date
     loadItinerary();
 }
+
 
 // Fetch & display itinerary for specific dates
 async function loadItinerary() {
@@ -488,6 +669,13 @@ function populateDateActivities(date, activities) {
         const activityEl = createActivityCard(activity.id, activity.name, true, "calendar", date);
         dropzone.appendChild(activityEl);
     });
+
+    // Add click listener to filter markers and show route
+    // const dateCard = document.querySelector(`[data-date="${date}"]`);
+    // dateCard.addEventListener("click", () => {
+    //     console.log("Activities for date:", date, activities);
+    //     filterMarkersByDate(date, activities);
+    // });
 
     // Enable reordering within the date
     enableReorderingWithinDate(dropzone);
@@ -513,6 +701,32 @@ function enableReorderingWithinDate(dropzone) {
         },
     });
 }
+
+
+// Function fetchPlaceAndAddMarker is retained for missing markers
+async function fetchPlaceAndAddMarker(placeId, name) {
+    const service = new google.maps.places.PlacesService(map);
+
+    return new Promise((resolve, reject) => {
+        service.getDetails({ placeId }, (place, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                console.log(`Fetched details for place: ${place.name}`);
+                addMarkers([place]); // Add marker to the map
+                resolve(place);
+            } else {
+                console.error(`Error fetching place details for ${name || placeId}:`, status);
+                reject(`Error fetching place details: ${status}`);
+            }
+        });
+    });
+}
+
+
+
+let directionsService = new google.maps.DirectionsService();
+let directionsRenderer = new google.maps.DirectionsRenderer();
+
+
 
 
 async function updateActivitiesOrderForDate(date, activities) {
@@ -689,6 +903,73 @@ window.searchPlaces = searchPlaces;
 window.removeActivityFromDate = removeActivityFromDate;
 
 
+// function drawRoute(markers) {
+//     const waypoints = markers.slice(1, -1).map(marker => ({
+//         location: marker.getPosition(),
+//         stopover: true,
+//     }));
+
+//     const request = {
+//         origin: markers[0].getPosition(),
+//         destination: markers[markers.length - 1].getPosition(),
+//         waypoints: waypoints,
+//         travelMode: google.maps.TravelMode.DRIVING, // Change travel mode as needed
+//     };
+
+//     directionsService.route(request, (result, status) => {
+//         if (status === google.maps.DirectionsStatus.OK) {
+//             directionsRenderer.setDirections(result);
+//             directionsRenderer.setMap(map);
+//         } else {
+//             console.error("Directions request failed:", status);
+//         }
+//     });
+// }
+
+// function clearRoute() {
+//     directionsRenderer.setMap(null);
+// }
+
+// async function filterMarkersByDate(date, activities) {
+//     console.log(`Filtering markers for date: ${date} with activities:`, activities);
+
+//     markers.forEach(marker => marker.setMap(null)); // Clear all existing markers on the map
+
+//     const filteredMarkers = [];
+//     for (const [index, activity] of activities.entries()) {
+//         const { placeId, name, id } = activity;
+
+//         if (!placeId) {
+//             console.warn(`Missing placeId for activity:`, activity);
+//             continue; // Skip activities without a placeId
+//         }
+
+//         let marker = markers.find(marker => marker.title === placeId);
+
+//         if (!marker) {
+//             console.warn(`Marker not found for placeId: ${placeId}, fetching details for activity: ${name}`);
+//             try {
+//                 const place = await fetchPlaceAndAddMarker(placeId, name);
+//                 marker = markers.find(marker => marker.title === place.place_id);
+//             } catch (error) {
+//                 console.error(`Failed to fetch details for placeId: ${placeId}`, error);
+//                 continue;
+//             }
+//         }
+
+//         if (marker) {
+//             marker.setLabel((index + 1).toString()); // Order markers with labels
+//             marker.setMap(map);
+//             filteredMarkers.push(marker);
+//         }
+//     }
+
+//     if (filteredMarkers.length > 1) {
+//         drawRoute(filteredMarkers); // Connect the markers with a route
+//     } else {
+//         clearRoute(); // Clear route if fewer than two markers
+//     }
+// }
 
 // function applyFilters() {
 //     // Get all selected filter buttons
