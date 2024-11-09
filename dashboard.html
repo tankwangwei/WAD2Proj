@@ -43,9 +43,8 @@
             z-index: -1;
         }
 
-        .row.g-4 {
-            gap: 20px;
-            /* Add more space between cards */
+        .row {
+            margin-bottom: -15px;
         }
 
         .container-fluid {
@@ -87,8 +86,10 @@
         }
 
         .rounded-section {
-            padding: 10px;
-            /* Ensures the section takes full height of its container */
+            margin-bottom: 10px;
+            /* Reduce gap between each section */
+            padding: 15px;
+            /* Adjust padding to reduce vertical space */
             background-color: rgba(255, 255, 255, 0.8);
             border-radius: 12px;
             backdrop-filter: blur(5px);
@@ -852,24 +853,23 @@
         <div class="row d-flex align-items-stretch">
             <!-- Destination Section -->
             <div class="col-lg-5 col-md-5">
-                <div id="destination-section" class="rounded-section p-4 h-100">
+                <div id="destination-section" class="p-3 rounded-section standard-height">
                     <h5 class="text-center">Destination</h5>
                 </div>
             </div>
+
             <div class="col-lg-7 col-md-7">
-                <div class="activities-planned">
-                    <div class="rounded-section p-4 h-100">
-                        <div class="attractions-header">
-                            <h5 style="margin: 0">Top Attractions in <span id="attraction-location"></span></h5>
-                            <a href="#" class="see-all-link" onclick="navigateToAttractionsPage()">
-                                See all attractions <span>→</span>
-                            </a>
-                        </div>
-                        <div class="attractions-carousel-container mt-5">
-                            <button class="carousel-button carousel-button-left" onclick="goLeft()">&#8249;</button>
-                            <div id="attractionsContainer" class="d-flex" onclick="navigateToAttractionsPage()"></div>
-                            <button class="carousel-button carousel-button-right" onclick="goRight()">&#8250;</button>
-                        </div>
+                <div class="activities-planned p-3 rounded-section standard-height">
+                    <div class="attractions-header">
+                        <h5 style="margin: 0">Top Attractions in <span id="attraction-location"></span></h5>
+                        <a href="#" class="see-all-link" onclick="navigateToAttractionsPage()">
+                            See all attractions <span>→</span>
+                        </a>
+                    </div>
+                    <div class="attractions-carousel-container mt-5">
+                        <button class="carousel-button carousel-button-left" onclick="goLeft()">&#8249;</button>
+                        <div id="attractionsContainer" class="d-flex" onclick="navigateToAttractionsPage()"></div>
+                        <button class="carousel-button carousel-button-right" onclick="goRight()">&#8250;</button>
                     </div>
                 </div>
             </div>
@@ -1816,8 +1816,6 @@
                     }
                 });
             });
-
-
 
             document.getElementById("itineraryBuilderLink").addEventListener("click", function () {
                 const tripId = localStorage.getItem("selectedTripId");
