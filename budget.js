@@ -386,7 +386,7 @@ function enterEditMode(index) {
 
 // Modified expense form submission, add/update
 expenseForm.addEventListener('submit', async function (event) {
-    event.preventDefault();
+    event.preventDefault(); // Prevent form from submitting normally
 
     if (!currentTripId || !userUID) {
         alert('Please select a trip first');
@@ -448,9 +448,7 @@ expenseForm.addEventListener('submit', async function (event) {
             console.log('Expense saved with ID:', docRef.id);
         }
 
-        // Verify the expenses array after adding
-        console.log('Current expenses after save:', expenses);
-
+        // Reset form without page reload
         expenseForm.reset();
         isEditMode = false;
         currentEditIndex = null;
