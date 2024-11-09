@@ -402,52 +402,72 @@
             overflow: hidden;
             padding: 0;
             margin: 0;
+            width: 100%;
+        }
+
+        #attractionsContainer {
+            display: flex;
+            transition: transform 0.3s ease;
+            width: 100%;
+            gap: 20px;
+            padding: 0 10px;
+            /* Padding to add space around the carousel */
         }
 
         .attraction-card {
-            flex: 0 0 calc(40% - 7px);
-            /* Increased from 33.333% to 40% */
-            margin-right: 10px;
+            min-width: calc(33.33% - 10px);
+            /* Show 4 cards at once */
+            flex: 0 0 calc(33.33% - 10px);
+            /* Keep cards from growing/shrinking */
             border-radius: 16px;
             overflow: hidden;
             background: white;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
+            margin-right: 10px;
         }
 
-        #attractionsContainer {
-            display: flex;
-            gap: 20px;
-            /* Space between cards */
-            justify-content: space-around;
-            /* Distribute cards evenly */
-            padding: 0;
-            margin: 0;
+        .attraction-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .attraction-card-body {
+            padding: 15px;
         }
 
         .carousel-button {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background-color: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            border-radius: 50%;
+            z-index: 2;
             width: 40px;
             height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 1;
+            border: none;
+            transition: background 0.3s ease;
+        }
+
+        .carousel-button:hover {
+            background: rgba(0, 0, 0, 0.7);
+            /* Slightly darken on hover */
         }
 
         .carousel-button-left {
             left: 10px;
+            /* Adjust positioning */
         }
 
         .carousel-button-right {
             right: 10px;
+            /* Adjust positioning */
         }
 
         .small-chart {
@@ -519,7 +539,7 @@
             text-align: center;
         }
 
-        #currency-section .result{
+        #currency-section .result {
             font-size: 1.5rem;
             /* Increase font size to match larger chart */
             font-weight: bold;
@@ -592,6 +612,12 @@
             align-items: center;
             gap: 5px;
             /* Controls the spacing between the icon and text */
+        }
+
+        #weather-description {
+            font-size: 1rem;
+            color: #333;
+            margin: 0;
         }
 
         .col-md-6 p-4 {
@@ -823,1066 +849,988 @@
     </div>
 
     <div class="container-fluid p-3">
-        <div class="row g-4 d-flex align-items-stretch">
+        <div class="row d-flex align-items-stretch">
             <!-- Destination Section -->
-            <div class="col-12">
+            <div class="col-lg-5 col-md-5">
                 <div id="destination-section" class="rounded-section p-4 h-100">
                     <h5 class="text-center">Destination</h5>
                 </div>
             </div>
-        </div>
-    </div>
-
-
-    <div class="container-fluid p-3">
-        <div class="row g-4 d-flex align-items-stretch">
-            <div class="activities-planned">
-                <div class="rounded-section p-4 h-100">
-                    <div class="attractions-header">
-                        <h5 style="margin: 0">Top Attractions in <span id="attraction-location"></span></h5>
-                        <a href="#" class="see-all-link" onclick="navigateToAttractionsPage()">
-                            See all attractions <span>→</span>
-                        </a>
-                    </div>
-                    <div class="attractions-carousel-container mt-5">
-                        <button class="carousel-button carousel-button-left" onclick="goLeft()">&#8249;</button>
-                        <div id="attractionsContainer" class="d-flex" onclick="navigateToAttractionsPage()"></div>
-                        <button class="carousel-button carousel-button-right" onclick="goRight()">&#8250;</button>
+            <div class="col-lg-7 col-md-7">
+                <div class="activities-planned">
+                    <div class="rounded-section p-4 h-100">
+                        <div class="attractions-header">
+                            <h5 style="margin: 0">Top Attractions in <span id="attraction-location"></span></h5>
+                            <a href="#" class="see-all-link" onclick="navigateToAttractionsPage()">
+                                See all attractions <span>→</span>
+                            </a>
+                        </div>
+                        <div class="attractions-carousel-container mt-5">
+                            <button class="carousel-button carousel-button-left" onclick="goLeft()">&#8249;</button>
+                            <div id="attractionsContainer" class="d-flex" onclick="navigateToAttractionsPage()"></div>
+                            <button class="carousel-button carousel-button-right" onclick="goRight()">&#8250;</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal fade" id="budgetPromptModal" tabindex="-1" aria-labelledby="budgetPromptLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="budgetPromptLabel">Create a Budget</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    You have created a new trip! To get started, we recommend creating a budget to manage your
-                    expenses.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Later</button>
-                    <button type="button" class="btn btn-primary" onclick="redirectToBudgetPage()">Create
-                        Budget</button>
+        <div class="modal fade" id="budgetPromptModal" tabindex="-1" aria-labelledby="budgetPromptLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="budgetPromptLabel">Create a Budget</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        You have created a new trip! To get started, we recommend creating a budget to manage your
+                        expenses.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Later</button>
+                        <button type="button" class="btn btn-primary" onclick="redirectToBudgetPage()">Create
+                            Budget</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-        import {
-            getFirestore,
-            collection,
-            getDocs,
-            doc,
-            getDoc
-        } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+            import {
+                getFirestore,
+                collection,
+                getDocs,
+                doc,
+                getDoc
+            } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+            import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
-        // Global variables to hold budget information
-        let totalBudget = 0;
-        let totalSpending = 0;
-        let remainingBudget = 0;
-        let expenses = [];
+            // Global variables to hold budget information
+            let totalBudget = 0;
+            let totalSpending = 0;
+            let remainingBudget = 0;
+            let expenses = [];
 
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAb7M3MiQ3tGYMT1PCFRam-Z0S6rXqwVcQ",
-            authDomain: "wad2-32757.firebaseapp.com",
-            projectId: "wad2-32757",
-            storageBucket: "wad2-32757.appspot.com",
-            messagingSenderId: "191549341083",
-            appId: "1:191549341083:web:ad67ea6030d29c8700353e"
-        };
+            // Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyAb7M3MiQ3tGYMT1PCFRam-Z0S6rXqwVcQ",
+                authDomain: "wad2-32757.firebaseapp.com",
+                projectId: "wad2-32757",
+                storageBucket: "wad2-32757.appspot.com",
+                messagingSenderId: "191549341083",
+                appId: "1:191549341083:web:ad67ea6030d29c8700353e"
+            };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth();
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+            const auth = getAuth();
 
-        function updateNavLinks() {
-            const tripId = localStorage.getItem("selectedTripId");
-            const location = localStorage.getItem("location");
+            function updateNavLinks() {
+                const tripId = localStorage.getItem("selectedTripId");
+                const location = localStorage.getItem("location");
 
-            // Update attractions link
-            const attractionsLink = document.querySelector('a[href="attractions.html"]');
-            if (attractionsLink) {
-                attractionsLink.href = tripId ?
-                    `attractions.html?tripID=${tripId}&location=${encodeURIComponent(location)}` :
-                    'attractions.html';
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const params = new URLSearchParams(window.location.search);
-            const tripID = params.get("tripID");
-            const location = params.get("location");
-
-            updateNavLinks();
-
-
-            if (tripID && location) {
-                localStorage.setItem("selectedTripId", tripID);
-                localStorage.setItem("location", location);
+                // Update attractions link
+                const attractionsLink = document.querySelector('a[href="attractions.html"]');
+                if (attractionsLink) {
+                    attractionsLink.href = tripId ?
+                        `attractions.html?tripID=${tripId}&location=${encodeURIComponent(location)}` :
+                        'attractions.html';
+                }
             }
 
-            // if (location) {
-            //     // Save the location in localStorage for future use
-            //     localStorage.setItem("location", location);
-            // } else {
-            //     // If location parameter isn't in the URL, use the one from localStorage
-            //     location = localStorage.getItem("location");
-            // }
+            document.addEventListener("DOMContentLoaded", function () {
+                const params = new URLSearchParams(window.location.search);
+                const tripID = params.get("tripID");
+                const location = params.get("location");
 
-            if (location) {
-                console.log("Location:", location);
-                document.getElementById("weather-location").textContent = location;
-                document.getElementById("attraction-location").textContent = location;
-                fetchWeatherData(location);
-                fetchCurrencyByCountry(location)
-                    .then(currencyCode => {
-                        if (currencyCode) {
-                            // Fetch and display conversion rate for 1 EUR to the country's currency
-                            fetchConversionRate(currencyCode);
-                        } else {
-                            resultElem.innerText = "Currency not found for the specified country.";
-                        }
-                    })
-                    .catch(error => console.error("Error fetching currency for location:", error));
-            } else {
-                resultElem.innerText = "Location not specified.";
-            }
+                updateNavLinks();
 
-            const tripName = localStorage.getItem("tripName");
 
-            // Display the trip name in the designated HTML element
-            if (tripName) {
-                document.getElementById("tripNameDisplay").textContent = tripName;
-            } else {
-                document.getElementById("tripNameDisplay").textContent = "Your Trip";
-            }
+                if (tripID && location) {
+                    localStorage.setItem("selectedTripId", tripID);
+                    localStorage.setItem("location", location);
+                }
 
-            const selectedTripId = params.get("tripID") || localStorage.getItem("selectedTripId");
+                // if (location) {
+                //     // Save the location in localStorage for future use
+                //     localStorage.setItem("location", location);
+                // } else {
+                //     // If location parameter isn't in the URL, use the one from localStorage
+                //     location = localStorage.getItem("location");
+                // }
 
-            if (selectedTripId) {
-                const tripDropdown = document.getElementById("tripDropdown");
-                tripDropdown.value = selectedTripId;  // Set dropdown to the selected trip
+                if (location) {
+                    console.log("Location:", location);
+                    document.getElementById("weather-location").textContent = location;
+                    document.getElementById("attraction-location").textContent = location;
+                    fetchWeatherData(location);
+                    fetchCurrencyByCountry(location)
+                        .then(currencyCode => {
+                            if (currencyCode) {
+                                // Fetch and display conversion rate for 1 EUR to the country's currency
+                                fetchConversionRate(currencyCode);
+                            } else {
+                                resultElem.innerText = "Currency not found for the specified country.";
+                            }
+                        })
+                        .catch(error => console.error("Error fetching currency for location:", error));
+                } else {
+                    resultElem.innerText = "Location not specified.";
+                }
 
-                // Load and display the initial trip data if a trip is pre-selected
-                loadTripData(selectedTripId);
-            }
+                const tripName = localStorage.getItem("tripName");
 
-            // Event listener for dropdown change to update the dashboard data
-            document.getElementById('tripDropdown').addEventListener("change", async function (event) {
-                const selectedTripId = this.value;
+                // Display the trip name in the designated HTML element
+                if (tripName) {
+                    document.getElementById("tripNameDisplay").textContent = tripName;
+                } else {
+                    document.getElementById("tripNameDisplay").textContent = "Your Trip";
+                }
+
+                const selectedTripId = params.get("tripID") || localStorage.getItem("selectedTripId");
+
                 if (selectedTripId) {
+                    const tripDropdown = document.getElementById("tripDropdown");
+                    tripDropdown.value = selectedTripId;  // Set dropdown to the selected trip
+
+                    // Load and display the initial trip data if a trip is pre-selected
                     loadTripData(selectedTripId);
+                }
+
+                // Event listener for dropdown change to update the dashboard data
+                document.getElementById('tripDropdown').addEventListener("change", async function (event) {
+                    const selectedTripId = this.value;
+                    if (selectedTripId) {
+                        loadTripData(selectedTripId);
+                    } else {
+                        clearDashboard();
+                    }
+                });
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userUID = user.uid;
+                        loadTrips(); // Load trips to populate the dropdown
+                        initializeChart();
+
+                        document.getElementById('tripDropdown').addEventListener('change', async function (event) {
+                            const selectedTripId = event.target.value;
+
+                            if (selectedTripId) {
+                                currentTripId = selectedTripId;
+
+                                // Load and display trip data in the dashboard
+                                await loadTripData(selectedTripId);
+                                updateDashboard();
+                            } else {
+                                // Clear dashboard if no trip is selected
+                                clearDashboard();
+                            }
+                        });
+                    } else {
+                        window.location.href = "login.html";
+                    }
+                });
+
+                console.log("Checking for showBudgetModal flag:", localStorage.getItem("showBudgetModal"));
+                if (localStorage.getItem("showBudgetModal") === "true") {
+                    const budgetModal = new bootstrap.Modal(document.getElementById("budgetPromptModal"));
+                    budgetModal.show();
+                    localStorage.removeItem("showBudgetModal"); // Clear the flag after showing the modal
+                }
+            });
+
+            async function loadTrips() {
+                const tripSelect = document.getElementById('tripDropdown');
+                tripSelect.innerHTML = '<option value="">Select a trip</option>';
+
+                try {
+                    if (!auth.currentUser) return;
+                    const userUID = auth.currentUser.uid;
+                    const tripsRef = collection(db, `users/${userUID}/trips`);
+                    const querySnapshot = await getDocs(tripsRef);
+
+                    querySnapshot.forEach((doc) => {
+                        const tripData = doc.data();
+                        const option = document.createElement('option');
+                        option.value = doc.id;
+                        option.textContent = tripData.name || 'Unnamed Trip';
+                        tripSelect.appendChild(option);
+                    });
+
+                    // Set dropdown to pre-selected trip from previous page, if available
+                    const selectedTripId = localStorage.getItem("selectedTripId");
+                    if (selectedTripId) {
+                        tripSelect.value = selectedTripId;
+                        await loadTripData(selectedTripId); // Load initial data
+                    }
+                } catch (error) {
+                    console.error("Error loading trips:", error);
+                }
+            }
+
+            // Function to update trip display when a trip is selected
+            async function loadTripData(tripId) {
+                try {
+                    const tripRef = doc(db, `users/${auth.currentUser.uid}/trips`, tripId);
+                    const tripDoc = await getDoc(tripRef);
+
+                    if (tripDoc.exists()) {
+                        const tripData = tripDoc.data();
+                        console.log("Trip data retrieved:", tripData); // Log for verification
+
+                        const location = tripData.location;
+                        const days = tripData.dates ? tripData.dates.length : 7; // Use dates array length as tripDays
+                        const dates = tripData.dates || [];
+                        const dateRange = dates.length > 0 ? `${dates[0]} to ${dates[dates.length - 1]}` : "Date range not available";
+
+                        // Store the calculated days in localStorage
+                        localStorage.setItem("tripDays", days);
+                        console.log("Updated tripDays to:", days); // Confirm days is set correctly
+
+                        localStorage.setItem("location", location);
+                        updateNavLinks();
+
+
+                        // Display trip name and location
+                        document.getElementById("tripNameDisplay").textContent = tripData.name || "Your Trip";
+                        document.getElementById("tripCountryDisplay").textContent = `${location}`;
+                        document.getElementById("tripDateRangeDisplay").textContent = `${dateRange}`;
+                        document.getElementById("weather-location").textContent = location;
+                        document.getElementById("attraction-location").textContent = location;
+
+                        // Update the pie chart with the expense data
+                        updatePieChart(await calculateCategoryTotals(tripId)); // Fetch category totals for pie chart
+
+                        // Fetch and display updated weather, attractions, and currency based on location
+                        fetchWeatherData(location);
+                        fetchAttractionsForLocation(location);
+                        fetchCurrencyForLocation(location);
+                        const expensesRef = collection(db, `users/${auth.currentUser.uid}/trips/${tripId}/expenses`);
+                        const querySnapshot = await getDocs(expensesRef);
+                        const currencyCode = await fetchCurrencyByCountry(location);
+
+                        const categoryData = {};
+                        querySnapshot.forEach((doc) => {
+                            const expense = doc.data();
+                            const category = expense.category || 'Miscellaneous';
+                            const amount = parseFloat(expense.amount) || 0;
+                            categoryData[category] = (categoryData[category] || 0) + amount;
+                        });
+
+                        totalBudget = tripData.budget || 0;
+
+                        // Update the displayed budget information
+                        document.getElementById("totalBudgetDisplay").textContent = `$${totalBudget.toFixed(2)}`;
+                        expenses = [];
+                        querySnapshot.forEach((doc) => {
+                            const expense = doc.data();
+                            expenses.push(expense);
+                        });
+
+                        totalSpending = await calculateTotalSpending(tripId); // Function to fetch and sum expenses for the trip
+                        remainingBudget = totalBudget - totalSpending;
+
+                        document.getElementById("remainingBudgetDisplay").textContent = `$${remainingBudget.toFixed(2)}`;
+
+                        if (totalBudget > 0) {
+                            document.getElementById("totalBudgetDisplay").textContent = `$${totalBudget.toFixed(2)}`;
+
+                            totalSpending = await calculateTotalSpending(tripId);
+                            remainingBudget = totalBudget - totalSpending;
+
+                            document.getElementById("remainingBudgetDisplay").textContent = `$${remainingBudget.toFixed(2)}`;
+                            document.getElementById("budgetContainer").style.display = "block";
+                        } else {
+                            document.getElementById("budgetContainer").style.display = "none";
+                        }
+
+                        if (currencyCode) {
+                            totalBudget = tripData.budget || 0;
+                            totalSpending = await calculateTotalSpending(tripId);
+                            remainingBudget = totalBudget - totalSpending;
+
+                            // Update total and remaining budget with currency
+                            document.getElementById("totalBudgetDisplay").textContent = `${totalBudget.toFixed(2)} ${currencyCode}`;
+                            document.getElementById("remainingBudgetDisplay").textContent = `${remainingBudget.toFixed(2)} ${currencyCode}`;
+                        } else {
+                            console.error("Currency not found for the specified country.");
+                        }
+
+                        updatePieChart(categoryData);
+                    }
+                } catch (error) {
+                    console.error("Error loading trip data:", error);
+                }
+            }
+
+            // Calculate total spending per category for the current trip
+            function calculateCategoryTotals() {
+                const categoryData = {};
+
+                expenses.forEach(expense => {
+                    const category = expense.category || 'Miscellaneous';
+                    const amount = parseFloat(expense.amount) || 0;
+                    categoryData[category] = (categoryData[category] || 0) + amount;
+                });
+
+                return categoryData;
+            }
+
+            // Calculate total spending for the selected trip
+            async function calculateTotalSpending(tripId) {
+                const expensesRef = collection(db, `users/${auth.currentUser.uid}/trips/${tripId}/expenses`);
+                const querySnapshot = await getDocs(expensesRef);
+                let total = 0;
+
+                querySnapshot.forEach((doc) => {
+                    const expense = doc.data();
+                    total += parseFloat(expense.amount) || 0;
+                });
+
+                return total;
+            }
+
+            function updatePieChart(categoryData) {
+                const chartContainer = document.querySelector(".chart-container");
+                const canvas = document.getElementById('budgetPieChart');
+
+                if (Object.keys(categoryData).length === 0) {
+                    // If no budget data, display a message
+                    canvas.style.display = "none";
+
+                    // Create a message element if it doesn't already exist
+                    let noDataMessage = document.getElementById('noDataMessage');
+                    if (!noDataMessage) {
+                        noDataMessage = document.createElement("p");
+                        noDataMessage.id = "noDataMessage";
+                        noDataMessage.className = "text-center";
+                        noDataMessage.textContent = "A budget has not been planned for this trip";
+                        chartContainer.appendChild(noDataMessage);
+                    }
+                } else {
+                    // Remove no data message if it exists
+                    const noDataMessage = document.getElementById('noDataMessage');
+                    if (noDataMessage) {
+                        chartContainer.removeChild(noDataMessage);
+                    }
+
+                    // Display the chart and update it with data
+                    canvas.style.display = "block";
+
+                    if (!budgetPieChart) {
+                        initializePieChart();
+                    }
+
+                    const labels = Object.keys(categoryData);
+                    const data = Object.values(categoryData);
+
+                    budgetPieChart.data.labels = labels;
+                    budgetPieChart.data.datasets[0].data = data;
+                    budgetPieChart.update();
+                }
+            }
+
+            // Auth state change listener
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    console.log("User is signed in:", user.uid);
+                    loadTrips(); // Load trips for the authenticated user
+                } else {
+                    console.warn("No user signed in, redirecting to login.");
+                    window.location.href = "login.html"; // Redirect if not logged in
+                }
+            });
+
+            // Event listener for trip dropdown change
+            document.getElementById('tripDropdown').addEventListener('change', async (event) => {
+                const selectedTripId = event.target.value;
+
+                if (selectedTripId) {
+                    localStorage.setItem("selectedTripId", selectedTripId); // Update localStorage with the new tripId
+                    await loadTripData(selectedTripId); // Load selected trip data
                 } else {
                     clearDashboard();
                 }
             });
 
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    userUID = user.uid;
-                    loadTrips(); // Load trips to populate the dropdown
-                    initializeChart();
+            let budgetPieChart;
 
-                    document.getElementById('tripDropdown').addEventListener('change', async function (event) {
-                        const selectedTripId = event.target.value;
-
-                        if (selectedTripId) {
-                            currentTripId = selectedTripId;
-
-                            // Load and display trip data in the dashboard
-                            await loadTripData(selectedTripId);
-                            updateDashboard();
-                        } else {
-                            // Clear dashboard if no trip is selected
-                            clearDashboard();
-                        }
-                    });
-                } else {
-                    window.location.href = "login.html";
-                }
-            });
-
-            console.log("Checking for showBudgetModal flag:", localStorage.getItem("showBudgetModal"));
-            if (localStorage.getItem("showBudgetModal") === "true") {
-                const budgetModal = new bootstrap.Modal(document.getElementById("budgetPromptModal"));
-                budgetModal.show();
-                localStorage.removeItem("showBudgetModal"); // Clear the flag after showing the modal
-            }
-        });
-
-        async function loadTrips() {
-            const tripSelect = document.getElementById('tripDropdown');
-            tripSelect.innerHTML = '<option value="">Select a trip</option>';
-
-            try {
-                if (!auth.currentUser) return;
-                const userUID = auth.currentUser.uid;
-                const tripsRef = collection(db, `users/${userUID}/trips`);
-                const querySnapshot = await getDocs(tripsRef);
-
-                querySnapshot.forEach((doc) => {
-                    const tripData = doc.data();
-                    const option = document.createElement('option');
-                    option.value = doc.id;
-                    option.textContent = tripData.name || 'Unnamed Trip';
-                    tripSelect.appendChild(option);
-                });
-
-                // Set dropdown to pre-selected trip from previous page, if available
-                const selectedTripId = localStorage.getItem("selectedTripId");
-                if (selectedTripId) {
-                    tripSelect.value = selectedTripId;
-                    await loadTripData(selectedTripId); // Load initial data
-                }
-            } catch (error) {
-                console.error("Error loading trips:", error);
-            }
-        }
-
-        // Function to update trip display when a trip is selected
-        async function loadTripData(tripId) {
-            try {
-                const tripRef = doc(db, `users/${auth.currentUser.uid}/trips`, tripId);
-                const tripDoc = await getDoc(tripRef);
-
-                if (tripDoc.exists()) {
-                    const tripData = tripDoc.data();
-                    console.log("Trip data retrieved:", tripData); // Log for verification
-
-                    const location = tripData.location;
-                    const days = tripData.dates ? tripData.dates.length : 7; // Use dates array length as tripDays
-                    const dates = tripData.dates || [];
-                    const dateRange = dates.length > 0 ? `${dates[0]} to ${dates[dates.length - 1]}` : "Date range not available";
-
-                    // Store the calculated days in localStorage
-                    localStorage.setItem("tripDays", days);
-                    console.log("Updated tripDays to:", days); // Confirm days is set correctly
-
-                    localStorage.setItem("location", location);
-                    updateNavLinks();
-
-
-                    // Display trip name and location
-                    document.getElementById("tripNameDisplay").textContent = tripData.name || "Your Trip";
-                    document.getElementById("tripCountryDisplay").textContent = `${location}`;
-                    document.getElementById("tripDateRangeDisplay").textContent = `${dateRange}`;
-                    document.getElementById("weather-location").textContent = location;
-                    document.getElementById("attraction-location").textContent = location;
-
-                    // Update the pie chart with the expense data
-                    updatePieChart(await calculateCategoryTotals(tripId)); // Fetch category totals for pie chart
-
-                    // Fetch and display updated weather, attractions, and currency based on location
-                    fetchWeatherData(location);
-                    fetchAttractionsForLocation(location);
-                    fetchCurrencyForLocation(location);
-                    const expensesRef = collection(db, `users/${auth.currentUser.uid}/trips/${tripId}/expenses`);
-                    const querySnapshot = await getDocs(expensesRef);
-                    const currencyCode = await fetchCurrencyByCountry(location);
-
-                    const categoryData = {};
-                    querySnapshot.forEach((doc) => {
-                        const expense = doc.data();
-                        const category = expense.category || 'Miscellaneous';
-                        const amount = parseFloat(expense.amount) || 0;
-                        categoryData[category] = (categoryData[category] || 0) + amount;
-                    });
-
-                    totalBudget = tripData.budget || 0;
-
-                    // Update the displayed budget information
-                    document.getElementById("totalBudgetDisplay").textContent = `$${totalBudget.toFixed(2)}`;
-                    expenses = [];
-                    querySnapshot.forEach((doc) => {
-                        const expense = doc.data();
-                        expenses.push(expense);
-                    });
-
-                    totalSpending = await calculateTotalSpending(tripId); // Function to fetch and sum expenses for the trip
-                    remainingBudget = totalBudget - totalSpending;
-
-                    document.getElementById("remainingBudgetDisplay").textContent = `$${remainingBudget.toFixed(2)}`;
-
-                    if (totalBudget > 0) {
-                        document.getElementById("totalBudgetDisplay").textContent = `$${totalBudget.toFixed(2)}`;
-
-                        totalSpending = await calculateTotalSpending(tripId);
-                        remainingBudget = totalBudget - totalSpending;
-
-                        document.getElementById("remainingBudgetDisplay").textContent = `$${remainingBudget.toFixed(2)}`;
-                        document.getElementById("budgetContainer").style.display = "block";
-                    } else {
-                        document.getElementById("budgetContainer").style.display = "none";
-                    }
-
-                    if (currencyCode) {
-                        totalBudget = tripData.budget || 0;
-                        totalSpending = await calculateTotalSpending(tripId);
-                        remainingBudget = totalBudget - totalSpending;
-
-                        // Update total and remaining budget with currency
-                        document.getElementById("totalBudgetDisplay").textContent = `${totalBudget.toFixed(2)} ${currencyCode}`;
-                        document.getElementById("remainingBudgetDisplay").textContent = `${remainingBudget.toFixed(2)} ${currencyCode}`;
-                    } else {
-                        console.error("Currency not found for the specified country.");
-                    }
-
-                    updatePieChart(categoryData);
-                }
-            } catch (error) {
-                console.error("Error loading trip data:", error);
-            }
-        }
-
-        // Calculate total spending per category for the current trip
-        function calculateCategoryTotals() {
-            const categoryData = {};
-
-            expenses.forEach(expense => {
-                const category = expense.category || 'Miscellaneous';
-                const amount = parseFloat(expense.amount) || 0;
-                categoryData[category] = (categoryData[category] || 0) + amount;
-            });
-
-            return categoryData;
-        }
-
-        // Calculate total spending for the selected trip
-        async function calculateTotalSpending(tripId) {
-            const expensesRef = collection(db, `users/${auth.currentUser.uid}/trips/${tripId}/expenses`);
-            const querySnapshot = await getDocs(expensesRef);
-            let total = 0;
-
-            querySnapshot.forEach((doc) => {
-                const expense = doc.data();
-                total += parseFloat(expense.amount) || 0;
-            });
-
-            return total;
-        }
-
-        function updatePieChart(categoryData) {
-            const chartContainer = document.querySelector(".chart-container");
-            const canvas = document.getElementById('budgetPieChart');
-
-            if (Object.keys(categoryData).length === 0) {
-                // If no budget data, display a message
-                canvas.style.display = "none";
-
-                // Create a message element if it doesn't already exist
-                let noDataMessage = document.getElementById('noDataMessage');
-                if (!noDataMessage) {
-                    noDataMessage = document.createElement("p");
-                    noDataMessage.id = "noDataMessage";
-                    noDataMessage.className = "text-center";
-                    noDataMessage.textContent = "A budget has not been planned for this trip";
-                    chartContainer.appendChild(noDataMessage);
-                }
-            } else {
-                // Remove no data message if it exists
-                const noDataMessage = document.getElementById('noDataMessage');
-                if (noDataMessage) {
-                    chartContainer.removeChild(noDataMessage);
-                }
-
-                // Display the chart and update it with data
-                canvas.style.display = "block";
-
-                if (!budgetPieChart) {
-                    initializePieChart();
-                }
-
-                const labels = Object.keys(categoryData);
-                const data = Object.values(categoryData);
-
-                budgetPieChart.data.labels = labels;
-                budgetPieChart.data.datasets[0].data = data;
-                budgetPieChart.update();
-            }
-        }
-
-        // Auth state change listener
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                console.log("User is signed in:", user.uid);
-                loadTrips(); // Load trips for the authenticated user
-            } else {
-                console.warn("No user signed in, redirecting to login.");
-                window.location.href = "login.html"; // Redirect if not logged in
-            }
-        });
-
-        // Event listener for trip dropdown change
-        document.getElementById('tripDropdown').addEventListener('change', async (event) => {
-            const selectedTripId = event.target.value;
-
-            if (selectedTripId) {
-                localStorage.setItem("selectedTripId", selectedTripId); // Update localStorage with the new tripId
-                await loadTripData(selectedTripId); // Load selected trip data
-            } else {
-                clearDashboard();
-            }
-        });
-
-        let budgetPieChart;
-
-        function initializePieChart() {
-            const ctx = document.getElementById('budgetPieChart').getContext('2d');
-            budgetPieChart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        data: [],
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
-                        borderColor: 'white',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                font: {
-                                    size: 14
-                                },
-                                padding: 20
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = context.dataset.data.reduce((acc, cur) => acc + cur, 0);
-                                    const percentage = ((value / total) * 100).toFixed(2);
-                                    return `${label}: ${value} (${percentage}%)`;
+            function initializePieChart() {
+                const ctx = document.getElementById('budgetPieChart').getContext('2d');
+                budgetPieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            data: [],
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
+                            borderColor: 'white',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    font: {
+                                        size: 14
+                                    },
+                                    padding: 20
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((acc, cur) => acc + cur, 0);
+                                        const percentage = ((value / total) * 100).toFixed(2);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            });
-        }
-
-        const resultElem = document.getElementById("result");
-
-        function fetchCurrencyByCountry(location) {
-            // Extract the country name if location includes a city (e.g., "Bali, Indonesia")
-            const locationParts = location.split(",").map(part => part.trim());
-            const country = locationParts[locationParts.length - 1];
-
-            // Map of countries to their currency codes
-            const countryToCurrencyMap = {
-                "Afghanistan": "AFN",
-                "Albania": "ALL",
-                "Algeria": "DZD",
-                "Andorra": "EUR",
-                "Angola": "AOA",
-                "Argentina": "ARS",
-                "Armenia": "AMD",
-                "Australia": "AUD",
-                "Austria": "EUR",
-                "Azerbaijan": "AZN",
-                "Bahamas": "BSD",
-                "Bahrain": "BHD",
-                "Bangladesh": "BDT",
-                "Barbados": "BBD",
-                "Belarus": "BYN",
-                "Belgium": "EUR",
-                "Belize": "BZD",
-                "Benin": "XOF",
-                "Bhutan": "BTN",
-                "Bolivia": "BOB",
-                "Bosnia and Herzegovina": "BAM",
-                "Botswana": "BWP",
-                "Brazil": "BRL",
-                "Brunei": "BND",
-                "Bulgaria": "BGN",
-                "Burkina Faso": "XOF",
-                "Burundi": "BIF",
-                "Cabo Verde": "CVE",
-                "Cambodia": "KHR",
-                "Cameroon": "XAF",
-                "Canada": "CAD",
-                "Central African Republic": "XAF",
-                "Chad": "XAF",
-                "Chile": "CLP",
-                "China": "CNY",
-                "Colombia": "COP",
-                "Comoros": "KMF",
-                "Congo (Congo-Brazzaville)": "CDF",
-                "Costa Rica": "CRC",
-                "Croatia": "HRK",
-                "Cuba": "CUP",
-                "Cyprus": "EUR",
-                "Czechia (Czech Republic)": "CZK",
-                "Denmark": "DKK",
-                "Djibouti": "DJF",
-                "Dominica": "XCD",
-                "Dominican Republic": "DOP",
-                "Ecuador": "USD",
-                "Egypt": "EGP",
-                "El Salvador": "USD",
-                "Equatorial Guinea": "XAF",
-                "Eritrea": "ERN",
-                "Estonia": "EUR",
-                "Ethiopia": "ETB",
-                "Fiji": "FJD",
-                "Finland": "EUR",
-                "France": "EUR",
-                "Gabon": "XAF",
-                "Gambia": "GMD",
-                "Georgia": "GEL",
-                "Germany": "EUR",
-                "Ghana": "GHS",
-                "Greece": "EUR",
-                "Grenada": "XCD",
-                "Guatemala": "GTQ",
-                "Guinea": "GNF",
-                "Guinea-Bissau": "XOF",
-                "Guyana": "GYD",
-                "Haiti": "HTG",
-                "Honduras": "HNL",
-                "Hungary": "HUF",
-                "Iceland": "ISK",
-                "India": "INR",
-                "Indonesia": "IDR",
-                "Iran": "IRR",
-                "Iraq": "IQD",
-                "Ireland": "EUR",
-                "Israel": "ILS",
-                "Italy": "EUR",
-                "Jamaica": "JMD",
-                "Japan": "JPY",
-                "Jordan": "JOD",
-                "Kazakhstan": "KZT",
-                "Kenya": "KES",
-                "Kiribati": "AUD",
-                "Kuwait": "KWD",
-                "Kyrgyzstan": "KGS",
-                "Laos": "LAK",
-                "Latvia": "EUR",
-                "Lebanon": "LBP",
-                "Lesotho": "LSL",
-                "Liberia": "LRD",
-                "Libya": "LYD",
-                "Liechtenstein": "CHF",
-                "Lithuania": "EUR",
-                "Luxembourg": "EUR",
-                "Madagascar": "MGA",
-                "Malawi": "MWK",
-                "Malaysia": "MYR",
-                "Maldives": "MVR",
-                "Mali": "XOF",
-                "Malta": "EUR",
-                "Marshall Islands": "USD",
-                "Mauritania": "MRU",
-                "Mauritius": "MUR",
-                "Mexico": "MXN",
-                "Moldova": "MDL",
-                "Monaco": "EUR",
-                "Mongolia": "MNT",
-                "Montenegro": "EUR",
-                "Morocco": "MAD",
-                "Mozambique": "MZN",
-                "Myanmar (formerly Burma)": "MMK",
-                "Namibia": "NAD",
-                "Nauru": "AUD",
-                "Nepal": "NPR",
-                "Netherlands": "EUR",
-                "New Zealand": "NZD",
-                "Nicaragua": "NIO",
-                "Niger": "XOF",
-                "Nigeria": "NGN",
-                "North Macedonia": "MKD",
-                "Norway": "NOK",
-                "Oman": "OMR",
-                "Pakistan": "PKR",
-                "Palau": "USD",
-                "Panama": "PAB",
-                "Papua New Guinea": "PGK",
-                "Paraguay": "PYG",
-                "Peru": "PEN",
-                "Philippines": "PHP",
-                "Poland": "PLN",
-                "Portugal": "EUR",
-                "Qatar": "QAR",
-                "Romania": "RON",
-                "Russia": "RUB",
-                "Rwanda": "RWF",
-                "Saint Kitts and Nevis": "XCD",
-                "Saint Lucia": "XCD",
-                "Saint Vincent and the Grenadines": "XCD",
-                "Samoa": "WST",
-                "San Marino": "EUR",
-                "Sao Tome and Principe": "STN",
-                "Saudi Arabia": "SAR",
-                "Senegal": "XOF",
-                "Serbia": "RSD",
-                "Seychelles": "SCR",
-                "Sierra Leone": "SLL",
-                "Singapore": "SGD",
-                "Slovakia": "EUR",
-                "Slovenia": "EUR",
-                "Solomon Islands": "SBD",
-                "Somalia": "SOS",
-                "South Africa": "ZAR",
-                "South Korea": "KRW",
-                "South Sudan": "SSP",
-                "Spain": "EUR",
-                "Sri Lanka": "LKR",
-                "Sudan": "SDG",
-                "Suriname": "SRD",
-                "Sweden": "SEK",
-                "Switzerland": "CHF",
-                "Syria": "SYP",
-                "Taiwan": "TWD",
-                "Tajikistan": "TJS",
-                "Tanzania": "TZS",
-                "Thailand": "THB",
-                "Timor-Leste": "USD",
-                "Togo": "XOF",
-                "Tonga": "TOP",
-                "Trinidad and Tobago": "TTD",
-                "Tunisia": "TND",
-                "Turkey": "TRY",
-                "Turkmenistan": "TMT",
-                "Tuvalu": "AUD",
-                "Uganda": "UGX",
-                "Ukraine": "UAH",
-                "United Arab Emirates": "AED",
-                "United Kingdom": "GBP",
-                "United States": "USD",
-                "Uruguay": "UYU",
-                "Uzbekistan": "UZS",
-                "Vanuatu": "VUV",
-                "Vatican City": "EUR",
-                "Venezuela": "VES",
-                "Vietnam": "VND",
-                "Yemen": "YER",
-                "Zambia": "ZMW",
-                "Zimbabwe": "ZWL"
-            };
-
-            // Return the currency code for the extracted country, or null if not found
-            return Promise.resolve(countryToCurrencyMap[country] || null);
-        }
-
-
-        function fetchConversionRate(currencyCode) {
-            const url = "http://data.fixer.io/api/latest";
-            const apiKey = ""; // Make sure your API key is correct
-
-            axios.get(url, {
-                params: {
-                    access_key: apiKey,
-                    symbols: currencyCode
-                }
-            })
-                .then(response => {
-                    const rate = response.data.rates[currencyCode];
-                    if (rate) {
-                        // Adjust the budget to the converted currency
-                        const convertedTotalBudget = totalBudget * rate;
-                        const convertedRemainingBudget = remainingBudget * rate;
-
-                        document.getElementById("totalBudgetDisplay").textContent = `${convertedTotalBudget.toFixed(2)} ${currencyCode}`;
-                        document.getElementById("remainingBudgetDisplay").textContent = `${convertedRemainingBudget.toFixed(2)} ${currencyCode}`;
-                        console.log(`1 EUR = ${rate.toFixed(2)} ${currencyCode}`);
-                        resultElem.innerText = `1 EUR = ${rate.toFixed(2)} ${currencyCode}`
-                    } else {
-                        console.error("Conversion rate not available.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error fetching conversion rate:", error);
                 });
-        }
+            }
+
+            const resultElem = document.getElementById("result");
+
+            function fetchCurrencyByCountry(location) {
+                // Extract the country name if location includes a city (e.g., "Bali, Indonesia")
+                const locationParts = location.split(",").map(part => part.trim());
+                const country = locationParts[locationParts.length - 1];
+
+                // Map of countries to their currency codes
+                const countryToCurrencyMap = {
+                    "Afghanistan": "AFN",
+                    "Albania": "ALL",
+                    "Algeria": "DZD",
+                    "Andorra": "EUR",
+                    "Angola": "AOA",
+                    "Argentina": "ARS",
+                    "Armenia": "AMD",
+                    "Australia": "AUD",
+                    "Austria": "EUR",
+                    "Azerbaijan": "AZN",
+                    "Bahamas": "BSD",
+                    "Bahrain": "BHD",
+                    "Bangladesh": "BDT",
+                    "Barbados": "BBD",
+                    "Belarus": "BYN",
+                    "Belgium": "EUR",
+                    "Belize": "BZD",
+                    "Benin": "XOF",
+                    "Bhutan": "BTN",
+                    "Bolivia": "BOB",
+                    "Bosnia and Herzegovina": "BAM",
+                    "Botswana": "BWP",
+                    "Brazil": "BRL",
+                    "Brunei": "BND",
+                    "Bulgaria": "BGN",
+                    "Burkina Faso": "XOF",
+                    "Burundi": "BIF",
+                    "Cabo Verde": "CVE",
+                    "Cambodia": "KHR",
+                    "Cameroon": "XAF",
+                    "Canada": "CAD",
+                    "Central African Republic": "XAF",
+                    "Chad": "XAF",
+                    "Chile": "CLP",
+                    "China": "CNY",
+                    "Colombia": "COP",
+                    "Comoros": "KMF",
+                    "Congo (Congo-Brazzaville)": "CDF",
+                    "Costa Rica": "CRC",
+                    "Croatia": "HRK",
+                    "Cuba": "CUP",
+                    "Cyprus": "EUR",
+                    "Czechia (Czech Republic)": "CZK",
+                    "Denmark": "DKK",
+                    "Djibouti": "DJF",
+                    "Dominica": "XCD",
+                    "Dominican Republic": "DOP",
+                    "Ecuador": "USD",
+                    "Egypt": "EGP",
+                    "El Salvador": "USD",
+                    "Equatorial Guinea": "XAF",
+                    "Eritrea": "ERN",
+                    "Estonia": "EUR",
+                    "Ethiopia": "ETB",
+                    "Fiji": "FJD",
+                    "Finland": "EUR",
+                    "France": "EUR",
+                    "Gabon": "XAF",
+                    "Gambia": "GMD",
+                    "Georgia": "GEL",
+                    "Germany": "EUR",
+                    "Ghana": "GHS",
+                    "Greece": "EUR",
+                    "Grenada": "XCD",
+                    "Guatemala": "GTQ",
+                    "Guinea": "GNF",
+                    "Guinea-Bissau": "XOF",
+                    "Guyana": "GYD",
+                    "Haiti": "HTG",
+                    "Honduras": "HNL",
+                    "Hungary": "HUF",
+                    "Iceland": "ISK",
+                    "India": "INR",
+                    "Indonesia": "IDR",
+                    "Iran": "IRR",
+                    "Iraq": "IQD",
+                    "Ireland": "EUR",
+                    "Israel": "ILS",
+                    "Italy": "EUR",
+                    "Jamaica": "JMD",
+                    "Japan": "JPY",
+                    "Jordan": "JOD",
+                    "Kazakhstan": "KZT",
+                    "Kenya": "KES",
+                    "Kiribati": "AUD",
+                    "Kuwait": "KWD",
+                    "Kyrgyzstan": "KGS",
+                    "Laos": "LAK",
+                    "Latvia": "EUR",
+                    "Lebanon": "LBP",
+                    "Lesotho": "LSL",
+                    "Liberia": "LRD",
+                    "Libya": "LYD",
+                    "Liechtenstein": "CHF",
+                    "Lithuania": "EUR",
+                    "Luxembourg": "EUR",
+                    "Madagascar": "MGA",
+                    "Malawi": "MWK",
+                    "Malaysia": "MYR",
+                    "Maldives": "MVR",
+                    "Mali": "XOF",
+                    "Malta": "EUR",
+                    "Marshall Islands": "USD",
+                    "Mauritania": "MRU",
+                    "Mauritius": "MUR",
+                    "Mexico": "MXN",
+                    "Moldova": "MDL",
+                    "Monaco": "EUR",
+                    "Mongolia": "MNT",
+                    "Montenegro": "EUR",
+                    "Morocco": "MAD",
+                    "Mozambique": "MZN",
+                    "Myanmar (formerly Burma)": "MMK",
+                    "Namibia": "NAD",
+                    "Nauru": "AUD",
+                    "Nepal": "NPR",
+                    "Netherlands": "EUR",
+                    "New Zealand": "NZD",
+                    "Nicaragua": "NIO",
+                    "Niger": "XOF",
+                    "Nigeria": "NGN",
+                    "North Macedonia": "MKD",
+                    "Norway": "NOK",
+                    "Oman": "OMR",
+                    "Pakistan": "PKR",
+                    "Palau": "USD",
+                    "Panama": "PAB",
+                    "Papua New Guinea": "PGK",
+                    "Paraguay": "PYG",
+                    "Peru": "PEN",
+                    "Philippines": "PHP",
+                    "Poland": "PLN",
+                    "Portugal": "EUR",
+                    "Qatar": "QAR",
+                    "Romania": "RON",
+                    "Russia": "RUB",
+                    "Rwanda": "RWF",
+                    "Saint Kitts and Nevis": "XCD",
+                    "Saint Lucia": "XCD",
+                    "Saint Vincent and the Grenadines": "XCD",
+                    "Samoa": "WST",
+                    "San Marino": "EUR",
+                    "Sao Tome and Principe": "STN",
+                    "Saudi Arabia": "SAR",
+                    "Senegal": "XOF",
+                    "Serbia": "RSD",
+                    "Seychelles": "SCR",
+                    "Sierra Leone": "SLL",
+                    "Singapore": "SGD",
+                    "Slovakia": "EUR",
+                    "Slovenia": "EUR",
+                    "Solomon Islands": "SBD",
+                    "Somalia": "SOS",
+                    "South Africa": "ZAR",
+                    "South Korea": "KRW",
+                    "South Sudan": "SSP",
+                    "Spain": "EUR",
+                    "Sri Lanka": "LKR",
+                    "Sudan": "SDG",
+                    "Suriname": "SRD",
+                    "Sweden": "SEK",
+                    "Switzerland": "CHF",
+                    "Syria": "SYP",
+                    "Taiwan": "TWD",
+                    "Tajikistan": "TJS",
+                    "Tanzania": "TZS",
+                    "Thailand": "THB",
+                    "Timor-Leste": "USD",
+                    "Togo": "XOF",
+                    "Tonga": "TOP",
+                    "Trinidad and Tobago": "TTD",
+                    "Tunisia": "TND",
+                    "Turkey": "TRY",
+                    "Turkmenistan": "TMT",
+                    "Tuvalu": "AUD",
+                    "Uganda": "UGX",
+                    "Ukraine": "UAH",
+                    "United Arab Emirates": "AED",
+                    "United Kingdom": "GBP",
+                    "United States": "USD",
+                    "Uruguay": "UYU",
+                    "Uzbekistan": "UZS",
+                    "Vanuatu": "VUV",
+                    "Vatican City": "EUR",
+                    "Venezuela": "VES",
+                    "Vietnam": "VND",
+                    "Yemen": "YER",
+                    "Zambia": "ZMW",
+                    "Zimbabwe": "ZWL"
+                };
+
+                // Return the currency code for the extracted country, or null if not found
+                return Promise.resolve(countryToCurrencyMap[country] || null);
+            }
 
 
-        function fetchWeatherData(location) {
-            const geoUrl = "http://api.openweathermap.org/geo/1.0/direct";
-            const apiKey = "4e1a69304c74566a0ebcf18acbafbc18";
+            function fetchConversionRate(currencyCode) {
+                const url = "http://data.fixer.io/api/latest";
+                const apiKey = ""; // Make sure your API key is correct
 
-            axios.get(geoUrl, { params: { q: location, appid: apiKey } })
-                .then(response => {
-                    const data = response.data;
-                    if (data.length === 0) {
-                        document.getElementById("current-temperature").innerText = "Location not found.";
-                        return;
+                axios.get(url, {
+                    params: {
+                        access_key: apiKey,
+                        symbols: currencyCode
                     }
-                    const lat = data[0].lat;
-                    const lon = data[0].lon;
-                    getWeatherForecast(lat, lon);
                 })
-                .catch(error => console.error("Error fetching location data:", error));
-        }
+                    .then(response => {
+                        const rate = response.data.rates[currencyCode];
+                        if (rate) {
+                            // Adjust the budget to the converted currency
+                            const convertedTotalBudget = totalBudget * rate;
+                            const convertedRemainingBudget = remainingBudget * rate;
 
-        function fetchAttractionsForLocation(location) {
-            const geoUrl = "http://api.openweathermap.org/geo/1.0/direct";
-            const apiKey = "4e1a69304c74566a0ebcf18acbafbc18";
+                            document.getElementById("totalBudgetDisplay").textContent = `${convertedTotalBudget.toFixed(2)} ${currencyCode}`;
+                            document.getElementById("remainingBudgetDisplay").textContent = `${convertedRemainingBudget.toFixed(2)} ${currencyCode}`;
+                            console.log(`1 EUR = ${rate.toFixed(2)} ${currencyCode}`);
+                            resultElem.innerText = `1 EUR = ${rate.toFixed(2)} ${currencyCode}`
+                        } else {
+                            console.error("Conversion rate not available.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error fetching conversion rate:", error);
+                    });
+            }
 
-            axios.get(geoUrl, { params: { q: location, appid: apiKey } })
-                .then(response => {
-                    const data = response.data;
-                    if (data.length === 0) {
-                        console.error("Location not found for attractions.");
-                        return;
-                    }
-                    const lat = data[0].lat;
-                    const lon = data[0].lon;
-                    fetchAttractions(lat, lon); // Calls the Google Places API to get attractions
-                })
-                .catch(error => console.error("Error fetching attractions location data:", error));
-        }
 
-        function fetchCurrencyForLocation(location) {
-            fetchCurrencyByCountry(location)
-                .then(currencyCode => {
-                    if (currencyCode) {
-                        fetchConversionRate(currencyCode); // Fetch and display currency conversion rate
+            function fetchWeatherData(location) {
+                const geoUrl = "http://api.openweathermap.org/geo/1.0/direct";
+                const apiKey = "4e1a69304c74566a0ebcf18acbafbc18";
+
+                axios.get(geoUrl, { params: { q: location, appid: apiKey } })
+                    .then(response => {
+                        const data = response.data;
+                        if (data.length === 0) {
+                            document.getElementById("current-temperature").innerText = "Location not found.";
+                            return;
+                        }
+                        const lat = data[0].lat;
+                        const lon = data[0].lon;
+                        getWeatherForecast(lat, lon);
+                    })
+                    .catch(error => console.error("Error fetching location data:", error));
+            }
+
+            function fetchAttractionsForLocation(location) {
+                const geoUrl = "http://api.openweathermap.org/geo/1.0/direct";
+                const apiKey = "4e1a69304c74566a0ebcf18acbafbc18";
+
+                axios.get(geoUrl, { params: { q: location, appid: apiKey } })
+                    .then(response => {
+                        const data = response.data;
+                        if (data.length === 0) {
+                            console.error("Location not found for attractions.");
+                            return;
+                        }
+                        const lat = data[0].lat;
+                        const lon = data[0].lon;
+                        fetchAttractions(lat, lon); // Calls the Google Places API to get attractions
+                    })
+                    .catch(error => console.error("Error fetching attractions location data:", error));
+            }
+
+            function fetchCurrencyForLocation(location) {
+                fetchCurrencyByCountry(location)
+                    .then(currencyCode => {
+                        if (currencyCode) {
+                            fetchConversionRate(currencyCode); // Fetch and display currency conversion rate
+                        } else {
+                            console.error("Currency not found for the specified country.");
+                        }
+                    })
+                    .catch(error => console.error("Error fetching currency for location:", error));
+            }
+
+            // Clear the dashboard if no trip is selected
+            function clearDashboard() {
+                document.getElementById("tripNameDisplay").textContent = "Your Trip";
+                document.getElementById("weather-location").textContent = "";
+                document.getElementById("attraction-location").textContent = "";
+                document.getElementById("current-temperature").textContent = "";
+                document.getElementById("weather-details").innerHTML = "";
+                document.getElementById("attractionsContainer").innerHTML = "";
+                document.getElementById("result").textContent = "Please input amount and currency";
+            }
+
+            function fetchAttractions(lat, lon) {
+                const service = new google.maps.places.PlacesService(document.createElement('div'));
+                const request = {
+                    location: new google.maps.LatLng(lat, lon),
+                    radius: 25000,
+                    type: ["tourist_attraction"]
+                };
+
+                service.nearbySearch(request, (results, status) => {
+                    if (status === google.maps.places.PlacesServiceStatus.OK) {
+                        displayAttractions(results);
                     } else {
-                        console.error("Currency not found for the specified country.");
+                        console.error("Failed to load attractions:", status);
                     }
-                })
-                .catch(error => console.error("Error fetching currency for location:", error));
-        }
+                });
+            }
 
-        // Clear the dashboard if no trip is selected
-        function clearDashboard() {
-            document.getElementById("tripNameDisplay").textContent = "Your Trip";
-            document.getElementById("weather-location").textContent = "";
-            document.getElementById("attraction-location").textContent = "";
-            document.getElementById("current-temperature").textContent = "";
-            document.getElementById("weather-details").innerHTML = "";
-            document.getElementById("attractionsContainer").innerHTML = "";
-            document.getElementById("result").textContent = "Please input amount and currency";
-        }
+            let currentPage = 0;
+            const cardsPerPage = 2;
 
-        function fetchAttractions(lat, lon) {
-            const service = new google.maps.places.PlacesService(document.createElement('div'));
-            const request = {
-                location: new google.maps.LatLng(lat, lon),
-                radius: 25000,
-                type: ["tourist_attraction"]
-            };
+            function displayAttractions(attractions) {
+                const container = document.getElementById('attractionsContainer');
+                container.innerHTML = '';
 
-            service.nearbySearch(request, (results, status) => {
-                if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    displayAttractions(results);
-                } else {
-                    console.error("Failed to load attractions:", status);
+                container.style.display = 'flex';
+                container.style.transform = 'translateX(0)';
+                container.style.transition = 'transform 0.3s ease';
+
+                attractions.forEach((attraction) => {
+                    const card = document.createElement('div');
+                    card.classList.add('attraction-card');
+
+                    const img = document.createElement('img');
+                    img.src = attraction.photos ? attraction.photos[0].getUrl({ maxWidth: 800 }) : 'https://via.placeholder.com/800x400';
+                    img.alt = attraction.name;
+                    card.appendChild(img);
+
+                    const body = document.createElement('div');
+                    body.classList.add('attraction-card-body');
+
+                    const title = document.createElement('h5');
+                    title.classList.add('attraction-card-title');
+                    title.innerText = attraction.name;
+                    body.appendChild(title);
+
+                    const location = document.createElement('p');
+                    location.classList.add('attraction-card-location');
+                    location.innerText = attraction.vicinity || 'Address not available';
+                    body.appendChild(location);
+
+                    card.appendChild(body);
+                    container.appendChild(card);
+                });
+
+                updateVisibleCards(attractions.length);
+            }
+
+            function updateVisibleCards(totalCards) {
+                const container = document.getElementById('attractionsContainer');
+                const cardWidth = 50; // Each card takes 50% of the width
+                const gapWidth = 20; // Gap between cards in pixels
+                const totalWidth = cardWidth + (gapWidth / container.offsetWidth * 100); // Total width including gap as percentage
+
+                // Calculate the translation
+                const translateX = -(currentPage * totalWidth);
+                container.style.transform = `translateX(${translateX}%)`;
+
+                // Update button states
+                const leftButton = document.querySelector('.carousel-button-left');
+                const rightButton = document.querySelector('.carousel-button-right');
+
+                if (leftButton && rightButton) {
+                    leftButton.style.display = currentPage === 0 ? 'none' : 'flex';
+                    const maxPage = Math.ceil(totalCards / cardsPerPage) - 1;
+                    rightButton.style.display = currentPage >= maxPage ? 'none' : 'flex';
                 }
-            });
-        }
+            }
+            // Attach functions to the global window object
+            window.goLeft = function () {
+                if (currentPage > 0) {
+                    currentPage--;
+                    console.log("Navigated left, current page:", currentPage);
+                    updateVisibleCards(document.getElementById('attractionsContainer').children.length);
+                }
+            }
 
-        let currentPage = 0;
-        const cardsPerPage = 2;
-
-        function displayAttractions(attractions) {
-            const container = document.getElementById('attractionsContainer');
-            container.innerHTML = '';
-
-            container.style.display = 'flex';
-            container.style.transform = 'translateX(0)';
-            container.style.transition = 'transform 0.3s ease';
-
-            attractions.forEach((attraction) => {
-                const card = document.createElement('div');
-                card.classList.add('attraction-card');
-
-                const img = document.createElement('img');
-                img.src = attraction.photos ? attraction.photos[0].getUrl({ maxWidth: 800 }) : 'https://via.placeholder.com/800x400';
-                img.alt = attraction.name;
-                card.appendChild(img);
-
-                const body = document.createElement('div');
-                body.classList.add('attraction-card-body');
-
-                const title = document.createElement('h5');
-                title.classList.add('attraction-card-title');
-                title.innerText = attraction.name;
-                body.appendChild(title);
-
-                const location = document.createElement('p');
-                location.classList.add('attraction-card-location');
-                location.innerText = attraction.vicinity || 'Address not available';
-                body.appendChild(location);
-
-                card.appendChild(body);
-                container.appendChild(card);
-            });
-
-            updateVisibleCards(attractions.length);
-        }
-
-        const style = document.createElement('style');
-        style.textContent = `
-    .attractions-carousel-container {
-        position: relative;
-        overflow: hidden;
-        padding: 0;
-        margin: 0;
-        width: 100%;
-    }
-
-    #attractionsContainer {
-        display: flex;
-        transition: transform 0.3s ease;
-        width: 100%;
-        gap: 20px;
-        padding: 0 10px; /* Padding to add space around the carousel */
-    }
-
-    .attraction-card {
-        min-width: calc(25% - 20px); /* Show 4 cards at once */
-        flex: 0 0 calc(25% - 20px); /* Keep cards from growing/shrinking */
-        border-radius: 16px;
-        overflow: hidden;
-        background: white;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease;
-        margin-right: 10px;
-    }
-
-    .attraction-card img {
-        width: 100%;
-        height: 220px;
-        object-fit: cover;
-    }
-
-    .attraction-card-body {
-        padding: 15px;
-    }
-
-    .carousel-button {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 2;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: rgba(0, 0, 0, 0.5);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        border: none;
-        transition: background 0.3s ease;
-    }
-
-    .carousel-button:hover {
-        background: rgba(0, 0, 0, 0.7); /* Slightly darken on hover */
-    }
-
-    .carousel-button-left {
-        left: 10px; /* Adjust positioning */
-    }
-
-    .carousel-button-right {
-        right: 10px; /* Adjust positioning */
-    }
-`;
-        document.head.appendChild(style);
-
-
-
-
-        function updateVisibleCards(totalCards) {
-            const container = document.getElementById('attractionsContainer');
-            const cardWidth = 50; // Each card takes 50% of the width
-            const gapWidth = 20; // Gap between cards in pixels
-            const totalWidth = cardWidth + (gapWidth / container.offsetWidth * 100); // Total width including gap as percentage
-
-            // Calculate the translation
-            const translateX = -(currentPage * totalWidth);
-            container.style.transform = `translateX(${translateX}%)`;
-
-            // Update button states
-            const leftButton = document.querySelector('.carousel-button-left');
-            const rightButton = document.querySelector('.carousel-button-right');
-
-            if (leftButton && rightButton) {
-                leftButton.style.display = currentPage === 0 ? 'none' : 'flex';
+            window.goRight = function () {
+                const totalCards = document.getElementById('attractionsContainer').children.length;
                 const maxPage = Math.ceil(totalCards / cardsPerPage) - 1;
-                rightButton.style.display = currentPage >= maxPage ? 'none' : 'flex';
+
+                if (currentPage < maxPage) {
+                    currentPage++;
+                    console.log("Navigated right, current page:", currentPage);
+                    updateVisibleCards(totalCards);
+                }
             }
-        }
-        // Attach functions to the global window object
-        window.goLeft = function () {
-            if (currentPage > 0) {
-                currentPage--;
-                console.log("Navigated left, current page:", currentPage);
-                updateVisibleCards(document.getElementById('attractionsContainer').children.length);
-            }
-        }
 
-        window.goRight = function () {
-            const totalCards = document.getElementById('attractionsContainer').children.length;
-            const maxPage = Math.ceil(totalCards / cardsPerPage) - 1;
+            document.addEventListener("DOMContentLoaded", function () {
+                // Example call to displayAttractions with dummy data
+                const attractions = Array(20).fill({ name: 'Attraction', photos: [], vicinity: 'Address' });
+                displayAttractions(attractions);
+                initializePieChart();
+            });
+            function getWeatherForecast(lat, lon) {
+                const weatherUrl = "https://api.openweathermap.org/data/3.0/onecall";
+                const apiKey = "4e1a69304c74566a0ebcf18acbafbc18";
 
-            if (currentPage < maxPage) {
-                currentPage++;
-                console.log("Navigated right, current page:", currentPage);
-                updateVisibleCards(totalCards);
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            // Example call to displayAttractions with dummy data
-            const attractions = Array(20).fill({ name: 'Attraction', photos: [], vicinity: 'Address' });
-            displayAttractions(attractions);
-            initializePieChart();
-        });
-        function getWeatherForecast(lat, lon) {
-            const weatherUrl = "https://api.openweathermap.org/data/3.0/onecall";
-            const apiKey = "4e1a69304c74566a0ebcf18acbafbc18";
-
-            axios.get(weatherUrl, {
-                params: { lat, lon, appid: apiKey, units: "metric", exclude: "minutely,hourly" }
-            })
-                .then(response => {
-                    const data = response.data;
-                    document.getElementById("current-temperature").textContent = `${data.current.temp}°C`;
-
-                    // Display Day 1's high, low, and summary (i.e., tomorrow's forecast)
-                    const dayOneForecast = data.daily[1];
-                    displayDayOneForecast(dayOneForecast);
+                axios.get(weatherUrl, {
+                    params: { lat, lon, appid: apiKey, units: "metric", exclude: "minutely,hourly" }
                 })
-                .catch(error => console.error("Error fetching weather data:", error));
-        }
-        function displayDayOneForecast(dayOneForecast) {
-            // Set the current temperature
-            const currentTempElement = document.getElementById("current-temperature");
-            currentTempElement.textContent = `${dayOneForecast.temp.day.toFixed(1)}°C`;
+                    .then(response => {
+                        const data = response.data;
+                        document.getElementById("current-temperature").textContent = `${data.current.temp}°C`;
 
-            // Set high and low temperatures
-            const highLowTempElement = document.getElementById("high-low-temperature");
-            highLowTempElement.textContent = `H: ${dayOneForecast.temp.max.toFixed(1)}°C L: ${dayOneForecast.temp.min.toFixed(1)}°C`;
+                        // Display Day 1's high, low, and summary (i.e., tomorrow's forecast)
+                        const dayOneForecast = data.daily[1];
+                        displayDayOneForecast(dayOneForecast);
+                    })
+                    .catch(error => console.error("Error fetching weather data:", error));
+            }
+            function displayDayOneForecast(dayOneForecast) {
+                // Set the current temperature
+                const currentTempElement = document.getElementById("current-temperature");
+                currentTempElement.textContent = `${dayOneForecast.temp.day.toFixed(1)}°C`;
 
-            // Set the weather icon and description
-            const iconUrl = `http://openweathermap.org/img/wn/${dayOneForecast.weather[0].icon}@2x.png`;
-            const iconElement = document.getElementById("weather-icon");
-            iconElement.src = iconUrl;
-            iconElement.alt = dayOneForecast.weather[0].description;
+                // Set high and low temperatures
+                const highLowTempElement = document.getElementById("high-low-temperature");
+                highLowTempElement.textContent = `H: ${dayOneForecast.temp.max.toFixed(1)}°C L: ${dayOneForecast.temp.min.toFixed(1)}°C`;
 
-            const descriptionElement = document.getElementById("weather-description");
-            descriptionElement.textContent = dayOneForecast.weather[0].description;
-        }
+                // Set the weather icon and description
+                const iconUrl = `http://openweathermap.org/img/wn/${dayOneForecast.weather[0].icon}@2x.png`;
+                const iconElement = document.getElementById("weather-icon");
+                iconElement.src = iconUrl;
+                iconElement.alt = dayOneForecast.weather[0].description;
 
-        // Function to fetch and set the cover photo as background image
-        function fetchCoverPhoto(location) {
-            console.log("Fetching photo for:", location); // Debugging
-            const unsplashUrl = `https://api.unsplash.com/search/photos?query=${location}&client_id=si0ikrNV-cDKP406cBzHlljJmq6GWhlkdAXeho1tzDU`;
+                const descriptionElement = document.getElementById("weather-description");
+                descriptionElement.textContent = dayOneForecast.weather[0].description;
+            }
 
-            axios.get(unsplashUrl)
-                .then(response => {
-                    const photos = response.data.results;
-                    if (photos.length > 0) {
-                        const coverPhotoUrl = photos[0].urls.regular;
-                        document.body.style.backgroundImage = `url(${coverPhotoUrl})`;
-                        document.body.style.backgroundSize = "cover";
-                        document.body.style.backgroundPosition = "center";
-                        document.body.style.backgroundRepeat = "no-repeat";
-                        console.log("Background image set to:", coverPhotoUrl); // Debugging
-                    } else {
-                        console.error("No photos found for this location.");
+            // Function to fetch and set the cover photo as background image
+            function fetchCoverPhoto(location) {
+                console.log("Fetching photo for:", location); // Debugging
+                const unsplashUrl = `https://api.unsplash.com/search/photos?query=${location}&client_id=si0ikrNV-cDKP406cBzHlljJmq6GWhlkdAXeho1tzDU`;
+
+                axios.get(unsplashUrl)
+                    .then(response => {
+                        const photos = response.data.results;
+                        if (photos.length > 0) {
+                            const coverPhotoUrl = photos[0].urls.regular;
+                            document.body.style.backgroundImage = `url(${coverPhotoUrl})`;
+                            document.body.style.backgroundSize = "cover";
+                            document.body.style.backgroundPosition = "center";
+                            document.body.style.backgroundRepeat = "no-repeat";
+                            console.log("Background image set to:", coverPhotoUrl); // Debugging
+                        } else {
+                            console.error("No photos found for this location.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error fetching cover photo:", error);
+                    });
+            }
+
+            // Set up the initial background based on location from local storage (if any)
+            document.addEventListener("DOMContentLoaded", function () {
+                const initialLocation = localStorage.getItem("location");
+                if (initialLocation) {
+                    fetchCoverPhoto(initialLocation);
+                }
+            });
+
+            // Update background image when the dropdown value changes
+            const dropdown = document.getElementById("tripDropdown");
+            dropdown.addEventListener("change", async function () { // Make it async
+                const selectedTripId = this.value;
+
+                if (selectedTripId) {
+                    localStorage.setItem("selectedTripId", selectedTripId);
+                    await loadTripData(selectedTripId);
+
+                    // Get location from the selected trip's data to update background
+                    const location = localStorage.getItem("location");
+                    if (location) {
+                        fetchCoverPhoto(location);
                     }
-                })
-                .catch(error => {
-                    console.error("Error fetching cover photo:", error);
+
+                    // Update all navigation links
+                    updateNavLinks();
+                } else {
+                    clearDashboard();
+                }
+            });
+
+        </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const navbarToggler = document.querySelector('.navbar-toggler');
+                const navbarCollapse = document.querySelector('.navbar-collapse');
+
+                // Update aria-expanded when navbar is shown/hidden
+                navbarCollapse.addEventListener('show.bs.collapse', function () {
+                    navbarToggler.setAttribute('aria-expanded', 'true');
                 });
-        }
 
-        // Set up the initial background based on location from local storage (if any)
-        document.addEventListener("DOMContentLoaded", function () {
-            const initialLocation = localStorage.getItem("location");
-            if (initialLocation) {
-                fetchCoverPhoto(initialLocation);
-            }
-        });
+                navbarCollapse.addEventListener('hide.bs.collapse', function () {
+                    navbarToggler.setAttribute('aria-expanded', 'false');
+                });
 
-        // Update background image when the dropdown value changes
-        const dropdown = document.getElementById("tripDropdown");
-        dropdown.addEventListener("change", async function () { // Make it async
-            const selectedTripId = this.value;
+                // Add click handler to close menu when clicking outside
+                document.addEventListener('click', function (event) {
+                    const isClickInside = navbarCollapse.contains(event.target) || navbarToggler.contains(event.target);
+                    if (!isClickInside && navbarCollapse.classList.contains('show')) {
+                        const bsCollapse = new bootstrap.Collapse(navbarCollapse);
+                        bsCollapse.hide();
+                    }
+                });
+            });
 
-            if (selectedTripId) {
-                localStorage.setItem("selectedTripId", selectedTripId);
-                await loadTripData(selectedTripId);
 
-                // Get location from the selected trip's data to update background
+
+            document.getElementById("itineraryBuilderLink").addEventListener("click", function () {
+                const tripId = localStorage.getItem("selectedTripId");
                 const location = localStorage.getItem("location");
-                if (location) {
-                    fetchCoverPhoto(location);
-                }
 
-                // Update all navigation links
-                updateNavLinks();
-            } else {
-                clearDashboard();
-            }
-        });
-
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const navbarToggler = document.querySelector('.navbar-toggler');
-            const navbarCollapse = document.querySelector('.navbar-collapse');
-
-            // Update aria-expanded when navbar is shown/hidden
-            navbarCollapse.addEventListener('show.bs.collapse', function () {
-                navbarToggler.setAttribute('aria-expanded', 'true');
-            });
-
-            navbarCollapse.addEventListener('hide.bs.collapse', function () {
-                navbarToggler.setAttribute('aria-expanded', 'false');
-            });
-
-            // Add click handler to close menu when clicking outside
-            document.addEventListener('click', function (event) {
-                const isClickInside = navbarCollapse.contains(event.target) || navbarToggler.contains(event.target);
-                if (!isClickInside && navbarCollapse.classList.contains('show')) {
-                    const bsCollapse = new bootstrap.Collapse(navbarCollapse);
-                    bsCollapse.hide();
+                if (tripId && location) {
+                    window.location.href = `itinerary.html?tripId=${tripId}&location=${encodeURIComponent(location)}`;
+                } else {
+                    alert("Please select a trip first!");
                 }
             });
-        });
 
-
-
-        document.getElementById("itineraryBuilderLink").addEventListener("click", function () {
-            const tripId = localStorage.getItem("selectedTripId");
-            const location = localStorage.getItem("location");
-
-            if (tripId && location) {
-                window.location.href = `itinerary.html?tripId=${tripId}&location=${encodeURIComponent(location)}`;
-            } else {
-                alert("Please select a trip first!");
-            }
-        });
-
-    </script>
+        </script>
 
 </body>
 
