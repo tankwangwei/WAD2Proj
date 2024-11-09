@@ -652,23 +652,27 @@
 
     <script>
         function navigateToAttractionsPage() {
-    const tripId = localStorage.getItem("selectedTripId");
-    const location = localStorage.getItem("location");
+            const tripId = localStorage.getItem("selectedTripId");
+            const location = localStorage.getItem("location");
 
-    if (tripId && location) {
-        window.location.href = `attractions.html?tripID=${tripId}&location=${encodeURIComponent(location)}`;
-    } else {
-        // Show alert and redirect to home page
-        alert("Please create a trip first!");
-        window.location.href = 'home.html';
-    }
-}
-
+            if (tripId && location) {
+                window.location.href = `attractions.html?tripID=${tripId}&location=${encodeURIComponent(location)}`;
+            } else {
+                // Show alert and redirect to home page
+                alert("Please create a trip first!");
+                window.location.href = 'home.html';
+            }
+        }
 
         function navigateToWeatherPage() {
-            const location = localStorage.getItem("location"); // Get location from localStorage or another source
-            const url = location ? `weather.html?location=${encodeURIComponent(location)}` : `weather.html`;
-            window.location.href = url;
+            const location = localStorage.getItem("location");
+            if (location) {
+                // Encode location and navigate with it as a parameter
+                const url = `weather.html?location=${encodeURIComponent(location)}`;
+                window.location.href = url;
+            } else {
+                window.location.href = 'weather.html';
+            }
         }
 
         function redirectToBudgetPage() {

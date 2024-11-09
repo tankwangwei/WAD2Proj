@@ -82,7 +82,7 @@
 
         .navbar .nav-link:hover::after {
             width: 100%;
-            bottom: 0; 
+            bottom: 0;
 
             /* Expand the line to full width on hover */
         }
@@ -93,7 +93,7 @@
             /* Distinct color for the active page */
             font-weight: bold;
             /* Make the active link bold */
-            bottom: 0; 
+            bottom: 0;
 
         }
 
@@ -103,7 +103,7 @@
             /* Make the underline match the active color */
             width: 100%;
             /* Show the underline for the active link */
-            bottom: 0; 
+            bottom: 0;
 
         }
 
@@ -677,6 +677,14 @@
 
 <script>
     window.onload = function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const location = urlParams.get("location");
+
+        if (location) {
+            document.getElementById("city").value = location;
+            setTimeout(getGeo); // Slight delay for stable DOM load before triggering search
+        }
+
         let cityEle = document.getElementById("city");
         let autocomplete = new google.maps.places.Autocomplete(cityEle);
 
@@ -690,6 +698,7 @@
             }
         });
     };
+
     let cityEle = document.getElementById("city")
     let btnEle = document.getElementById("get")
     let errorMessageEle = document.getElementById("errorMessage")
