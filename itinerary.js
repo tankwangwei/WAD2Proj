@@ -167,17 +167,22 @@ function loadPlaces(locationCoords) {
 // Display places in placeslist
 function displayPlaces(places) {
     const placesList = document.getElementById("placesList");
-    placesList.innerHTML = "";
+    placesList.innerHTML = ""; // Clear the list
 
     places.forEach((place) => {
         const photoUrl = place.photos
             ? place.photos[0].getUrl({ maxWidth: 100 })
             : "https://via.placeholder.com/100x100?text=No+Image";
 
-        const placeEl = document.createElement("div");
-        placeEl.classList.add("place-item", "card", "p-2", "m-2");
+        // Wrapper for the card and button
+        const placeWrapper = document.createElement("div");
+        placeWrapper.classList.add("mb-3", "place-wrapper");
 
-        // Event listener to display more details when clicking the card
+        // Card for the place details
+        const placeEl = document.createElement("div");
+        placeEl.classList.add("place-item", "card", "p-3");
+
+        // Add click event to navigate to place details
         placeEl.addEventListener("click", () => {
             displayPlaceDetails(place.place_id);
         });
@@ -185,19 +190,35 @@ function displayPlaces(places) {
         placeEl.innerHTML = `
             <div class="row">
                 <div class="col-3">
-                    <img src="${photoUrl}" alt="${place.name}" class="img-fluid">
+                    <img src="${photoUrl}" alt="${place.name}" class="img-fluid rounded">
                 </div>
                 <div class="col-9">
                     <h5>${place.name}</h5>
                     <p>${place.vicinity || "No address available"}</p>
                     <p>Rating: ${place.rating || "N/A"} (${place.user_ratings_total || 0} reviews)</p>
-                    <button onclick="savePlace('${place.place_id}', '${place.name}')">Save</button>
                 </div>
             </div>
         `;
-        placesList.appendChild(placeEl);
+
+        // Create the Save button
+        const saveButton = document.createElement("button");
+        saveButton.classList.add("btn", "btn-primary", "save-button", "w-100");
+        saveButton.textContent = "Save";
+        saveButton.addEventListener("click", (e) => {
+            e.stopPropagation(); // Prevent triggering card's click event
+            savePlace(place.place_id, place.name); // Save the place
+        });
+
+        // Append the card and button to the wrapper
+        placeWrapper.appendChild(placeEl);
+        placeWrapper.appendChild(saveButton);
+
+        // Append the wrapper to the list
+        placesList.appendChild(placeWrapper);
     });
 }
+
+
 
 // Place details when click on one
 function displayPlaceDetails(placeId) {
@@ -378,7 +399,7 @@ function createActivityCard(activityId, name, isRemovable = false, source = "sav
 
     // Include the Remove Button for both Saved Activities and Calendar
     const removeHandler = source === "calendar" 
-        ? `removeActivityFromCalendar('${activityId}', '${date}')` 
+        ? `removeActivityFromDate('${date}', '${activityId}')` 
         : `removeActivity('${activityId}')`;
 
     activityEl.innerHTML = `
@@ -548,7 +569,7 @@ async function handleDrop(event, targetDate) {
     if (activityId) {
         if (source === "calendar" && !targetDate) {
             // Move activity back to saved activities
-            await removeActivityFromCalendar(activityId);
+            await removeActivityFromDate(null, activityId); // Null date signifies no specific date
         } else if (source === "calendar") {
             const sourceDate = event.dataTransfer.getData("sourceDate");
             if (sourceDate !== targetDate) {
@@ -578,7 +599,7 @@ async function moveActivityBetweenDates(activityId, sourceDate, targetDate) {
 }
 
 async function removeActivityFromDate(date, activityId) {
-    if (!date) return;
+    if (!date) return; // Guard clause
 
     try {
         const dateRef = doc(db, `users/${userId}/trips/${tripId}/itinerary`, date);
@@ -593,50 +614,30 @@ async function removeActivityFromDate(date, activityId) {
             // Refresh the calendar
             loadItinerary();
         }
-    } catch (error) {
-        console.error("Error removing activity from date:", error);
-    }
-}
 
-async function removeActivityFromCalendar(activityId) {
-    try {
-        // Find the activity in the calendar
-        const itinerarySnapshot = await getDocs(collection(db, `users/${userId}/trips/${tripId}/itinerary`));
-        let activityFound = false;
-
-        itinerarySnapshot.forEach(async (doc) => {
-            const date = doc.id;
-            const activities = doc.data().activities || [];
-
-            // Check if the activity exists in the specific date
-            if (activities.some((act) => act.id === activityId)) {
-                activityFound = true;
-
-                // Remove the activity from this date
-                const updatedActivities = activities.filter((act) => act.id !== activityId);
-                await setDoc(doc.ref, { activities: updatedActivities });
-
-                // Refresh the calendar view
-                loadItinerary();
-            }
-        });
-
-        if (!activityFound) {
-            console.warn(`Activity with ID ${activityId} was not found in the calendar.`);
-        }
-
-        // Optionally, restore to Saved Activities container
+        // Dynamically add the activity back to Saved Activities
         const savedActivitiesContainer = document.getElementById("savedActivities");
         if (!isActivityInSavedActivities(activityId)) {
             const activityDoc = await getDoc(doc(db, `users/${userId}/trips/${tripId}/activities`, activityId));
             if (activityDoc.exists()) {
                 const activity = activityDoc.data();
-                const activityEl = createActivityCard(activityId, activity.name, false, "savedActivities");
+
+                // Create the card with the remove button
+                const activityEl = createActivityCard(activityId, activity.name, true, "savedActivities");
+
+                // Remove any existing card for the same activity (if needed)
+                const existingActivity = savedActivitiesContainer.querySelector(`[data-activity-id="${activityId}"]`);
+                if (existingActivity) {
+                    existingActivity.remove();
+                }
+
+                // Append the new card to the Saved Activities container
                 savedActivitiesContainer.appendChild(activityEl);
             }
         }
+
     } catch (error) {
-        console.error("Error removing activity from calendar:", error);
+        console.error("Error removing activity from date:", error);
     }
 }
 
@@ -685,7 +686,7 @@ window.drop = drop;
 window.allowDrag = allowDrag;
 window.removeActivity = removeActivity;
 window.searchPlaces = searchPlaces;
-window.removeActivityFromCalendar = removeActivityFromCalendar;
+window.removeActivityFromDate = removeActivityFromDate;
 
 
 
