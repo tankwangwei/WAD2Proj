@@ -712,7 +712,7 @@
             }
         }
 
-        function redirectToBudgetPage() {
+        function navigateToBudgetPage() {
             const tripID = localStorage.getItem("selectedTripId");
             const location = localStorage.getItem("location");
             if (tripID) {
@@ -841,7 +841,7 @@
 
             <!-- Budget Section -->
             <div class="col-lg-4 col-md-4">
-                <div id="budget-chart-section" class="p-3 rounded-section standard-height">
+                <div onclick="navigateToBudgetPage()" id="budget-chart-section" class="p-3 rounded-section standard-height">
                     <h5 class="text-center">Budget Overview</h5>
                     <div class="d-flex align-items-center justify-content-between mt-4">
                         <div id="budgetContainer" class="budget-summary d-flex">
