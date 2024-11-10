@@ -45,7 +45,6 @@ onAuthStateChanged(auth, (user) => {
         userId = user.uid;
         localStorage.setItem("userId", userId);
 
-        populateTripDropdown();
         initItinerary();
     } else {
         window.location.href = "login.html";
@@ -86,42 +85,6 @@ async function initItinerary() {
         loadItinerary();
     } catch (error) {
         console.error("Error initializing itinerary:", error);
-    }
-}
-
-async function populateTripDropdown() {
-    try {
-        const tripSelector = document.getElementById("tripSelector");
-        tripSelector.innerHTML = '<option value="" disabled selected>Select a Trip</option>';
-
-        const tripSnapshot = await getDocs(collection(db, `users/${userId}/trips`));
-        tripSnapshot.forEach((doc) => {
-            const tripData = doc.data();
-            tripSelector.innerHTML += `<option value="${doc.id}">${tripData.name} (${tripData.location})</option>`;
-        });
-
-        // Add event listener for dropdown change
-        tripSelector.addEventListener("change", async (event) => {
-            tripId = event.target.value;
-            localStorage.setItem("tripId", tripId);
-
-            const tripDoc = await getDoc(doc(db, `users/${userId}/trips/${tripId}`));
-            const tripData = tripDoc.data();
-
-            document.getElementById("trip-name").textContent = tripData.name;
-            document.getElementById("trip-location").textContent = tripData.location;
-
-            // Update the dashboard link dynamically
-            const dashboardLink = document.querySelector('a[href*="dashboard.html"]');
-            if (dashboardLink) {
-                dashboardLink.href = `dashboard.html?tripId=${tripId}&location=${encodeURIComponent(tripData.location)}`;
-            }
-
-            // Reinitialize itinerary with the new trip
-            await initItinerary();
-        });
-    } catch (error) {
-        console.error("Error populating trip dropdown:", error);
     }
 }
 
@@ -197,7 +160,7 @@ function searchPlaces() {
     const request = {
         query: query,
         location: map.getCenter(), // Ensure search is centered around the trip location
-        radius: "50000",
+        radius: "30000",
         fields: ["name", "geometry", "formatted_address", "rating", "photos", "place_id", "user_ratings_total"],
     };
 
@@ -219,7 +182,7 @@ function loadPlaces(locationCoords) {
     const placesService = new google.maps.places.PlacesService(map);
     const request = {
         location: new google.maps.LatLng(locationCoords.lat, locationCoords.lng),
-        radius: "50000",
+        radius: "30000",
         type: ["tourist_attraction"],
     };
 
@@ -241,120 +204,168 @@ function loadPlaces(locationCoords) {
     });
 }
 
-// Display places in placeslist
+
 function displayPlaces(places) {
     const placesList = document.getElementById("placesList");
-    placesList.innerHTML = "";
+
+    // Clear the existing content
+    while (placesList.firstChild) {
+        placesList.removeChild(placesList.firstChild);
+    }
 
     places.forEach((place) => {
         const photoUrl = place.photos
             ? place.photos[0].getUrl({ maxWidth: 100 })
             : "https://via.placeholder.com/100x100?text=No+Image";
 
-        const placeEl = document.createElement("div");
-        placeEl.classList.add("place-wrapper", "mb-3");
+        const placeWrapper = document.createElement("div");
+        placeWrapper.classList.add("place-wrapper", "mb-3");
 
-        // Card structure
-        placeEl.innerHTML = `
-            <div class="place-item">
-                <div class="row">
-                    <div class="col-3">
-                        <img src="${photoUrl}" alt="${place.name}" class="img-fluid">
-                    </div>
-                    <div class="col-9">
-                        <h5>${place.name}</h5>
-                        <p>${place.vicinity || "No address available"}</p>
-                        <p>Rating: ${place.rating || "N/A"} (${place.user_ratings_total || 0} reviews)</p>
-                    </div>
-                </div>
-            </div>
-            <button 
-                class="save-button btn btn-primary" 
-                onclick="savePlace('${place.place_id}', '${place.name}', event)"
-            >
-                Save
-            </button>
-        `;
+        const placeItem = document.createElement("div");
+        placeItem.classList.add("place-item");
 
-        // Event listener for navigating to Place Details (attached to the card, excluding the Save button)
-        placeEl.querySelector(".place-item").addEventListener("click", () => {
+        const row = document.createElement("div");
+        row.classList.add("row");
+
+        const colImage = document.createElement("div");
+        colImage.classList.add("col-3");
+
+        const image = document.createElement("img");
+        image.classList.add("img-fluid");
+        image.setAttribute("src", photoUrl);
+        image.setAttribute("alt", place.name);
+
+        colImage.appendChild(image);
+
+        const colDetails = document.createElement("div");
+        colDetails.classList.add("col-9");
+
+        const name = document.createElement("h5");
+        name.textContent = place.name;
+
+        const vicinity = document.createElement("p");
+        vicinity.textContent = place.vicinity || "No address available";
+
+        const rating = document.createElement("p");
+        rating.textContent = `Rating: ${place.rating || "N/A"} (${place.user_ratings_total || 0} reviews)`;
+
+        colDetails.append(name, vicinity, rating);
+
+        row.append(colImage, colDetails);
+        placeItem.appendChild(row);
+
+        const saveButton = document.createElement("button");
+        saveButton.classList.add("save-button", "btn", "btn-primary");
+        saveButton.textContent = "Save";
+        saveButton.addEventListener("click", (event) => {
+            event.stopPropagation();
+            savePlace(place.place_id, place.name, event);
+        });
+
+        placeWrapper.append(placeItem, saveButton);
+
+        placeItem.addEventListener("click", () => {
             displayPlaceDetails(place.place_id);
         });
 
-        placesList.appendChild(placeEl);
+        placesList.appendChild(placeWrapper);
     });
 }
 
 
-
-
-// Place details when click on one
-function displayPlaceDetails(placeId) {
+async function displayPlaceDetails(placeId) {
     const placesService = new google.maps.places.PlacesService(map);
 
-    placesService.getDetails({ placeId }, (place, status) => {
+    placesService.getDetails({ placeId }, async (place, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
-            // Create the carousel if photos are available
-            let carouselHTML = "";
-            if (place.photos && place.photos.length > 0) {
-                const photos = place.photos.slice(0, 5); // Limit to the first 5 photos
-                carouselHTML = `
-                    <div id="placePhotosCarousel" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-inner">
-                            ${photos
-                        .map((photo, index) => `
-                                <div class="carousel-item ${index === 0 ? "active" : ""}">
-                                    <img src="${photo.getUrl({ maxWidth: 800 })}" class="d-block w-100" alt="Photo ${index + 1}">
-                                </div>
-                            `)
-                        .join("")}
-                        </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#placePhotosCarousel" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#placePhotosCarousel" data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
-                        </button>
-                    </div>
-                `;
-            } else {
-                carouselHTML = `<p>No photos available for this location.</p>`;
+            const placesListContainer = document.getElementById("placesList");
+
+            // Clear existing content
+            while (placesListContainer.firstChild) {
+                placesListContainer.removeChild(placesListContainer.firstChild);
             }
 
-            // Display the place details
-            const placesListContainer = document.getElementById("placesList");
-            placesListContainer.innerHTML = `
-                <button id="backToList" class="btn btn-secondary mb-3">Back to List</button>
-                ${carouselHTML}
-                <h3 class="mt-4">${place.name}</h3>
-                <p><strong>Rating:</strong> ${place.rating || "N/A"} (${place.user_ratings_total || 0} reviews)</p>
-                <p><strong>Address:</strong> ${place.formatted_address || "Not available"}</p>
-                <p><strong>Opening Hours:</strong> ${place.opening_hours?.weekday_text?.join(", ") || "Not available"
-                }</p>
-                <p><strong>Phone:</strong> ${place.formatted_phone_number || "Not available"}</p>
-                <p><strong>Website:</strong> <a href="${place.website}" target="_blank">${place.website || "Not available"}</a></p>
-                <p><strong>Description:</strong> ${place.editorial_summary?.overview || "No description available."
-                }</p>
-            `;
-
-            // Add back button functionality
-            document.getElementById("backToList").addEventListener("click", () => {
-                // Restore search results or all places
+            const backButton = document.createElement("button");
+            backButton.id = "backToList";
+            backButton.classList.add("btn", "btn-secondary", "mb-3");
+            backButton.textContent = "Back to List";
+            backButton.addEventListener("click", () => {
                 if (currentSearchQuery && currentSearchResults.length > 0) {
-                    displayPlaces(currentSearchResults); // Restore search results
+                    displayPlaces(currentSearchResults);
                     addMarkers(currentSearchResults);
                 } else {
-                    displayPlaces(allPlaces); // Default to all places
+                    displayPlaces(allPlaces);
                     addMarkers(allPlaces);
                 }
 
-                // Restore the search input
                 document.getElementById("searchInput").value = currentSearchQuery;
             });
 
-            // Highlight the marker on the map
+            placesListContainer.appendChild(backButton);
+
+            if (place.photos && place.photos.length > 0) {
+                const carousel = createCarousel(place.photos.slice(0, 5));
+                placesListContainer.appendChild(carousel);
+            } else {
+                const noPhotos = document.createElement("p");
+                noPhotos.textContent = "No photos available for this location.";
+                placesListContainer.appendChild(noPhotos);
+            }
+
+            const details = [
+                { label: "Rating", value: `${place.rating || "N/A"} (${place.user_ratings_total || 0} reviews)` },
+                { label: "Address", value: place.formatted_address || "Not available" },
+                { label: "Phone", value: place.formatted_phone_number || "Not available" },
+                { label: "Website", value: place.website || "Not available" },
+            ];
+
+            details.forEach((detail) => {
+                const detailElement = document.createElement("p");
+
+                const strong = document.createElement("strong");
+                strong.textContent = `${detail.label}: `;
+
+                const span = document.createElement("span");
+                span.textContent = detail.value;
+
+                detailElement.appendChild(strong);
+                detailElement.appendChild(span);
+                placesListContainer.appendChild(detailElement);
+            });
+
+            // Opening Hours
+            if (place.opening_hours?.weekday_text) {
+                const openingHoursTitle = document.createElement("p");
+                const strong = document.createElement("strong");
+                strong.textContent = "Opening Hours:";
+                openingHoursTitle.appendChild(strong);
+                placesListContainer.appendChild(openingHoursTitle);
+
+                place.opening_hours.weekday_text.forEach((dayText) => {
+                    const dayElement = document.createElement("p");
+                    dayElement.textContent = dayText;
+                    placesListContainer.appendChild(dayElement);
+                });
+            } else {
+                const noOpeningHours = document.createElement("p");
+                noOpeningHours.textContent = "Opening Hours: Not available";
+                placesListContainer.appendChild(noOpeningHours);
+            }
+
+            // Fetch and display description using Wikipedia API
+            const descriptionTitle = document.createElement("p");
+            const strongDescription = document.createElement("strong");
+            strongDescription.textContent = "Description:";
+            descriptionTitle.appendChild(strongDescription);
+            placesListContainer.appendChild(descriptionTitle);
+
+            const description = await fetchWikipediaDescription(place.name);
+            description.forEach((paragraph) => {
+                const paragraphElement = document.createElement("p");
+                paragraphElement.textContent = paragraph;
+                placesListContainer.appendChild(paragraphElement);
+            });
+
             highlightMarker(place.geometry.location);
         } else {
             console.error("Error fetching place details:", status);
@@ -363,7 +374,118 @@ function displayPlaceDetails(placeId) {
 }
 
 
+async function fetchWikipediaDescription(query) {
+    const wikiUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=extracts&exintro=true&explaintext=true&titles=${encodeURIComponent(
+        query
+    )}`;
 
+    try {
+        const response = await fetch(wikiUrl);
+        const data = await response.json();
+        const pages = data.query.pages;
+        const page = Object.values(pages)[0]; // Get the first result
+
+        if (page && page.extract) {
+            return formatDescription(page.extract);
+        } else {
+            console.warn("No Wikipedia description found for:", query);
+            return ["No description available."];
+        }
+    } catch (error) {
+        console.error("Error fetching Wikipedia description:", error);
+        return ["Failed to fetch description."];
+    }
+}
+
+function formatDescription(description) {
+    const maxLength = 200; // Character limit per paragraph
+    const sentences = description.split(". "); // Split description into sentences
+    const paragraphs = [];
+    let currentParagraph = "";
+
+    sentences.forEach((sentence) => {
+        if ((currentParagraph + sentence).length <= maxLength) {
+            currentParagraph += sentence + ". ";
+        } else {
+            paragraphs.push(currentParagraph.trim());
+            currentParagraph = sentence + ". ";
+        }
+    });
+
+    // Add any remaining content as the last paragraph
+    if (currentParagraph.trim().length > 0) {
+        paragraphs.push(currentParagraph.trim());
+    }
+
+    return paragraphs;
+}
+
+
+
+function createCarousel(photos) {
+    const carousel = document.createElement("div");
+    carousel.id = "placePhotosCarousel";
+    carousel.classList.add("carousel", "slide");
+    carousel.setAttribute("data-bs-ride", "carousel");
+
+    const carouselInner = document.createElement("div");
+    carouselInner.classList.add("carousel-inner");
+
+    photos.forEach((photo, index) => {
+        const carouselItem = document.createElement("div");
+        carouselItem.classList.add("carousel-item");
+        if (index === 0) {
+            carouselItem.classList.add("active");
+        }
+
+        const img = document.createElement("img");
+        img.src = photo.getUrl({ maxWidth: 800 });
+        img.classList.add("d-block", "w-100");
+        img.alt = `Photo ${index + 1}`;
+
+        carouselItem.appendChild(img);
+        carouselInner.appendChild(carouselItem);
+    });
+
+    carousel.appendChild(carouselInner);
+
+    const prevButton = document.createElement("button");
+    prevButton.classList.add("carousel-control-prev");
+    prevButton.setAttribute("data-bs-target", "#placePhotosCarousel");
+    prevButton.setAttribute("data-bs-slide", "prev");
+
+    const prevIcon = document.createElement("span");
+    prevIcon.classList.add("carousel-control-prev-icon");
+    prevIcon.setAttribute("aria-hidden", "true");
+
+    const prevText = document.createElement("span");
+    prevText.classList.add("visually-hidden");
+    prevText.textContent = "Previous";
+
+    prevButton.appendChild(prevIcon);
+    prevButton.appendChild(prevText);
+
+    const nextButton = document.createElement("button");
+    nextButton.classList.add("carousel-control-next");
+    nextButton.setAttribute("data-bs-target", "#placePhotosCarousel");
+    nextButton.setAttribute("data-bs-slide", "next");
+
+    const nextIcon = document.createElement("span");
+    nextIcon.classList.add("carousel-control-next-icon");
+    nextIcon.setAttribute("aria-hidden", "true");
+
+    const nextText = document.createElement("span");
+    nextText.classList.add("visually-hidden");
+    nextText.textContent = "Next";
+
+    nextButton.appendChild(nextIcon);
+    nextButton.appendChild(nextText);
+
+    carousel.appendChild(prevButton);
+    carousel.appendChild(nextButton);
+
+    return carousel;
+}
 
 
 function highlightMarker(location) {
@@ -461,7 +583,12 @@ function updateMapMarkers(places) {
 
 async function loadSavedActivities() {
     const savedActivitiesContainer = document.getElementById("savedActivities");
-    savedActivitiesContainer.innerHTML = "";
+
+    // Clear existing content
+    while (savedActivitiesContainer.firstChild) {
+        savedActivitiesContainer.removeChild(savedActivitiesContainer.firstChild);
+    }
+
 
     try {
         const snapshot = await getDocs(collection(db, `users/${userId}/trips/${tripId}/activities`));
@@ -481,39 +608,6 @@ async function loadSavedActivities() {
     }
 }
 
-
-// async function loadSavedActivities() {
-//     const savedActivitiesContainer = document.getElementById("savedActivities");
-//     savedActivitiesContainer.innerHTML = "";
-
-//     try {
-//         const snapshot = await getDocs(collection(db, `users/${userId}/trips/${tripId}/activities`));
-//         snapshot.forEach((doc) => {
-//             const activity = doc.data();
-//             const activityId = doc.id;
-
-//             console.log("Saved activity loaded:", { id: activityId, name: activity.name });
-
-//             // // Check if the activity already has a marker
-//             // const markerExists = markers.some(marker => marker.title === activityId);
-
-//             // if (!markerExists) {
-//             //     console.warn(`Marker for activity ID ${activityId} not found. Fetching place details.`);
-//             //     fetchMissingPlace(activityId); // Fetch marker for missing place
-//             // }
-
-//             // Only display activities not already in the calendar
-//             if (!isActivityInCalendar(activityId)) {
-//                 const activityEl = createActivityCard(activityId, activity.name, true, "savedActivities");
-//                 savedActivitiesContainer.appendChild(activityEl);
-//             }
-//         });
-//     } catch (error) {
-//         console.error("Error loading saved activities:", error);
-//     }
-// }
-
-
 function createActivityCard(activityId, name, isRemovable = false, source = "savedActivities", date = null) {
     const activityEl = document.createElement("div");
     activityEl.classList.add("activity-item", "card", "p-2", "m-2");
@@ -529,18 +623,30 @@ function createActivityCard(activityId, name, isRemovable = false, source = "sav
         }
     });
 
-    // Include the Remove Button for both Saved Activities and Calendar
-    const removeHandler = source === "calendar"
-        ? `removeActivityFromDate('${date}', '${activityId}')`
-        : `removeActivity('${activityId}')`;
+    // Create the span for the activity name
+    const nameEl = document.createElement("span");
+    nameEl.textContent = name;
+    activityEl.appendChild(nameEl);
 
-    activityEl.innerHTML = `
-        <span>${name}</span>
-        ${isRemovable ? `<button class="btn btn-sm btn-danger mt-2" onclick="${removeHandler}">Remove</button>` : ""}
-    `;
+    // If removable, add the remove button
+    if (isRemovable) {
+        const removeButton = document.createElement("button");
+        removeButton.classList.add("btn", "btn-sm", "btn-danger", "mt-2");
+        removeButton.textContent = "Remove";
+
+        // Add the appropriate click event listener for the remove button
+        if (source === "calendar") {
+            removeButton.addEventListener("click", () => removeActivityFromDate(date, activityId));
+        } else {
+            removeButton.addEventListener("click", () => removeActivity(activityId));
+        }
+
+        activityEl.appendChild(removeButton);
+    }
 
     return activityEl;
 }
+
 
 function savePlace(placeId, name, event) {
     event.stopPropagation(); // Prevent click propagation
@@ -604,47 +710,65 @@ async function removeActivity(activityId) {
 // Event listener removed from calendar dates (for filtering markers)
 async function displayCalendar(dates) {
     const calendar = document.getElementById("calendar");
-    calendar.innerHTML = "";
+
+    // Clear existing content
+    while (calendar.firstChild) {
+        calendar.removeChild(calendar.firstChild);
+    }
 
     for (const date of dates) {
         const weatherDataForDate = weatherData[date]; // Use pre-fetched weather data
 
-        // Build weather display if data exists
-        const weatherDisplay = weatherDataForDate
-            ? `
-                <div class="weather-details">
-                    <img 
-                        src="http://openweathermap.org/img/wn/${weatherDataForDate.icon}@2x.png" 
-                        alt="${weatherDataForDate.description}" 
-                        class="weather-icon" 
-                    />
-                    <span class="high-low-temp">
-                        H: ${weatherDataForDate.highTemp}°C L: ${weatherDataForDate.lowTemp}°C
-                    </span>
-                </div>
-              `
-            : `<p>No weather data</p>`;
-
+        // Create the date container
         const dateContainer = document.createElement("div");
         dateContainer.classList.add("card", "p-3", "mb-3");
         dateContainer.dataset.date = date;
 
-        // Allow dragover and drop
+        // Add drag-and-drop event listeners
         dateContainer.addEventListener("dragover", (event) => event.preventDefault());
         dateContainer.addEventListener("drop", (event) => handleDrop(event, date));
 
-        dateContainer.innerHTML = `
-            <h6>${new Date(date).toLocaleDateString()}</h6>
-            ${weatherDisplay}
-            <div class="activity-dropzone"></div>
-        `;
+        // Add the date as a header
+        const dateHeader = document.createElement("h6");
+        dateHeader.textContent = new Date(date).toLocaleDateString();
+        dateContainer.appendChild(dateHeader);
 
+        // Add weather details if available
+        if (weatherDataForDate) {
+            const weatherDetails = document.createElement("div");
+            weatherDetails.classList.add("weather-details");
+
+            const weatherIcon = document.createElement("img");
+            weatherIcon.src = `http://openweathermap.org/img/wn/${weatherDataForDate.icon}@2x.png`;
+            weatherIcon.alt = weatherDataForDate.description;
+            weatherIcon.classList.add("weather-icon");
+
+            const tempSpan = document.createElement("span");
+            tempSpan.classList.add("high-low-temp");
+            tempSpan.textContent = `H: ${weatherDataForDate.highTemp}°C L: ${weatherDataForDate.lowTemp}°C`;
+
+            weatherDetails.appendChild(weatherIcon);
+            weatherDetails.appendChild(tempSpan);
+            dateContainer.appendChild(weatherDetails);
+        } else {
+            const noWeather = document.createElement("p");
+            noWeather.textContent = "No weather data";
+            dateContainer.appendChild(noWeather);
+        }
+
+        // Add the activity dropzone
+        const dropzone = document.createElement("div");
+        dropzone.classList.add("activity-dropzone");
+        dateContainer.appendChild(dropzone);
+
+        // Append the date container to the calendar
         calendar.appendChild(dateContainer);
     }
 
     // Load itinerary data for each date
     loadItinerary();
 }
+
 
 
 // Fetch & display itinerary for specific dates
@@ -663,19 +787,17 @@ async function loadItinerary() {
 
 function populateDateActivities(date, activities) {
     const dropzone = document.querySelector(`[data-date="${date}"] .activity-dropzone`);
-    dropzone.innerHTML = ""; // Clear existing activities
 
+    // Clear existing activities
+    while (dropzone.firstChild) {
+        dropzone.removeChild(dropzone.firstChild);
+    }
+
+    // Add activities to the dropzone
     activities.forEach((activity) => {
         const activityEl = createActivityCard(activity.id, activity.name, true, "calendar", date);
         dropzone.appendChild(activityEl);
     });
-
-    // Add click listener to filter markers and show route
-    // const dateCard = document.querySelector(`[data-date="${date}"]`);
-    // dateCard.addEventListener("click", () => {
-    //     console.log("Activities for date:", date, activities);
-    //     filterMarkersByDate(date, activities);
-    // });
 
     // Enable reordering within the date
     enableReorderingWithinDate(dropzone);
