@@ -30,6 +30,14 @@ const db = getFirestore(app);
 const auth = getAuth();
 let userUID = null;
 
+function getUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        tripID: params.get('tripID'),
+        location: params.get('location')
+    };
+}
+
 // Existing variables and elements
 let totalBudget = 0;
 let totalSpending = 0;
@@ -73,58 +81,62 @@ const CATEGORY_COLORS = {
 
 
 async function loadTrips() {
-    console.log("Current auth state:", auth.currentUser); // Debug auth state
-    console.log("Local userUID:", userUID); // Debug local userUID
-
     const tripSelect = document.getElementById('trip');
-    tripSelect.innerText = ''; // Clear previous options
-
-    // Add default option
+    tripSelect.innerText = '';
     const defaultOption = document.createElement('option');
     defaultOption.value = "";
     defaultOption.innerText = "Select a trip";
     tripSelect.appendChild(defaultOption);
 
     try {
-        const user = auth.currentUser;
-        if (!user) {
-            console.error("No user logged in");
-            window.location.href = "login.html";
-            return;
-        }
-        userUID = user.uid;
-        console.log("Attempting to load trips for user:", userUID);
-        console.log("Full collection path:", `users/${userUID}/trips`);
-
-        // Query trips from user's subcollection
+        if (!auth.currentUser) return;
+        userUID = auth.currentUser.uid;
         const tripsRef = collection(db, `users/${userUID}/trips`);
         const querySnapshot = await getDocs(tripsRef);
 
-        console.log("Number of trips found:", querySnapshot.size); // Debug log
+        // Get tripID - first check URL params, then fallback to localStorage
+        const params = new URLSearchParams(window.location.search);
+        const urlTripID = params.get('tripID');
+        const storedTripID = localStorage.getItem("selectedTripId");
+        const tripToSelect = urlTripID || storedTripID;
+
+        console.log('TripID to select:', tripToSelect); // Debug log
 
         querySnapshot.forEach((doc) => {
             const tripData = doc.data();
-            console.log("Trip data:", tripData); // Debug log
-
             const option = document.createElement('option');
             option.value = doc.id;
-            option.innerText = tripData.name || 'Unnamed Trip'; // Fallback if name is missing
-            option.dataset.country = tripData.country || ''; // Store country info
-            tripSelect.appendChild(option);
-
+            option.innerText = tripData.name || 'Unnamed Trip';
+            
             if (tripData.location) {
                 const country = tripData.location.split(',').pop().trim();
-                console.log('Extracted country:', country); // Debug log
                 option.dataset.country = country;
             }
+            
+            // Set this option as selected if it matches the tripID
+            if (tripToSelect && doc.id === tripToSelect) {
+                option.selected = true;
+                console.log('Found matching trip, setting as selected'); // Debug log
+            }
+            
+            tripSelect.appendChild(option);
         });
 
-        if (querySnapshot.size === 0) {
-            console.log("No trips found for user"); // Debug log
+        // If we have a trip to select, trigger the change event to load the trip data
+        if (tripToSelect) {
+            console.log('Triggering change event for trip selection'); // Debug log
+            currentTripId = tripToSelect;
+            tripSelect.dispatchEvent(new Event('change'));
+            
+            // Load trip data
+            await loadTripData(tripToSelect);
+            
+            // Show UI elements
+            expenseCard.style.display = 'block';
+            dashboardSection.style.display = 'block';
         }
     } catch (error) {
         console.error("Error loading trips:", error);
-        console.error("Error details:", error.code, error.message);
     }
 }
 
@@ -661,61 +673,78 @@ async function deleteTransaction(index) {
 
 document.addEventListener('DOMContentLoaded', function () {
     // Check authentication first
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
             userUID = user.uid;
-            loadTrips();  // Load trips after we have the userUID
-            initializeChart();
+            await loadTrips();  // Wait for trips to load
+            
+            // Get URL parameters for initial load
+            const { tripID } = getUrlParams();
+            
+            if (tripID) {
+                // Set the dropdown value to the tripID
+                const tripSelect = document.getElementById('trip');
+                tripSelect.value = tripID;
+                
+                // Initialize chart and load trip data
+                currentTripId = tripID;
+                initializeChart();
+                await loadTripData(tripID);
+                
+                // Show UI elements
+                expenseCard.style.display = 'block';
+                dashboardSection.style.display = 'block';
+            }
 
-            // Add trip selection handler
+            // Add change event handler for trip dropdown
             document.getElementById('trip').addEventListener('change', async function (e) {
                 const selectedTripId = e.target.value;
                 const selectedOption = e.target.options[e.target.selectedIndex];
-                const country = selectedOption.dataset.country;
-
-                console.log('Selected country:', country); // Debug log
-                console.log('Mapped currency:', countryToCurrencyMap[country]); // Debug log
-
-                if (expenseChart) {
-                    expenseChart.destroy();
-                    expenseChart = null;
-                }
-
-                if (country && countryToCurrencyMap[country]) {
-                    selectedCurrency = countryToCurrencyMap[country];
-                    document.getElementById('currency').value = selectedCurrency;
-                    console.log('Currency set to:', selectedCurrency); // Confirm currency update
-                }
-
+                
                 if (selectedTripId) {
                     currentTripId = selectedTripId;
-
+                    
+                    // Get trip data and update everything
                     try {
-                        // Use the correct path with user ID
                         const tripRef = doc(db, `users/${userUID}/trips`, selectedTripId);
                         const tripDoc = await getDoc(tripRef);
 
                         if (tripDoc.exists()) {
                             const tripData = tripDoc.data();
-
-                            // Set budget values
+                            
+                            // Set budget value
                             totalBudget = Number(tripData.budget) || 0;
                             document.getElementById('budget').value = totalBudget;
 
-                            // Reset spending and expenses
-                            totalSpending = 0;
-                            expenses.length = 0;
+                            // Set location-based currency if available
+                            if (tripData.location) {
+                                const country = tripData.location.split(',').pop().trim();
+                                if (countryToCurrencyMap[country]) {
+                                    selectedCurrency = countryToCurrencyMap[country];
+                                    const currencySelect = document.getElementById('currency');
+                                    if (currencySelect) {
+                                        currencySelect.value = selectedCurrency;
+                                    }
+                                }
+                            }
 
                             // Show UI elements
                             expenseCard.style.display = 'block';
                             dashboardSection.style.display = 'block';
 
-                            // Load trip data and set up listeners
-                            initializeChart();
+                            // Initialize chart if needed
+                            if (!expenseChart) {
+                                initializeChart();
+                            }
+
+                            // Load full trip data including expenses
                             await loadTripData(selectedTripId);
 
-                            // Initial dashboard update
+                            // Update all UI elements
                             updateDashboard();
+                            
+                        } else {
+                            console.log("No trip found with ID:", selectedTripId);
                         }
                     } catch (error) {
                         console.error("Error loading trip:", error);
@@ -732,7 +761,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         } else {
-            // If no user is logged in, redirect to login page
             window.location.href = "login.html";
         }
     });

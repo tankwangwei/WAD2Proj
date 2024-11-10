@@ -632,7 +632,7 @@ function createActivityCard(activityId, name, isRemovable = false, source = "sav
     if (isRemovable) {
         const removeButton = document.createElement("button");
         removeButton.classList.add("btn", "btn-sm", "btn-danger", "mt-2");
-        removeButton.textContent = "Remove";
+        removeButton.textContent = "REMOVE";
 
         // Add the appropriate click event listener for the remove button
         if (source === "calendar") {
