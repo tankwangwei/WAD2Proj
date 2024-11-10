@@ -16,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
-        body ::after {
+        body {
             position: fixed;
             /* Changed to fixed */
             top: 0;
@@ -71,12 +71,13 @@
             height: 2px;
             background-color: white;
             left: 0;
-            bottom: -5px;
+            bottom: 0px;
             transition: width 0.4s ease;
         }
 
         .navbar .nav-link:hover::after {
             width: 100%;
+            bottom: 0;
         }
 
         /* Position the collapsed navbar content below the toggler button on small screens */
