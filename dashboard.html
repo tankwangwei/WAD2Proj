@@ -696,6 +696,21 @@
             }
         }
 
+        function navigateToItineraryBuilder() {
+            const tripId = localStorage.getItem("tripId"); // Get the current tripId from localStorage
+            const location = localStorage.getItem("location"); // Get the current location from localStorage
+
+            if (!tripId || !location) {
+                console.error("Missing tripId or location. Cannot navigate to Itinerary Builder.");
+                return;
+            }
+
+            // Redirect to itinerary.html with query parameters for tripId and location
+            const url = `itinerary.html?tripId=${encodeURIComponent(tripId)}&location=${encodeURIComponent(location)}`;
+            window.location.href = url;
+        }
+
+
     </script>
 </head>
 
@@ -853,7 +868,25 @@
             <!-- Destination Section -->
             <div class="col-lg-5 col-md-5">
                 <div id="destination-section" class="p-3 rounded-section standard-height">
-                    <h5 class="text-center">Destination</h5>
+                    <div class="destination-header d-flex justify-content-between align-items-center">
+                        <h5 style="margin: 0">Destination</h5>
+                        <a href="#" class="see-all-link" onclick="navigateToItineraryBuilder()">
+                            Edit Itinerary <span>→</span>
+                        </a>
+                    </div>
+                    <div class="destination-carousel-container mt-3">
+                        <button class="carousel-button carousel-button-left"
+                            onclick="scrollLeft('destination-carousel')">
+                            &#8249;
+                        </button>
+                        <div id="destination-carousel" class="carousel">
+                            <!-- Itinerary days will be dynamically inserted here -->
+                        </div>
+                        <button class="carousel-button carousel-button-right"
+                            onclick="scrollRight('destination-carousel')">
+                            &#8250;
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -1109,6 +1142,8 @@
 
                         // Update the pie chart with the expense data
                         updatePieChart(await calculateCategoryTotals(tripId)); // Fetch category totals for pie chart
+
+                        await populateDestinationCarousel(); // Update itinerary
 
                         // Fetch and display updated weather, attractions, and currency based on location
                         fetchWeatherData(location);
@@ -1698,6 +1733,85 @@
                 }
             }
 
+            // Function to fetch and populate the destination carousel dynamically
+            async function populateDestinationCarousel() {
+                const carousel = document.getElementById("destination-carousel");
+                const tripId = localStorage.getItem("selectedTripId");
+                const userId = auth.currentUser.uid;
+
+                // Clear existing content in the carousel
+                while (carousel.firstChild) {
+                    carousel.removeChild(carousel.firstChild);
+                }
+
+                if (!tripId || !userId) {
+                    console.error("Trip ID or User ID is missing.");
+                    return;
+                }
+
+                try {
+                    const tripDoc = await getDoc(doc(db, `users/${userId}/trips/${tripId}`));
+                    if (!tripDoc.exists()) {
+                        console.error("Trip document does not exist.");
+                        return;
+                    }
+
+                    const tripData = tripDoc.data();
+                    const { dates } = tripData;
+
+                    // Iterate through the dates array
+                    dates.forEach(async (date, index) => {
+                        const dateRef = doc(db, `users/${userId}/trips/${tripId}/itinerary`, date);
+                        const dateSnapshot = await getDoc(dateRef);
+
+                        const dayCard = document.createElement("div");
+                        dayCard.classList.add("day-card");
+
+                        const dayTitle = document.createElement("h6");
+                        dayTitle.textContent = `Day ${index + 1} - ${new Date(date).toLocaleDateString()}`;
+                        dayCard.appendChild(dayTitle);
+
+                        const activityList = document.createElement("ul");
+                        if (dateSnapshot.exists()) {
+                            const dayData = dateSnapshot.data();
+                            dayData.activities.forEach((activity) => {
+                                const activityItem = document.createElement("li");
+                                activityItem.textContent = activity.name;
+                                activityList.appendChild(activityItem);
+                            });
+                        } else {
+                            const noActivityMessage = document.createElement("p");
+                            noActivityMessage.textContent = "No activities planned for this day.";
+                            activityList.appendChild(noActivityMessage);
+                        }
+
+                        dayCard.appendChild(activityList);
+                        carousel.appendChild(dayCard);
+                    });
+                } catch (error) {
+                    console.error("Error populating destination carousel:", error);
+                }
+            }
+
+
+            // Scrolling functionality for carousel
+            function scrollLeft(containerId) {
+                const container = document.getElementById(containerId);
+                container.scrollLeft -= 300; // Adjust scroll amount as needed
+            }
+
+            function scrollRight(containerId) {
+                const container = document.getElementById(containerId);
+                container.scrollLeft += 300; // Adjust scroll amount as needed
+            }
+
+            // Call the function to populate the carousel when the page loads
+            // document.addEventListener("DOMContentLoaded", () => {
+            //     populateDestinationCarousel();
+            // });
+
+
+
             document.addEventListener("DOMContentLoaded", function () {
                 // Example call to displayAttractions with dummy data
                 const attractions = Array(20).fill({ name: 'Attraction', photos: [], vicinity: 'Address' });
@@ -1780,6 +1894,9 @@
                 if (selectedTripId) {
                     localStorage.setItem("selectedTripId", selectedTripId);
                     await loadTripData(selectedTripId);
+
+                    // Call populateDestinationCarousel to update the destination section
+                    await populateDestinationCarousel();
 
                     // Get location from the selected trip's data to update background
                     const location = localStorage.getItem("location");
