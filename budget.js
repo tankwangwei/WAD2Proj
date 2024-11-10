@@ -77,7 +77,13 @@ async function loadTrips() {
     console.log("Local userUID:", userUID); // Debug local userUID
 
     const tripSelect = document.getElementById('trip');
-    tripSelect.innerHTML = '<option value="">Select a trip</option>';
+    tripSelect.innerText = ''; // Clear previous options
+
+    // Add default option
+    const defaultOption = document.createElement('option');
+    defaultOption.value = "";
+    defaultOption.innerText = "Select a trip";
+    tripSelect.appendChild(defaultOption);
 
     try {
         const user = auth.currentUser;
@@ -102,9 +108,10 @@ async function loadTrips() {
 
             const option = document.createElement('option');
             option.value = doc.id;
-            option.textContent = tripData.name || 'Unnamed Trip'; // Fallback if name is missing
+            option.innerText = tripData.name || 'Unnamed Trip'; // Fallback if name is missing
             option.dataset.country = tripData.country || ''; // Store country info
             tripSelect.appendChild(option);
+
             if (tripData.location) {
                 const country = tripData.location.split(',').pop().trim();
                 console.log('Extracted country:', country); // Debug log
@@ -322,7 +329,7 @@ async function loadTripData(tripId) {
 
 // Function to update the Recent Transactions Table
 function updateRecentTransactionsTable() {
-    recentTransactionsTable.innerHTML = ''; // Clear existing rows
+    recentTransactionsTable.innerText = ''; // Clear existing rows
     expenses.forEach((expense, index) => {
         const row = document.createElement('tr');
 
@@ -747,13 +754,20 @@ async function getCurrencyRates() {
 
             // Populate currency select dropdown
             const currencySelect = document.getElementById("currency");
-            currencySelect.innerHTML = '<option value="EUR">EUR</option>'; // Add EUR as default
+            currencySelect.innerText = ''; // Clear previous options
 
+            // Add EUR as default option
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "EUR";
+            defaultOption.innerText = "EUR";
+            currencySelect.appendChild(defaultOption);
+
+            // Add remaining currencies
             Object.keys(currencyRates).sort().forEach(key => {
                 if (key !== "EUR") { // Skip EUR as it's already added
-                    let option = document.createElement("option");
+                    const option = document.createElement("option");
                     option.value = key;
-                    option.textContent = key;
+                    option.innerText = key;
                     currencySelect.appendChild(option);
                 }
             });
@@ -778,19 +792,25 @@ async function getCurrencyRates() {
     }
 }
 
+
 function handleCurrencyError() {
     currencyRates = { "EUR": 1 }; // Set default rate
     selectedCurrency = "EUR";
 
     // Update currency select dropdown with only EUR
     const currencySelect = document.getElementById("currency");
-    currencySelect.innerHTML = '<option value="EUR">EUR</option>';
+    currencySelect.innerText = ''; // Clear previous options
+
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "EUR";
+    defaultOption.innerText = "EUR";
+    currencySelect.appendChild(defaultOption);
     currencySelect.value = "EUR";
 
     // Show error message to user
     const errorMessage = document.createElement('div');
     errorMessage.className = 'alert alert-warning';
-    errorMessage.textContent = 'Currency conversion unavailable. Showing amounts in EUR.';
+    errorMessage.innerText = 'Currency conversion unavailable. Showing amounts in EUR.';
     errorMessage.style.margin = '10px 0';
 
     const dashboardSection = document.getElementById('dashboardSection');
@@ -825,7 +845,7 @@ document.getElementById("currency").addEventListener("change", updateCurrency);
 
 
 function updateRecentTransactionsTableInCurrency(currency) {
-    recentTransactionsTable.innerHTML = '';
+    recentTransactionsTable.innerText = '';
     expenses.forEach((expense, index) => {
         const row = document.createElement('tr');
 

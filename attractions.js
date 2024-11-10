@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // For the itinerary builder specifically
     const itineraryLink = document.getElementById("itineraryBuilderLink");
     if (itineraryLink) {
-        itineraryLink.addEventListener("click", function(e) {
+        itineraryLink.addEventListener("click", function (e) {
             clearExistingAlerts();
             const tripId = localStorage.getItem("selectedTripId");
             const location = localStorage.getItem("location");
@@ -83,24 +83,24 @@ function initializeTripId() {
     const urlParams = new URLSearchParams(window.location.search);
     const urlTripId = urlParams.get('tripID');
     const storedTripId = localStorage.getItem("selectedTripId");
-    
+
     // Use URL tripID if available, otherwise use stored tripID
     currentTripId = urlTripId || storedTripId;
-    
+
     console.log('Initialized tripID:', currentTripId);
-    
+
     if (!currentTripId) {
         showTripAlert();
         return false;
     }
-    
+
     // Set the location input field if available
     const location = decodeURIComponent(urlParams.get('location') || localStorage.getItem("location") || "");
     const locationInput = document.getElementById("location");
     if (locationInput && location) {
         locationInput.value = location;
     }
-    
+
     return true;
 }
 
@@ -150,7 +150,7 @@ function checkTripID(tripID) {
         // Insert alert at the top of the main container
         const container = document.querySelector('body > div') || document.body;
         container.insertBefore(alert, container.firstChild);
-        
+
         return false;
     }
     return true;
@@ -159,11 +159,11 @@ function getCurrentTripId() {
     const urlParams = new URLSearchParams(window.location.search);
     const urlTripId = urlParams.get('tripID');
     const storedTripId = localStorage.getItem("selectedTripId");
-    
+
     console.log('Trip ID from URL:', urlTripId);
     console.log('Trip ID from localStorage:', storedTripId);
     console.log('Using Trip ID:', urlTripId || storedTripId);
-    
+
     return urlTripId || storedTripId;
 }
 
@@ -190,7 +190,7 @@ document.getElementById("searchForm").addEventListener("submit", function (event
 // Display attractions in cards
 function displayAttractions(attractions) {
     const attractionContainer = document.getElementById('attractionsContainer');
-    attractionContainer.innerHTML = ''; // Clear previous results
+    attractionContainer.innerText = ''; // Clear previous results
 
     if (attractions.length === 0) {
         displayNoAttractionsMessage();
@@ -211,33 +211,88 @@ function displayAttractions(attractions) {
         const lat = attraction.geometry.location.lat();
         const lng = attraction.geometry.location.lng();
 
-        attractionCard.innerHTML = `
-            <div class="card h-100">
-                <img src="${imageUrl}" class="card-img-top" alt="${attraction.name}">
-                <div class="card-body">
-                    <h5 class="card-title">${attraction.name}</h5>
-                    <p class="card-text">Rating: ${attraction.rating || "N/A"}</p>
-                    <p class="card-text">Reviews: ${attraction.user_ratings_total || 0}</p>
-                    <p class="card-text">Address: ${attraction.formatted_address || attraction.vicinity}</p>
-                    
-                    <div class="save-icon" onclick="saveActivity('${tripID}', '${attraction.name}', '${attraction.formatted_address || attraction.vicinity}', ${lat}, ${lng}, '${imageUrl}', this)">
-                        <span class="icon plus-icon" title="Save Activity">＋</span>
-                        <span class="icon checkmark-icon" title="Saved" style="display:none;">✔</span>
-                    </div>
+        // Create card structure
+        const card = document.createElement('div');
+        card.classList.add('card', 'h-100');
 
-                    <!-- Popup Content -->
-                    <div class="popup-content">
-                        <div class="popup-title">${attraction.name}</div>
-                        <div class="popup-description" id="about-${attraction.place_id}">Loading about...</div>
-                    </div>
-                </div>
-            </div>
-        `;
-        attractionContainer.append(attractionCard);
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.classList.add('card-img-top');
+        img.alt = attraction.name;
 
+        const cardBody = document.createElement('div');
+        cardBody.classList.add('card-body');
+
+        const title = document.createElement('h5');
+        title.classList.add('card-title');
+        title.innerText = attraction.name;
+
+        const ratingText = document.createElement('p');
+        ratingText.classList.add('card-text');
+        ratingText.innerText = `Rating: ${attraction.rating || "N/A"}`;
+
+        const reviewsText = document.createElement('p');
+        reviewsText.classList.add('card-text');
+        reviewsText.innerText = `Reviews: ${attraction.user_ratings_total || 0}`;
+
+        const addressText = document.createElement('p');
+        addressText.classList.add('card-text');
+        addressText.innerText = `Address: ${attraction.formatted_address || attraction.vicinity}`;
+
+        // Create save icon section
+        const saveIcon = document.createElement('div');
+        saveIcon.classList.add('save-icon');
+        saveIcon.onclick = () => saveActivity(currentTripId, attraction.name, attraction.formatted_address || attraction.vicinity, lat, lng, imageUrl, saveIcon);
+
+        const plusIcon = document.createElement('span');
+        plusIcon.classList.add('icon', 'plus-icon');
+        plusIcon.title = "Save Activity";
+        plusIcon.innerText = "＋";
+
+        const checkmarkIcon = document.createElement('span');
+        checkmarkIcon.classList.add('icon', 'checkmark-icon');
+        checkmarkIcon.title = "Saved";
+        checkmarkIcon.style.display = "none";
+        checkmarkIcon.innerText = "✔";
+
+        saveIcon.appendChild(plusIcon);
+        saveIcon.appendChild(checkmarkIcon);
+
+        // Popup content for details
+        const popupContent = document.createElement('div');
+        popupContent.classList.add('popup-content');
+
+        const popupTitle = document.createElement('div');
+        popupTitle.classList.add('popup-title');
+        popupTitle.innerText = attraction.name;
+
+        const popupDescription = document.createElement('div');
+        popupDescription.classList.add('popup-description');
+        popupDescription.id = `about-${attraction.place_id}`;
+        popupDescription.innerText = "Loading about...";
+
+        popupContent.appendChild(popupTitle);
+        popupContent.appendChild(popupDescription);
+
+        // Assemble card components
+        cardBody.appendChild(title);
+        cardBody.appendChild(ratingText);
+        cardBody.appendChild(reviewsText);
+        cardBody.appendChild(addressText);
+        cardBody.appendChild(saveIcon);
+        cardBody.appendChild(popupContent);
+
+        card.appendChild(img);
+        card.appendChild(cardBody);
+
+        attractionCard.appendChild(card);
+        attractionContainer.appendChild(attractionCard);
+
+        // Fetch and display the attraction summary
         fetchAttractionSummary(attraction.name, `about-${attraction.place_id}`);
     });
 }
+
 
 async function fetchAttractionSummary(attractionName, elementId) {
     try {

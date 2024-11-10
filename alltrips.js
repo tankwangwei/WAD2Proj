@@ -31,13 +31,13 @@ onAuthStateChanged(auth, async (user) => {
 
 async function loadUserItineraries(userId) {
     const itinerariesContainer = document.getElementById("itinerariesContainer");
-    itinerariesContainer.innerHTML = "";
+    itinerariesContainer.innerText = "";
 
     const tripRef = collection(db, `users/${userId}/trips`);
     const snapshot = await getDocs(tripRef);
 
     if (snapshot.empty) {
-        itinerariesContainer.innerHTML = "<p>No itineraries found. Start planning your first trip!</p>";
+        itinerariesContainer.innerText = "No itineraries found. Start planning your first trip!";
         return;
     }
 
@@ -49,10 +49,10 @@ async function loadUserItineraries(userId) {
 // Display itineraries based on the given list
 async function displayItineraries(itinerariesList) {
     const itinerariesContainer = document.getElementById("itinerariesContainer");
-    itinerariesContainer.innerHTML = "";
+    itinerariesContainer.innerText = "";
 
     if (itinerariesList.length === 0) {
-        itinerariesContainer.innerHTML = "<p>No itineraries found. Start planning your first trip!</p>";
+        itinerariesContainer.innerText = "No itineraries found. Start planning your first trip!";
         return;
     }
 
@@ -73,43 +73,96 @@ async function displayItineraries(itinerariesList) {
             imageUrl = './imgs/default-placeholder.jpg'; // Fallback image
         }
 
-        const cardHtml = `
-            <div class="card h-100">
-                <div class="card-image-top" style="height: 200px; overflow: hidden;">
-                    <img src="${imageUrl}" alt="${itinerary.location}" 
-                         style="width: 100%; height: 100%; object-fit: cover;">
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title">${itinerary.name}</h5>
-                    <p class="card-text">
-                        <i class="fas fa-map-marker-alt"></i> ${itinerary.location}<br>
-                        <i class="fas fa-calendar"></i> ${itinerary.dates ? `${itinerary.dates[0]} to ${itinerary.dates[itinerary.dates.length - 1]}` : 'Dates not set'}<br>
-                        <small class="text-muted">Created on: ${itinerary.createdAt?.toDate ? itinerary.createdAt.toDate().toLocaleDateString() : "Date not available"}</small>
-                    </p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <button class="btn btn-primary" onclick="window.location.href='dashboard.html?tripID=${itinerary.id}&location=${encodeURIComponent(itinerary.location)}'">View</button>
-                        <button class="btn btn-danger" onclick="event.stopPropagation(); deleteTrip('${itinerary.id}', this.closest('.col-md-4'))">Delete</button>
-                    </div>
-                </div>
-            </div>
-        `;
+        // Create card elements
+        const card = document.createElement("div");
+        card.className = "card h-100";
 
-        col.innerHTML = cardHtml;
+        const cardImageTop = document.createElement("div");
+        cardImageTop.className = "card-image-top";
+        cardImageTop.style.height = "200px";
+        cardImageTop.style.overflow = "hidden";
+
+        const img = document.createElement("img");
+        img.src = imageUrl;
+        img.alt = itinerary.location;
+        img.style.width = "100%";
+        img.style.height = "100%";
+        img.style.objectFit = "cover";
+
+        const cardBody = document.createElement("div");
+        cardBody.className = "card-body";
+
+        const cardTitle = document.createElement("h5");
+        cardTitle.className = "card-title";
+        cardTitle.innerText = itinerary.name;
+
+        const cardText = document.createElement("p");
+        cardText.className = "card-text";
+
+        const locationIcon = document.createElement("i");
+        locationIcon.className = "fas fa-map-marker-alt";
+        const locationText = document.createTextNode(` ${itinerary.location}`);
+        cardText.appendChild(locationIcon);
+        cardText.appendChild(locationText);
+        cardText.appendChild(document.createElement("br"));
+
+        const dateIcon = document.createElement("i");
+        dateIcon.className = "fas fa-calendar";
+        const dateText = document.createTextNode(` ${itinerary.dates ? `${itinerary.dates[0]} to ${itinerary.dates[itinerary.dates.length - 1]}` : 'Dates not set'}`);
+        cardText.appendChild(dateIcon);
+        cardText.appendChild(dateText);
+        cardText.appendChild(document.createElement("br"));
+
+        const createdText = document.createElement("small");
+        createdText.className = "text-muted";
+        createdText.innerText = `Created on: ${itinerary.createdAt?.toDate ? itinerary.createdAt.toDate().toLocaleDateString() : "Date not available"}`;
+        cardText.appendChild(createdText);
+
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "d-flex justify-content-between align-items-center";
+
+        const viewButton = document.createElement("button");
+        viewButton.className = "btn btn-primary";
+        viewButton.innerText = "View";
+        viewButton.onclick = () => {
+            window.location.href = `dashboard.html?tripID=${itinerary.id}&location=${encodeURIComponent(itinerary.location)}`;
+        };
+
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "btn btn-danger";
+        deleteButton.innerText = "Delete";
+        deleteButton.onclick = (event) => {
+            event.stopPropagation();
+            deleteTrip(itinerary.id, col);
+        };
+
+        // Assemble card elements
+        cardImageTop.appendChild(img);
+        buttonContainer.appendChild(viewButton);
+        buttonContainer.appendChild(deleteButton);
+        cardBody.appendChild(cardTitle);
+        cardBody.appendChild(cardText);
+        cardBody.appendChild(buttonContainer);
+        card.appendChild(cardImageTop);
+        card.appendChild(cardBody);
+        col.appendChild(card);
+
         itinerariesContainer.appendChild(col);
     }
 }
+
 // to delete trip
-window.deleteTrip = async function(tripId, itineraryItem) {
+window.deleteTrip = async function (tripId, itineraryItem) {
     try {
         await deleteDoc(doc(db, `users/${userId}/trips`, tripId));
-        
+
         // Remove the item from the main itineraries array
         itineraries = itineraries.filter(itinerary => itinerary.id !== tripId);
 
         // Reapply the search filter to display updated results
         const searchTerm = document.getElementById("searchBar").value.toLowerCase();
-        const filteredItineraries = itineraries.filter(itinerary => 
-            itinerary.name.toLowerCase().includes(searchTerm) || 
+        const filteredItineraries = itineraries.filter(itinerary =>
+            itinerary.name.toLowerCase().includes(searchTerm) ||
             itinerary.location.toLowerCase().includes(searchTerm)
         );
         displayItineraries(filteredItineraries);
