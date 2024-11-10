@@ -689,10 +689,17 @@
         }
 
         function navigateToBudgetPage() {
-            const tripID = localStorage.getItem("selectedTripId");
-            const location = localStorage.getItem("location");
-            if (tripID) {
-                window.location.href = `budget.html?tripID=${tripID}&location=${encodeURIComponent(location)}`;
+            const selectedTripId = document.getElementById('tripDropdown').value;
+
+            if (selectedTripId) {
+                // Store the current trip ID and location
+                localStorage.setItem("selectedTripId", selectedTripId);
+                const location = localStorage.getItem("location");
+
+                // Redirect to budget page with parameters
+                window.location.href = `budget.html?tripID=${selectedTripId}&location=${encodeURIComponent(location)}`;
+            } else {
+                alert("Please select a trip first!");
             }
         }
 
@@ -1831,6 +1838,16 @@
                 }
             });
 
+            function redirectToBudgetPage() {
+                const tripID = localStorage.getItem("selectedTripId");
+                const location = localStorage.getItem("location");
+
+                if (tripID && location) {
+                    window.location.href = `budget.html?tripID=${tripID}&location=${encodeURIComponent(location)}`;
+                } else {
+                    alert("Error: Trip information not found!");
+                }
+            }
         </script>
 
 </body>
