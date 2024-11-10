@@ -11,7 +11,6 @@ export function initAutocomplete(inputID, callback) {
     autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
         if (place.geometry) {
-            // Pass the location details to the callback
             callback(place.geometry.location);
         } else {
             console.log("No geometry details available for the selected place.");
@@ -52,7 +51,7 @@ export function searchAttractionsByText(locationText, callback) {
     const service = new google.maps.places.PlacesService(document.createElement('div'));
     const request = {
         query: locationText,
-        type: ['regions'] // Search for cities, towns, etc.
+        type: ['regions']
     };
 
     service.textSearch(request, (results, status) => {
@@ -68,7 +67,10 @@ export function searchAttractionsByText(locationText, callback) {
 
 export function displayNoAttractionsMessage() {
     const attractionContainer = document.getElementById('attractionsContainer');
-    attractionContainer.innerHTML = ''; // Clear previous results
-    attractionContainer.innerHTML = '<h2>No attractions found.</h2>'; // Show message if no attractions
+    attractionContainer.innerText = ''; // Clear previous results
+    
+    const noAttractionsMessage = document.createElement('h2');
+    noAttractionsMessage.innerText = 'No attractions found'; // Set the message text    
+    attractionContainer.appendChild(noAttractionsMessage);
 }
 

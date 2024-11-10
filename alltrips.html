@@ -48,12 +48,9 @@
 
     .navbar.navbar-expand-md.fixed-top {
         width: 100vw;
-        /* Use viewport width instead of fixed width */
         overflow: visible !important;
-        /* Allow dropdown to overflow */
     }
 
-    /* Fix container overflow */
     .container-fluid {
         overflow: visible !important;
     }
@@ -64,7 +61,6 @@
 
     .container h1 {
         padding: 25px 10px;
-        /* Adjust these values as needed */
     }
 
 
@@ -77,15 +73,12 @@
     .trip-header {
         display: flex;
         justify-content: space-between;
-        /* Pushes dropdown to the far right */
         align-items: center;
     }
 
     .trip-dropdown {
         width: auto;
-        /* Makes the dropdown width fit its content */
         min-width: 120px;
-        /* Adjust this width as needed */
     }
 
     .card {
@@ -129,7 +122,6 @@
 
     #main {
         position: fixed;
-        /* Changed to fixed */
         top: 0;
         left: 0;
         width: 100%;
@@ -139,7 +131,6 @@
         align-items: center;
         background-color: rgba(0, 0, 0, 0.5);
         overflow: hidden;
-        /* Prevent scrolling */
     }
 
 
@@ -181,31 +172,24 @@
     .navbar .nav-link:hover::after {
         width: 100%;
         bottom: 0;
-
-        /* Expand the line to full width on hover */
     }
 
-    /* Style for the active page link */
     .navbar .nav-link.active {
         color: rgb(22, 96, 175) !important;
-        /* Distinct color for the active page */
         font-weight: bold;
         bottom: 0;
 
-        /* Make the active link bold */
     }
 
     /* Add underline to the active link */
     .navbar .nav-link.active::after {
         background-color: rgb(22, 96, 175);
-        /* Make the underline match the active color */
         width: 100%;
         bottom: 0;
     }
 
     .navbar .nav-item.dropdown {
         position: relative;
-        /* Add this */
     }
 
     .navbar .nav-item.dropdown .nav-link {
@@ -324,9 +308,7 @@
 
     .dropdown-menu {
         background-color: rgba(255, 255, 255, 1) !important;
-        /* White background */
         backdrop-filter: none !important;
-        /* Remove blur */
         -webkit-backdrop-filter: none !important;
         border: none;
         border-radius: 8px;
@@ -338,7 +320,6 @@
 
     .dropdown-item {
         color: #000 !important;
-        /* Black text */
         text-align: center;
         padding: 0.5rem 1rem;
         white-space: nowrap;
@@ -347,7 +328,6 @@
 
     .dropdown-item:hover {
         background-color: #f8f9fa !important;
-        /* Light gray on hover */
         color: #000 !important;
     }
 </style>
@@ -356,12 +336,10 @@
 
     <nav class="navbar navbar-expand-md fixed-top">
         <div class="container-fluid d-flex justify-content-between align-items-center" style="padding: 12px 12px;">
-            <!-- Logo -->
             <a class="navbar-brand" href="dashboard.html">
                 <img src="./imgs/TripPal Transparent Logo.png" id="logo">
             </a>
 
-            <!-- Toggler button for smaller screens -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>

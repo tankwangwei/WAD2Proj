@@ -78,16 +78,12 @@
 
         .trip-dropdown {
             width: auto;
-            /* Makes the dropdown width fit its content */
             min-width: 120px;
-            /* Adjust this width as needed */
         }
 
         .rounded-section {
             margin-bottom: 10px;
-            /* Reduce gap between each section */
             padding: 15px;
-            /* Adjust padding to reduce vertical space */
             background-color: rgba(255, 255, 255, 0.8);
             border-radius: 12px;
             backdrop-filter: blur(5px);
@@ -97,7 +93,6 @@
 
         #main {
             position: fixed;
-            /* Changed to fixed */
             top: 0;
             left: 0;
             width: 100%;
@@ -107,7 +102,6 @@
             align-items: center;
             background-color: rgba(0, 0, 0, 0.5);
             overflow: hidden;
-            /* Prevent scrolling */
         }
 
         .navbar {
@@ -354,13 +348,11 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
-            /* Adjusted margin to reduce space */
         }
 
         .attraction-card img {
             width: 100%;
             height: 180x;
-            /* Increased from 180px */
             object-fit: cover;
         }
 
@@ -368,7 +360,6 @@
             padding: 15px;
             font-family: 'Roboto', sans-serif;
             flex-grow: 1;
-            /* Take up remaining space */
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -377,11 +368,9 @@
         .attraction-card-title {
             font-weight: bold;
             font-size: 1.1rem;
-            /* Adds spacing to separate title and location */
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            /* Prevents title overflow */
         }
 
         .attraction-card-location {
@@ -390,7 +379,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            /* Prevents location overflow */
         }
 
         .attractions-carousel-container {
@@ -410,7 +398,6 @@
             width: 100%;
             gap: 20px;
             padding: 0 10px;
-            /* Padding to add space around the carousel */
         }
 
         .attraction-card {
@@ -461,12 +448,10 @@
 
         .carousel-button-left {
             left: 10px;
-            /* Adjust positioning */
         }
 
         .carousel-button-right {
             right: 10px;
-            /* Adjust positioning */
         }
 
         .small-chart {
@@ -514,13 +499,11 @@
 
         #budgetContainer .text-center {
             margin: 0 10px;
-            /* Optional: Adjust spacing between Total Budget and Remaining */
         }
 
         .budget-summary {
             display: flex;
             gap: 20px;
-            /* Smaller gap to bring elements closer */
         }
 
         .budget-summary .label {
@@ -532,7 +515,6 @@
 
         .budget-summary .amount {
             font-size: 1.5rem;
-            /* Increase font size to match larger chart */
             font-weight: bold;
             color: #333;
             text-align: center;
@@ -540,7 +522,6 @@
 
         #currency-section .result {
             font-size: 1.5rem;
-            /* Increase font size to match larger chart */
             font-weight: bold;
             color: #333;
             text-align: center;
@@ -589,7 +570,6 @@
         .left-forecast {
             margin-right: 10px;
             align-items: center;
-            /* Adjust as needed to control spacing between left and right sections */
         }
 
         #current-temperature {
@@ -610,7 +590,6 @@
             display: flex;
             align-items: center;
             gap: 5px;
-            /* Controls the spacing between the icon and text */
         }
 
         #weather-description {
@@ -682,7 +661,6 @@
         .standard-height {
             min-height: 150px;
         }
-
     </style>
 
     <script>
@@ -839,7 +817,8 @@
 
             <!-- Budget Section -->
             <div class="col-lg-4 col-md-4">
-                <div onclick="navigateToBudgetPage()" id="budget-chart-section" class="p-3 rounded-section standard-height">
+                <div onclick="navigateToBudgetPage()" id="budget-chart-section"
+                    class="p-3 rounded-section standard-height">
                     <h5 class="text-center">Budget Overview</h5>
                     <div class="d-flex align-items-center justify-content-between mt-4">
                         <div id="budgetContainer" class="budget-summary d-flex">
@@ -1066,7 +1045,12 @@
 
             async function loadTrips() {
                 const tripSelect = document.getElementById('tripDropdown');
-                tripSelect.innerHTML = '<option value="">Select a trip</option>';
+                tripSelect.innerText = '';
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.innerText = 'Select a trip';
+
+                tripSelect.appendChild(defaultOption);
 
                 try {
                     if (!auth.currentUser) return;
@@ -1612,8 +1596,8 @@
                 document.getElementById("weather-location").textContent = "";
                 document.getElementById("attraction-location").textContent = "";
                 document.getElementById("current-temperature").textContent = "";
-                document.getElementById("weather-details").innerHTML = "";
-                document.getElementById("attractionsContainer").innerHTML = "";
+                document.getElementById("weather-details").textContent = "";
+                document.getElementById("attractionsContainer").textContent = "";
                 document.getElementById("result").textContent = "Please input amount and currency";
             }
 
@@ -1639,7 +1623,7 @@
 
             function displayAttractions(attractions) {
                 const container = document.getElementById('attractionsContainer');
-                container.innerHTML = '';
+                container.innerText = '';
 
                 container.style.display = 'flex';
                 container.style.transform = 'translateX(0)';

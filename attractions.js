@@ -198,7 +198,7 @@ function displayAttractions(attractions) {
     }
 
     const currentTripId = getCurrentTripId();
-    console.log('Current Trip ID in displayAttractions:', currentTripId); // Debug log
+    console.log('Current Trip ID in displayAttractions:', currentTripId);
 
     attractions.forEach(attraction => {
         const attractionCard = document.createElement('div');

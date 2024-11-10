@@ -20,41 +20,32 @@
 
             padding: 0;
             min-height: 100vh;
-            /* Ensures minimum height is full viewport height */
             background-image: url('./imgs/ChangiBackground.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
-            /* Keeps background fixed while scrolling */
         }
 
         .containermain {
             margin: 100px auto;
-            /* Auto margins for horizontal centering */
             padding: 40px;
             width: 90%;
-            /* Use percentage width instead of calc */
             max-width: 1200px;
-            /* Maximum width constraint */
             background-color: rgba(255, 255, 255, 0.8);
             border-radius: 10px;
             backdrop-filter: blur(5px);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-
-        /* Make text more readable against the semi-transparent background */
         .containermain h1,
         .containermain h3 {
             color: #333;
             margin-bottom: 20px;
         }
 
-        /* Style the form area */
         #searchForm {
             background-color: rgba(255, 255, 255, 0.9);
-            /* Slightly more opaque white */
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 30px;
@@ -67,14 +58,12 @@
             padding: 15px;
             background-color: #f9f9f9;
             height: 100%;
-            /* Ensures all cards have same height */
         }
 
         .attraction-card img,
         .card-img-top {
             width: 100%;
             height: 250px;
-            /* Fixed height for all images */
             object-fit: cover;
             border-radius: 5px;
             margin-bottom: 15px;
@@ -199,7 +188,6 @@
         }
 
         /* Popup Container */
-        /* Popup Container */
         .card {
             position: relative;
         }
@@ -208,7 +196,6 @@
             display: none;
             position: absolute;
             bottom: 100%;
-            /* Position above the card */
             left: 50%;
             transform: translateX(-50%);
             width: 300px;
@@ -218,7 +205,6 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             z-index: 1000;
             margin-bottom: 10px;
-            /* Space between popup and card */
             animation: fadeIn 0.3s ease-in-out;
         }
 
@@ -461,7 +447,7 @@
             let location = urlParams.get("location");
 
             if (!location || location === "null" || location === null) {
-                location = ""; // Set location to empty string if null
+                location = "";
             }
 
             const locationInput = document.getElementById("location");
@@ -469,7 +455,6 @@
 
             // Automatically search for attractions if location has a valid value
             if (location.trim() !== "") {
-                // Call the function directly to display results without requiring a button press
                 searchAttractionsByText(location, displayAttractions);
             }
         });

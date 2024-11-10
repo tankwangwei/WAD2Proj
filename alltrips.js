@@ -16,7 +16,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 let userId;
-let itineraries = []; // Store all itineraries to filter later
+let itineraries = [];
 
 localStorage.removeItem("selectedTripId");
 
@@ -151,7 +151,7 @@ async function displayItineraries(itinerariesList) {
     }
 }
 
-// to delete trip
+// To delete trip
 window.deleteTrip = async function (tripId, itineraryItem) {
     try {
         await deleteDoc(doc(db, `users/${userId}/trips`, tripId));

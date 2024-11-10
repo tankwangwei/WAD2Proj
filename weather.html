@@ -38,11 +38,9 @@
 
         .navbar {
             background-color: transparent;
-            /* Transparent navbar */
             height: 100px;
             padding: 10px 20px;
             box-shadow: none;
-            /* Removes the shadow */
             top: 0;
             width: 100%;
             z-index: 1000;
@@ -56,7 +54,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Styling for the navigation links */
         .navbar .nav-link {
             color: white !important;
             font-weight: bold;
@@ -83,28 +80,20 @@
         .navbar .nav-link:hover::after {
             width: 100%;
             bottom: 0;
-
-            /* Expand the line to full width on hover */
         }
 
         /* Style for the active page link */
         .navbar .nav-link.active {
             color: rgb(22, 96, 175) !important;
-            /* Distinct color for the active page */
             font-weight: bold;
-            /* Make the active link bold */
             bottom: 0;
 
         }
 
-        /* Add underline to the active link */
         .navbar .nav-link.active::after {
             background-color: rgb(22, 96, 175);
-            /* Make the underline match the active color */
             width: 100%;
-            /* Show the underline for the active link */
             bottom: 0;
-
         }
 
 
@@ -158,11 +147,8 @@
             margin: 0 auto;
             margin-bottom: 30px;
             transition: all 0.3s ease;
-            /* Add smooth transition */
             max-height: 200px;
-            /* Initial height */
             overflow: hidden;
-            /* Hide overflow content initially */
         }
 
         h1 {
@@ -224,7 +210,6 @@
 
         .container.has-results {
             max-height: 2000px;
-            /* Large enough to show all content */
         }
 
         #location {
@@ -315,7 +300,6 @@
                 font-size: 0.8rem;
             }
 
-            /* Adjust the input group for better mobile display */
             .input-group.search-bar {
                 flex-direction: column;
                 gap: 10px;
@@ -327,10 +311,8 @@
                 width: 100%;
             }
 
-            /* Make table scroll horizontally on small screens */
             .table-responsive {
                 margin: 0 -0.75rem;
-                /* Negative margin to allow full-width scroll */
                 padding: 0 0.75rem;
             }
         }
@@ -343,7 +325,6 @@
 
         @media (max-width: 767.98px) {
 
-            /* Ensure consistent spacing */
             .navbar-nav {
                 align-items: center;
             }
@@ -452,7 +433,6 @@
             margin-bottom: 5px;
         }
 
-        /* Highlight style for "Today" */
         .highlight-today {
             background-color: #007bff;
             color: white;
@@ -465,21 +445,18 @@
         .row {
             display: flex;
             align-items: stretch;
-            /* Makes both columns match height */
         }
 
         .col-md-7 {
             display: flex;
             flex-direction: column;
             justify-content: center;
-            /* Centers the chart vertically */
         }
 
         .graph-container {
             width: 100%;
             max-width: 800px;
             height: 100%;
-            /* Takes up full height of the column */
             display: flex;
             align-items: center;
         }
@@ -502,7 +479,6 @@
 
         @media (max-width: 767.98px) {
 
-            /* Remove the old navbar styles */
             .navbar-nav {
                 text-align: center;
             }
@@ -510,8 +486,6 @@
             /* Style for collapsed navbar */
             .navbar-collapse {
                 background-color: rgba(0, 0, 0, 0.5);
-                /* Reduced opacity from 0.8 to 0.5 */
-                /* Translucent black background */
                 border-radius: 10px;
                 margin-top: 10px;
                 backdrop-filter: blur(1px);
@@ -521,17 +495,14 @@
 
             .navbar-nav .nav-link {
                 color: white !important;
-                /* White text */
             }
 
             .navbar-nav .nav-link:hover {
                 color: rgba(255, 255, 255, 0.8) !important;
-                /* Slightly dimmed white on hover */
             }
 
             .navbar-nav .nav-link::after {
                 background-color: white;
-                /* White underline */
             }
 
             .navbar.background-crop {
@@ -667,9 +638,6 @@
         </div>
     </div>
 
-    <!-- JavaScript for Google Places and Weather API scripts -->
-    <!-- The script code from the initial page remains unchanged -->
-
 </body>
 
 </html>
@@ -682,7 +650,7 @@
 
         if (location) {
             document.getElementById("city").value = location;
-            setTimeout(getGeo); // Slight delay for stable DOM load before triggering search
+            setTimeout(getGeo);
         }
 
         let cityEle = document.getElementById("city");
