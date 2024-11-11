@@ -26,9 +26,6 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            background-attachment: fixed;
-            /* This is key for scrolling behavior */
-
         }
 
 
@@ -46,8 +43,6 @@
 
         .row {
             margin-bottom: -15px;
-            margin-left: 0;
-            margin-right: 0;
         }
 
         .container-fluid {
@@ -55,159 +50,13 @@
             z-index: 1;
         }
 
-        .container-fluid .row:nth-of-type(2) .rounded-section {
-            min-height: 400px;
-            height: auto;
-        }
-
-        /* Specific adjustments for the weather section */
-        #weather-section {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        /* Specific adjustments for the budget section */
-        #budget-chart-section {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        /* Specific adjustments for the currency section */
-        #currency-section {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        /* Center the content vertically in all top sections */
-        .standard-height {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        /* Adjust margins between rows */
-        .container-fluid .row {
-            margin-bottom: 5px;
-        }
-
-        /* Make headings more compact */
-        .rounded-section h5 {
-            margin-bottom: 10px;
-        }
-
-        /* Adjust the forecast container spacing */
-        #forecast-container {
-            margin-top: 10px;
-        }
-
-        /* Adjust the budget summary spacing */
-        .budget-summary {
-            margin-top: 10px;
-        }
-
-        /* Adjust the currency result spacing */
-        .result {
-            margin-top: 10px !important;
-        }
-
-        .container-fluid .row:first-of-type .rounded-section {
-            min-height: 120px !important;
-            /* Override the standard-height */
-            height: auto !important;
-            padding: 15px;
-        }
-
         .carousel {
-            position: relative !important;
-            top: auto;
-            left: auto;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: auto;
-            z-index: auto;
-        }
-
-        /* Create a new class for our destination carousel */
-        .destination-scroll {
-            display: flex;
-            gap: 15px;
-            transition: transform 0.3s ease;
-            padding: 10px 0;
-        }
-
-
-        .destination-carousel-container .carousel-button {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            color: #333;
-            z-index: 10;
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .destination-carousel-container .carousel-button-left {
-            left: 5px;
-            display: flex !important;
-        }
-
-        .destination-carousel-container .carousel-button-right {
-            right: 5px;
-            display: flex !important;
-        }
-
-        .destination-carousel-container .carousel-button:hover {
-            background-color: #f0f0f0;
-        }
-
-        .carousel-button:hover {
-            background-color: #f0f0f0;
-        }
-
-        .carousel-button-left {
-            left: 5px;
-        }
-
-        .carousel-button-right {
-            right: 5px;
-        }
-
-        #destination-section,
-        .activities-planned {
-            padding: 20px !important;
-        }
-
-        .destination-carousel-container,
-        .attractions-carousel-container {
-            margin-top: 20px;
-        }
-
-        .day-card ul {
-            list-style: none;
-            padding: 0;
-            margin: 10px 0 0 0;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .day-card li {
-            padding: 8px 12px;
-            background: #f8f9fa;
-            border-radius: 4px;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
+            height: 100%;
+            z-index: -1;
         }
 
         .carousel-item {
@@ -233,7 +82,7 @@
         }
 
         .rounded-section {
-            margin-bottom: 5px;
+            margin-bottom: 10px;
             padding: 15px;
             background-color: rgba(255, 255, 255, 0.8);
             border-radius: 12px;
@@ -494,21 +343,11 @@
             transform: translateY(-5px);
         }
 
-        .destination-header,
         .attractions-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
-            height: 40px;
-
-        }
-
-        .destination-header h5,
-        .attractions-header h5 {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 600;
         }
 
         .attraction-card img {
@@ -588,20 +427,18 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 32px;
-            height: 32px;
+            z-index: 2;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            display: flex !important;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
             border: none;
-            color: #333;
-            z-index: 10;
-            font-size: 20px;
-            transition: background-color 0.3s ease;
+            transition: background 0.3s ease;
         }
 
         .carousel-button:hover {
@@ -794,6 +631,12 @@
             margin-left: 4px;
         }
 
+        .attractions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
 
         .see-all-link {
             color: #007bff;
@@ -803,7 +646,6 @@
             align-items: center;
             gap: 4px;
             transition: color 0.3s ease;
-            margin: 0;
         }
 
         .see-all-link:hover {
@@ -818,77 +660,6 @@
         /* Standardize height for the Weather, Budget, and Currency sections */
         .standard-height {
             min-height: 150px;
-        }
-
-        .destination-carousel-container {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-            padding: 0 0px;
-        }
-
-        #destination-carousel {
-            display: flex;
-            gap: 15px;
-            transition: transform 0.3s ease;
-            padding: 10px 0;
-        }
-
-        .day-card {
-            flex: 0 0 calc(33.33% - 10px);
-            min-width: calc(33.33% - 10px);
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-            margin-right: 10px;
-            padding: 15px;
-            height: 280px;
-            /* Match attraction card height */
-        }
-
-        .carousel-button {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: none;
-            background: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            z-index: 2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .standard-height {
-            height: 100%;
-            min-height: 400px;
-        }
-
-        /* Make sure both sections have the same height */
-        .row.align-items-stretch>[class*='col-'] {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .row.align-items-stretch>[class*='col-']>div {
-            flex: 1;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                background-size: cover;
-                min-height: 100vh;
-            }
-
-            .container-fluid {
-                padding: 10px;
-            }
         }
     </style>
 
@@ -918,35 +689,12 @@
         }
 
         function navigateToBudgetPage() {
-            const selectedTripId = document.getElementById('tripDropdown').value;
-
-            if (selectedTripId) {
-                // Store the current trip ID and location
-                localStorage.setItem("selectedTripId", selectedTripId);
-                const location = localStorage.getItem("location");
-
-                // Redirect to budget page with parameters
-                window.location.href = `budget.html?tripID=${selectedTripId}&location=${encodeURIComponent(location)}`;
-            } else {
-                alert("Please select a trip first!");
-            }
-        }
-
-        function navigateToItineraryBuilder() {
-            const tripId = localStorage.getItem("selectedTripId"); // get tripid from here
+            const tripID = localStorage.getItem("selectedTripId");
             const location = localStorage.getItem("location");
-
-            if (!tripId || !location) {
-                console.error("Missing tripId or location. Cannot navigate to Itinerary Builder.");
-                alert("Please select a trip first!");
-                return;
+            if (tripID) {
+                window.location.href = `budget.html?tripID=${tripID}&location=${encodeURIComponent(location)}`;
             }
-
-            // Redirect to itinerary.html with query parameters for tripId and location
-            const url = `itinerary.html?tripId=${encodeURIComponent(tripId)}&location=${encodeURIComponent(location)}`;
-            window.location.href = url;
         }
-
 
     </script>
 </head>
@@ -1047,87 +795,86 @@
     </div>
 
     <div class="container" style="background-color: rgba(0, 0, 0, 0.5); border-radius: 10px; padding: 10px; max-height: 65vh;overflow-y: auto; margin:20px 20px 20px 20px auto">
-    <div class="container-fluid p-3">
-        <div class="row d-flex align-items-stretch">
-            <!-- Weather Section -->
-            <div class="col-lg-4 col-md-4">
-                <div onclick="navigateToWeatherPage()" id="weather-section" class="p-3 rounded-section standard-height">
-                    <h5 class="text-center">Weather Forecast for <span id="weather-location"></span></h5>
-                    <div id="forecast-container" class="d-flex justify-content-between align-items-center">
-                        <!-- Left side for temperature and high/low values -->
-                        <div id="left-forecast" class="left-forecast">
-                            <p id="current-temperature" class="large-temperature">--°C</p>
-                            <p id="high-low-temperature">H: --°C L: --°C</p>
-                        </div>
-                        <!-- Right side for weather icon and description -->
-                        <div id="right-forecast" class="right-forecast text-center">
-                            <img id="weather-icon" src="" alt="Weather icon" style="width: 30px;" />
-                            <p id="weather-description">--</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Budget Section -->
-            <div class="col-lg-4 col-md-4">
-                <div onclick="navigateToBudgetPage()" id="budget-chart-section"
-                    class="p-3 rounded-section standard-height">
-                    <h5 class="text-center">Budget Overview</h5>
-                    <div class="d-flex align-items-center justify-content-between mt-4">
-                        <div id="budgetContainer" class="budget-summary d-flex">
-                            <div class="text-center me-5">
-                                <p class="label">Total Budget</p>
-                                <span id="totalBudgetDisplay" class="amount"></span>
+        <div class="container-fluid p-3">
+            <div class="row d-flex align-items-stretch">
+                <!-- Weather Section -->
+                <div class="col-lg-4 col-md-4">
+                    <div onclick="navigateToWeatherPage()" id="weather-section" class="p-3 rounded-section standard-height">
+                        <h5 class="text-center">Weather Forecast for <span id="weather-location"></span></h5>
+                        <div id="forecast-container" class="d-flex justify-content-between align-items-center">
+                            <!-- Left side for temperature and high/low values -->
+                            <div id="left-forecast" class="left-forecast">
+                                <p id="current-temperature" class="large-temperature">--°C</p>
+                                <p id="high-low-temperature">H: --°C L: --°C</p>
                             </div>
-                            <div class="text-center">
-                                <p class="label">Remaining</p>
-                                <span id="remainingBudgetDisplay" class="amount"></span>
+                            <!-- Right side for weather icon and description -->
+                            <div id="right-forecast" class="right-forecast text-center">
+                                <img id="weather-icon" src="" alt="Weather icon" style="width: 30px;" />
+                                <p id="weather-description">--</p>
                             </div>
                         </div>
-                        <div class="chart-container">
-                            <canvas id="budgetPieChart" class="small-chart"></canvas>
+                    </div>
+                </div>
+    
+                <!-- Budget Section -->
+                <div class="col-lg-4 col-md-4">
+                    <div onclick="navigateToBudgetPage()" id="budget-chart-section"
+                        class="p-3 rounded-section standard-height">
+                        <h5 class="text-center">Budget Overview</h5>
+                        <div class="d-flex align-items-center justify-content-between mt-4">
+                            <div id="budgetContainer" class="budget-summary d-flex">
+                                <div class="text-center me-5">
+                                    <p class="label">Total Budget</p>
+                                    <span id="totalBudgetDisplay" class="amount"></span>
+                                </div>
+                                <div class="text-center">
+                                    <p class="label">Remaining</p>
+                                    <span id="remainingBudgetDisplay" class="amount"></span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="budgetPieChart" class="small-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Currency Section -->
+                <div class="col-lg-4 col-md-4">
+                    <div id="currency-section" class="p-3 rounded-section standard-height">
+                        <h5 class="text-center">Currency Converter</h5>
+                        <div id="result" class="result"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="container-fluid p-3">
+            <div class="row d-flex align-items-stretch">
+                <!-- Destination Section -->
+                <div class="col-lg-5 col-md-5">
+                    <div id="destination-section" class="p-3 rounded-section standard-height">
+                        <h5 class="text-center">Destination</h5>
+                    </div>
+                </div>
+    
+                <div class="col-lg-7 col-md-7">
+                    <div class="activities-planned p-3 rounded-section standard-height">
+                        <div class="attractions-header">
+                            <h5 style="margin: 0">Top Attractions in <span id="attraction-location"></span></h5>
+                            <a href="#" class="see-all-link" onclick="navigateToAttractionsPage()">
+                                See all attractions <span>→</span>
+                            </a>
+                        </div>
+                        <div class="attractions-carousel-container mt-5">
+                            <button class="carousel-button carousel-button-left" onclick="goLeft()">&#8249;</button>
+                            <div id="attractionsContainer" class="d-flex" onclick="navigateToAttractionsPage()"></div>
+                            <button class="carousel-button carousel-button-right" onclick="goRight()">&#8250;</button>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Currency Section -->
-            <div class="col-lg-4 col-md-4">
-                <div id="currency-section" class="p-3 rounded-section standard-height">
-                    <h5 class="text-center">Currency Converter</h5>
-                    <div id="result" class="result"></div>
-                </div>
             </div>
-        </div>
-    </div>
-
-    <div class="container-fluid p-3">
-        <div class="row d-flex align-items-stretch">
-            <!-- Destination Section -->
-            <div class="col-lg-5 col-md-5">
-                <div id="destination-section" class="p-3 rounded-section standard-height">
-                    <h5 class="text-center">Destination</h5>
-                </div>
-            </div>
-
-            <div class="col-lg-7 col-md-7">
-                <div class="activities-planned p-3 rounded-section standard-height">
-                    <div class="attractions-header">
-                        <h5 style="margin: 0">Top Attractions in <span id="attraction-location"></span></h5>
-                        <a href="#" class="see-all-link" onclick="navigateToAttractionsPage()">
-                            See all attractions <span>→</span>
-                        </a>
-                    </div>
-                    <div class="attractions-carousel-container mt-5">
-                        <button class="carousel-button carousel-button-left" onclick="goLeft()">&#8249;</button>
-                        <div id="attractionsContainer" class="d-flex" onclick="navigateToAttractionsPage()"></div>
-                        <button class="carousel-button carousel-button-right" onclick="goRight()">&#8250;</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        </div>
-
 
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -1157,24 +904,6 @@
                 messagingSenderId: "191549341083",
                 appId: "1:191549341083:web:ad67ea6030d29c8700353e"
             };
-
-            let destinationScrollPosition = 0;
-            const scrollAmount = 320; // for destination scroll
-
-            window.scrollDestinationLeft = function () {
-                const carousel = document.getElementById('destination-carousel');
-                destinationScrollPosition = Math.max(0, destinationScrollPosition - scrollAmount);
-                carousel.style.transform = `translateX(-${destinationScrollPosition}px)`;
-                updateDestinationButtons();
-            }
-
-            window.scrollDestinationRight = function () {
-                const carousel = document.getElementById('destination-carousel');
-                const maxScroll = carousel.scrollWidth - carousel.parentElement.clientWidth + 80;
-                destinationScrollPosition = Math.min(destinationScrollPosition + scrollAmount, maxScroll);
-                carousel.style.transform = `translateX(-${destinationScrollPosition}px)`;
-                updateDestinationButtons();
-            }
 
             // Initialize Firebase
             const app = initializeApp(firebaseConfig);
@@ -1357,16 +1086,20 @@
 
                     if (tripDoc.exists()) {
                         const tripData = tripDoc.data();
-                        console.log("Trip data retrieved:", tripData);
+                        console.log("Trip data retrieved:", tripData); // Log for verification
 
                         const location = tripData.location;
-                        const days = tripData.dates ? tripData.dates.length : 7;
+                        const days = tripData.dates ? tripData.dates.length : 7; // Use dates array length as tripDays
                         const dates = tripData.dates || [];
                         const dateRange = dates.length > 0 ? `${dates[0]} to ${dates[dates.length - 1]}` : "Date range not available";
 
+                        // Store the calculated days in localStorage
                         localStorage.setItem("tripDays", days);
+                        console.log("Updated tripDays to:", days); // Confirm days is set correctly
+
                         localStorage.setItem("location", location);
                         updateNavLinks();
+
 
                         // Display trip name and location
                         document.getElementById("tripNameDisplay").textContent = tripData.name || "Your Trip";
@@ -1375,32 +1108,65 @@
                         document.getElementById("weather-location").textContent = location;
                         document.getElementById("attraction-location").textContent = location;
 
-                        // Get budget and expenses
-                        totalBudget = tripData.budget || 0;
-                        const expensesRef = collection(db, `users/${auth.currentUser.uid}/trips/${tripId}/expenses`);
-                        const querySnapshot = await getDocs(expensesRef);
-                        expenses = querySnapshot.docs.map(doc => doc.data());
-                        totalSpending = expenses.reduce((total, expense) => total + (parseFloat(expense.amount) || 0), 0);
-                        remainingBudget = totalBudget - totalSpending;
+                        // Update the pie chart with the expense data
+                        updatePieChart(await calculateCategoryTotals(tripId)); // Fetch category totals for pie chart
 
-                        // IMPORTANT: Get currency code and fetch conversion rate BEFORE updating displays
-                        const currencyCode = await fetchCurrencyByCountry(location);
-                        if (currencyCode) {
-                            // Fetch conversion rate and update displays
-                            await fetchConversionRate(currencyCode);
-                        } else {
-                            // Fallback to displaying in original currency (EUR)
-                            document.getElementById("totalBudgetDisplay").textContent = `${totalBudget.toFixed(2)} EUR`;
-                            document.getElementById("remainingBudgetDisplay").textContent = `${remainingBudget.toFixed(2)} EUR`;
-                        }
-
-                        // Update other UI elements
-                        await populateDestinationCarousel();
+                        // Fetch and display updated weather, attractions, and currency based on location
                         fetchWeatherData(location);
                         fetchAttractionsForLocation(location);
-                        updatePieChart(await calculateCategoryTotals(tripId));
+                        fetchCurrencyForLocation(location);
+                        const expensesRef = collection(db, `users/${auth.currentUser.uid}/trips/${tripId}/expenses`);
+                        const querySnapshot = await getDocs(expensesRef);
+                        const currencyCode = await fetchCurrencyByCountry(location);
 
-                        document.getElementById("budgetContainer").style.display = "block";
+                        const categoryData = {};
+                        querySnapshot.forEach((doc) => {
+                            const expense = doc.data();
+                            const category = expense.category || 'Miscellaneous';
+                            const amount = parseFloat(expense.amount) || 0;
+                            categoryData[category] = (categoryData[category] || 0) + amount;
+                        });
+
+                        totalBudget = tripData.budget || 0;
+
+                        // Update the displayed budget information
+                        document.getElementById("totalBudgetDisplay").textContent = `$${totalBudget.toFixed(2)}`;
+                        expenses = [];
+                        querySnapshot.forEach((doc) => {
+                            const expense = doc.data();
+                            expenses.push(expense);
+                        });
+
+                        totalSpending = await calculateTotalSpending(tripId); // Function to fetch and sum expenses for the trip
+                        remainingBudget = totalBudget - totalSpending;
+
+                        document.getElementById("remainingBudgetDisplay").textContent = `$${remainingBudget.toFixed(2)}`;
+
+                        if (totalBudget > 0) {
+                            document.getElementById("totalBudgetDisplay").textContent = `$${totalBudget.toFixed(2)}`;
+
+                            totalSpending = await calculateTotalSpending(tripId);
+                            remainingBudget = totalBudget - totalSpending;
+
+                            document.getElementById("remainingBudgetDisplay").textContent = `$${remainingBudget.toFixed(2)}`;
+                            document.getElementById("budgetContainer").style.display = "block";
+                        } else {
+                            document.getElementById("budgetContainer").style.display = "none";
+                        }
+
+                        if (currencyCode) {
+                            totalBudget = tripData.budget || 0;
+                            totalSpending = await calculateTotalSpending(tripId);
+                            remainingBudget = totalBudget - totalSpending;
+
+                            // Update total and remaining budget with currency
+                            document.getElementById("totalBudgetDisplay").textContent = `${totalBudget.toFixed(2)} ${currencyCode}`;
+                            document.getElementById("remainingBudgetDisplay").textContent = `${remainingBudget.toFixed(2)} ${currencyCode}`;
+                        } else {
+                            console.error("Currency not found for the specified country.");
+                        }
+
+                        updatePieChart(categoryData);
                     }
                 } catch (error) {
                     console.error("Error loading trip data:", error);
@@ -1748,69 +1514,31 @@
 
             function fetchConversionRate(currencyCode) {
                 const url = "http://data.fixer.io/api/latest";
-                const apiKey = "a7f1d79a2ef9816d80a593fe0340008f";
+                const apiKey = ""; // Make sure your API key is correct
 
-                // First get fresh values from Firebase
-                const tripId = localStorage.getItem("selectedTripId");
-                if (!tripId) {
-                    console.error("No trip selected");
-                    return;
-                }
-
-                getDoc(doc(db, `users/${auth.currentUser.uid}/trips`, tripId))
-                    .then(tripDoc => {
-                        if (!tripDoc.exists()) {
-                            throw new Error("Trip not found");
-                        }
-
-                        const tripData = tripDoc.data();
-                        // Get fresh budget value in EUR
-                        totalBudget = tripData.budget || 0;
-
-                        // Calculate fresh remaining budget
-                        return calculateTotalSpending(tripId).then(spending => {
-                            totalSpending = spending;                        
-
-                            // Now fetch conversion rate with fresh values
-                            return axios.get(url, {
-                                params: {
-                                    access_key: apiKey,
-                                    base: "EUR",  // Explicitly set base currency to EUR
-                                    symbols: currencyCode
-                                }
-                            });
-                        });
-                    })
+                axios.get(url, {
+                    params: {
+                        access_key: apiKey,
+                        symbols: currencyCode
+                    }
+                })
                     .then(response => {
                         const rate = response.data.rates[currencyCode];
                         if (rate) {
-                            // Convert from EUR to target currency (SGD in this case)
-                            // Since budget is in EUR, multiply by rate to get SGD
+                            // Adjust the budget to the converted currency
                             const convertedTotalBudget = totalBudget * rate;
-                            remainingBudget = convertedTotalBudget - totalSpending;
-                            // const convertedRemainingBudget = remainingBudget * rate;
+                            const convertedRemainingBudget = remainingBudget * rate;
 
-                            // Update displays with converted values
-                            document.getElementById("totalBudgetDisplay").textContent =
-                                `${convertedTotalBudget.toFixed(2)} ${currencyCode}`;
-                            document.getElementById("remainingBudgetDisplay").textContent =
-                                `${remainingBudget.toFixed(2)} ${currencyCode}`;
-
-                            // Update conversion rate display
+                            document.getElementById("totalBudgetDisplay").textContent = `${convertedTotalBudget.toFixed(2)} ${currencyCode}`;
+                            document.getElementById("remainingBudgetDisplay").textContent = `${convertedRemainingBudget.toFixed(2)} ${currencyCode}`;
                             console.log(`1 EUR = ${rate.toFixed(2)} ${currencyCode}`);
-                            resultElem.innerText = `1 EUR = ${rate.toFixed(2)} ${currencyCode}`;
-
+                            resultElem.innerText = `1 EUR = ${rate.toFixed(2)} ${currencyCode}`
                         } else {
                             console.error("Conversion rate not available.");
                         }
                     })
                     .catch(error => {
-                        console.error("Error in conversion process:", error);
-                        // Fall back to original currency if there's an error
-                        document.getElementById("totalBudgetDisplay").textContent =
-                            `${totalBudget.toFixed(2)} EUR`;
-                        document.getElementById("remainingBudgetDisplay").textContent =
-                            `${remainingBudget.toFixed(2)} EUR`;
+                        console.error("Error fetching conversion rate:", error);
                     });
             }
 
@@ -1971,85 +1699,6 @@
                 }
             }
 
-            // Function to fetch and populate the destination carousel dynamically
-            async function populateDestinationCarousel() {
-                const carousel = document.getElementById("destination-carousel");
-                const tripId = localStorage.getItem("selectedTripId");
-                const userId = auth.currentUser.uid;
-
-                // Clear existing content in the carousel
-                while (carousel.firstChild) {
-                    carousel.removeChild(carousel.firstChild);
-                }
-
-                if (!tripId || !userId) {
-                    console.error("Trip ID or User ID is missing.");
-                    return;
-                }
-
-                try {
-                    const tripDoc = await getDoc(doc(db, `users/${userId}/trips/${tripId}`));
-                    if (!tripDoc.exists()) {
-                        console.error("Trip document does not exist.");
-                        return;
-                    }
-
-                    const tripData = tripDoc.data();
-                    const { dates } = tripData;
-
-                    // Iterate through the dates array
-                    dates.forEach(async (date, index) => {
-                        const dateRef = doc(db, `users/${userId}/trips/${tripId}/itinerary`, date);
-                        const dateSnapshot = await getDoc(dateRef);
-
-                        const dayCard = document.createElement("div");
-                        dayCard.classList.add("day-card");
-
-                        const dayTitle = document.createElement("h6");
-                        dayTitle.textContent = `Day ${index + 1} - ${new Date(date).toLocaleDateString()}`;
-                        dayCard.appendChild(dayTitle);
-
-                        const activityList = document.createElement("ul");
-                        if (dateSnapshot.exists()) {
-                            const dayData = dateSnapshot.data();
-                            dayData.activities.forEach((activity) => {
-                                const activityItem = document.createElement("li");
-                                activityItem.textContent = activity.name;
-                                activityList.appendChild(activityItem);
-                            });
-                        } else {
-                            const noActivityMessage = document.createElement("p");
-                            noActivityMessage.textContent = "No activities planned for this day.";
-                            activityList.appendChild(noActivityMessage);
-                        }
-
-                        dayCard.appendChild(activityList);
-                        carousel.appendChild(dayCard);
-                    });
-                } catch (error) {
-                    console.error("Error populating destination carousel:", error);
-                }
-            }
-
-
-            // Scrolling functionality for carousel
-            function scrollLeft(containerId) {
-                const container = document.getElementById(containerId);
-                container.scrollLeft -= 300; // Adjust scroll amount as needed
-            }
-
-            function scrollRight(containerId) {
-                const container = document.getElementById(containerId);
-                container.scrollLeft += 300; // Adjust scroll amount as needed
-            }
-
-            // Call the function to populate the carousel when the page loads
-            // document.addEventListener("DOMContentLoaded", () => {
-            //     populateDestinationCarousel();
-            // });
-
-
-
             document.addEventListener("DOMContentLoaded", function () {
                 // Example call to displayAttractions with dummy data
                 const attractions = Array(20).fill({ name: 'Attraction', photos: [], vicinity: 'Address' });
@@ -2133,9 +1782,6 @@
                     localStorage.setItem("selectedTripId", selectedTripId);
                     await loadTripData(selectedTripId);
 
-                    // Call populateDestinationCarousel to update the destination section
-                    await populateDestinationCarousel();
-
                     // Get location from the selected trip's data to update background
                     const location = localStorage.getItem("location");
                     if (location) {
@@ -2186,49 +1832,6 @@
                 }
             });
 
-            function redirectToBudgetPage() {
-                const tripID = localStorage.getItem("selectedTripId");
-                const location = localStorage.getItem("location");
-
-                if (tripID && location) {
-                    window.location.href = `budget.html?tripID=${tripID}&location=${encodeURIComponent(location)}`;
-                } else {
-                    alert("Error: Trip information not found!");
-                }
-            }
-
-            function updateDestinationButtons() {
-                const carousel = document.getElementById('destination-carousel');
-                const leftButton = document.querySelector('.destination-carousel-container .carousel-button-left');
-                const rightButton = document.querySelector('.destination-carousel-container .carousel-button-right');
-
-                if (leftButton && rightButton) {
-                    leftButton.style.opacity = destinationScrollPosition <= 0 ? '0.5' : '1';
-                    leftButton.style.cursor = destinationScrollPosition <= 0 ? 'default' : 'pointer';
-
-                    const maxScroll = carousel.scrollWidth - carousel.parentElement.clientWidth + 80;
-                    rightButton.style.opacity = destinationScrollPosition >= maxScroll ? '0.5' : '1';
-                    rightButton.style.cursor = destinationScrollPosition >= maxScroll ? 'default' : 'pointer';
-                }
-            }
-
-
-            document.addEventListener('DOMContentLoaded', function () {
-                // Update the button onclick handlers
-                const leftButton = document.querySelector('.destination-carousel-container .carousel-button-left');
-                const rightButton = document.querySelector('.destination-carousel-container .carousel-button-right');
-
-                if (leftButton) {
-                    leftButton.onclick = scrollDestinationLeft;
-                }
-
-                if (rightButton) {
-                    rightButton.onclick = scrollDestinationRight;
-                }
-
-                // Initialize button states
-                updateDestinationButtons();
-            });
         </script>
 
 </body>
