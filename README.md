@@ -12,9 +12,13 @@ A comprehensive travel planning dashboard that integrates real-time updates on w
 - **Find Attractions**
 
 ## Take Note
-- If you are using SMU school wifi, do change to 4G/5G to access the website due to domain rules.
-- If you have any antivirus software, do disable it.
+- If you are using SMU school wifi, do change to 4G/5G to access the website due to domain rules
+- If you have any antivirus software, do disable it
+
+## Limitations
 - The base currency is in Euros due to the Fixer API.
+- Limit of 100 requests for Fixer API
+- The weather forecast only shows 7 days from now due to the OpenWeatherMap API
 
 ## Tech Stack
 - **Frontend**: HTML, CSS, Javascript, Bootstrap
