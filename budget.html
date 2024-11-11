@@ -194,10 +194,20 @@
             justify-content: center;
             align-items: center;
             height: 300px;
+
+
+        }
+
+        .transaction-history {
+            overflow-x: auto;
+            max-width: 100%;
+            -webkit-overflow-scrolling: touch;
         }
 
         .transaction-history table {
             width: 100%;
+            min-width: 500px;
+            /* Minimum width to prevent squishing */
             border-collapse: collapse;
         }
 
@@ -346,6 +356,20 @@
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        .action-cell {
+            min-width: 120px;
+            display: flex;
+            gap: 5px;
+            justify-content: flex-start;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            min-width: 50px;
         }
 
         @media (max-width: 600px) {
