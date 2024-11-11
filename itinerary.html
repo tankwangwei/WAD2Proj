@@ -282,16 +282,22 @@
             margin-bottom: 15px;
         }
 
-        #savedActivities .activity-item {
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            background-color: #ffffff;
-            cursor: grab;
-            border-radius: 5px;
+        .activity-item {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            justify-content: space-between; /* Align name to the left and icon to the right */
+            align-items: center; /* Center items vertically */
+            padding: 10px; /* Add some spacing */
+            border: 1px solid #ddd; /* Optional: Add a border */
+            border-radius: 5px; /* Rounded corners */
+            background-color: #fff; /* Background color */
+            margin-bottom: 10px; /* Spacing between cards */
+        }
+
+        .activity-name {
+            font-size: 1rem; /* Adjust text size */
+            color: #333; /* Optional: Text color */
+            flex-grow: 1; /* Let the name take available space */
+            margin-right: auto; /* Ensure name aligns to the left */
         }
 
         .activity-item span {
@@ -305,11 +311,6 @@
             justify-content: center;
             padding: 5px 10px; /* Smaller padding for compact size */
             color: white;
-        }
-
-        .fas.fa-trash-alt {
-            font-size: 1rem; /* Adjust the size of the dustbin icon */
-            margin: 0; /* Remove any margin for precise alignment */
         }
 
         .activity-item button {
