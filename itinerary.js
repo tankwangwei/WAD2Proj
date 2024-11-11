@@ -610,7 +610,7 @@ async function loadSavedActivities() {
 
 function createActivityCard(activityId, name, isRemovable = false, source = "savedActivities", date = null) {
     const activityEl = document.createElement("div");
-    activityEl.classList.add("activity-item", "card", "p-2", "m-2");
+    activityEl.classList.add("card", "p-2", "m-2");
     activityEl.draggable = true;
     activityEl.dataset.activityId = activityId;
 
@@ -623,30 +623,41 @@ function createActivityCard(activityId, name, isRemovable = false, source = "sav
         }
     });
 
-    // Create the span for the activity name
+    // Create a row container for name and icon
+    const activityRow = document.createElement("div");
+    activityRow.classList.add("d-flex", "justify-content-between", "align-items-center");
+
+    // Add the activity name
     const nameEl = document.createElement("span");
     nameEl.textContent = name;
-    activityEl.appendChild(nameEl);
+    nameEl.classList.add("activity-name"); // Optional: Class for additional styling
+    nameEl.style.margin = "0"; // No extra margin
+    activityRow.appendChild(nameEl);
 
-    // If removable, add the remove button
+    // If removable, add the remove icon
     if (isRemovable) {
-        const removeButton = document.createElement("button");
-        removeButton.classList.add("btn", "btn-sm", "btn-danger", "mt-2");
-        removeButton.textContent = "REMOVE";
+        const removeIcon = document.createElement("img");
+        removeIcon.src = "./imgs/trash-icon.png"; // Path to the trash icon image
+        removeIcon.alt = "Remove";
+        removeIcon.style.width = "23px"; // Set icon width
+        removeIcon.style.height = "23px"; // Set icon height
+        removeIcon.style.cursor = "pointer"; // Make it clear the icon is clickable
 
-        // Add the appropriate click event listener for the remove button
+        // Add the click event listener for removing the activity
         if (source === "calendar") {
-            removeButton.addEventListener("click", () => removeActivityFromDate(date, activityId));
+            removeIcon.addEventListener("click", () => removeActivityFromDate(date, activityId));
         } else {
-            removeButton.addEventListener("click", () => removeActivity(activityId));
+            removeIcon.addEventListener("click", () => removeActivity(activityId));
         }
 
-        activityEl.appendChild(removeButton);
+        activityRow.appendChild(removeIcon);
     }
+
+    // Append the row to the activity card
+    activityEl.appendChild(activityRow);
 
     return activityEl;
 }
-
 
 function savePlace(placeId, name, event) {
     event.stopPropagation(); // Prevent click propagation
@@ -705,70 +716,6 @@ async function removeActivity(activityId) {
         console.error(`Error removing activity ${activityId}:`, error);
     }
 }
-
-
-// Event listener removed from calendar dates (for filtering markers)
-// async function displayCalendar(dates) {
-//     const calendar = document.getElementById("calendar");
-
-//     // Clear existing content
-//     while (calendar.firstChild) {
-//         calendar.removeChild(calendar.firstChild);
-//     }
-
-//     for (const date of dates) {
-//         const weatherDataForDate = weatherData[date]; // Use pre-fetched weather data
-
-//         // Create the date container
-//         const dateContainer = document.createElement("div");
-//         dateContainer.classList.add("card", "p-3", "mb-3");
-//         dateContainer.dataset.date = date;
-
-//         // Add drag-and-drop event listeners
-//         dateContainer.addEventListener("dragover", (event) => event.preventDefault());
-//         dateContainer.addEventListener("drop", (event) => handleDrop(event, date));
-
-//         // Add the date as a header
-//         const dateHeader = document.createElement("h6");
-//         dateHeader.textContent = new Date(date).toLocaleDateString();
-//         dateContainer.appendChild(dateHeader);
-
-//         // Add weather details if available
-//         if (weatherDataForDate) {
-//             const weatherDetails = document.createElement("div");
-//             weatherDetails.classList.add("weather-details");
-
-//             const weatherIcon = document.createElement("img");
-//             weatherIcon.src = `http://openweathermap.org/img/wn/${weatherDataForDate.icon}@2x.png`;
-//             weatherIcon.alt = weatherDataForDate.description;
-//             weatherIcon.classList.add("weather-icon");
-
-//             const tempSpan = document.createElement("span");
-//             tempSpan.classList.add("high-low-temp");
-//             tempSpan.textContent = `H: ${weatherDataForDate.highTemp}°C L: ${weatherDataForDate.lowTemp}°C`;
-
-//             weatherDetails.appendChild(weatherIcon);
-//             weatherDetails.appendChild(tempSpan);
-//             dateContainer.appendChild(weatherDetails);
-//         } else {
-//             const noWeather = document.createElement("p");
-//             noWeather.textContent = "No weather data";
-//             dateContainer.appendChild(noWeather);
-//         }
-
-//         // Add the activity dropzone
-//         const dropzone = document.createElement("div");
-//         dropzone.classList.add("activity-dropzone");
-//         dateContainer.appendChild(dropzone);
-
-//         // Append the date container to the calendar
-//         calendar.appendChild(dateContainer);
-//     }
-
-//     // Load itinerary data for each date
-//     loadItinerary();
-// }
-
 
 async function displayCalendar(dates) {
     const calendar = document.getElementById("calendar");
