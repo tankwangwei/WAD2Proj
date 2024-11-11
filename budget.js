@@ -484,10 +484,11 @@ function updateDashboard() {
     const convertedBudget = convertAmount(totalBudget, selectedCurrency);
     const convertedSpending = convertAmount(totalSpending, selectedCurrency);
     const convertedRemaining = convertAmount(totalBudget - totalSpending, selectedCurrency);
-    const remaining = convertedBudget - totalSpending
+    const remaining = (convertedBudget - totalSpending).toFixed(2)
+    
 
     dashboardTotalBudget.textContent = `${convertedBudget} ${selectedCurrency}`;
-    dashboardTotalSpending.textContent = `${totalSpending} ${selectedCurrency}`;
+    dashboardTotalSpending.textContent = `${totalSpending.toFixed(2)} ${selectedCurrency}`;
     dashboardRemainingBudget.textContent = `${remaining} ${selectedCurrency}`;
 
     // Change color based on remaining budget
@@ -772,38 +773,53 @@ let selectedCurrency = 'EUR'; // Default currency
 // Fetch and populate currency options
 async function getCurrencyRates() {
     try {
-        const response = await axios.get("https://data.fixer.io/api/latest", {
-            params: { access_key: "33fca48c8f4d19573139c26a4c34ab00" }
+        const response = await axios.get("http://data.fixer.io/api/latest", {
+            params: { access_key: "45818ae685202a973809c1932d8763e2" }
         });
 
         if (response.data.success) {
             currencyRates = response.data.rates;
             console.log("Currency rates fetched successfully");
 
-            // Populate both currency select dropdowns
+            // Populate currency select dropdown
             const currencySelect = document.getElementById("currency");
-            const expenseCurrencySelect = document.getElementById("expenseCurrency");
+            currencySelect.innerText = ''; // Clear previous options
 
-            // Clear previous options
-            currencySelect.innerHTML = '<option value="">Select Currency</option>';
-            expenseCurrencySelect.innerHTML = '<option value="">Select Currency</option>';
+            // Add EUR as default option
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "EUR";
+            defaultOption.innerText = "EUR";
+            currencySelect.appendChild(defaultOption);
 
-            // Populate dropdowns with currency options
+            // Add remaining currencies
             Object.keys(currencyRates).sort().forEach(key => {
-                const option = document.createElement("option");
-                option.value = key;
-                option.innerText = key;
-                currencySelect.appendChild(option.cloneNode(true));
-                expenseCurrencySelect.appendChild(option.cloneNode(true));
+                if (key !== "EUR") { // Skip EUR as it's already added
+                    const option = document.createElement("option");
+                    option.value = key;
+                    option.innerText = key;
+                    currencySelect.appendChild(option);
+                }
             });
+
+            // Set initial currency
+            selectedCurrency = "EUR";
+            currencySelect.value = "EUR";
+
+            // Update UI with new rates
+            updateDashboard();
+            if (expenses.length > 0) {
+                updateExpenseChart(getFilteredExpenses());
+                updateRecentTransactionsTableInCurrency(selectedCurrency);
+            }
         } else {
             console.error("Failed to fetch currency rates:", response.data.error);
+            handleCurrencyError();
         }
     } catch (error) {
         console.error("Error fetching currency rates:", error);
+        handleCurrencyError();
     }
 }
-
 
 
 function handleCurrencyError() {
