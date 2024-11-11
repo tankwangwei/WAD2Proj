@@ -992,9 +992,6 @@
                     <a class="nav-link" href="alltrips.html">All Trips</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="dashboard.html">Dashboard</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" id="itineraryBuilderLink" href="#">Itinerary Builder</a>
                 </li>
                 <li class="nav-item">
@@ -1024,8 +1021,8 @@
     </div>
 </nav>
 
-<body>
-    <div class="container-fluid px-3 mt-5">
+<body style="overflow: hidden;">
+    <div class="container-fluid mt-5">
         <div class="trip-details text-center">
             <h1 id="tripCountryDisplay" class="trip-country text-white"></h1>
             <h6 class="trip-date-range text-white">
@@ -1034,11 +1031,11 @@
             </h6>
         </div>
 
-        <div class="trip-header d-flex align-items-center justify-content-center mb-2">
+        <div class="trip-header d-flex align-items-center justify-content-center mb-4">
             <h1 id="tripNameDisplay" class="trip-title" style="display: none;"></h1>
 
-            <div class="ms-auto d-flex align-items-center"
-                style="position: relative; right: 10px; margin-top: 5px; margin-bottom: 5px;">
+            <!-- Move this div to the far right while keeping it inline with the title/date -->
+            <div class="ms-auto d-flex align-items-center" style="right: 10px;">
                 <select id="tripDropdown" class="form-select me-2">
                     <option value="">Select a trip</option>
                 </select>
@@ -1049,8 +1046,9 @@
         </div>
     </div>
 
-    <div class="container-fluid px-3 mt-1">
-        <div class="row d-flex align-items-stretch mt-3">
+    <div class="container" style="background-color: rgba(0, 0, 0, 0.5); border-radius: 10px; padding: 10px; max-height: 65vh;overflow-y: auto; margin:20px 20px 20px 20px auto">
+    <div class="container-fluid p-3">
+        <div class="row d-flex align-items-stretch">
             <!-- Weather Section -->
             <div class="col-lg-4 col-md-4">
                 <div onclick="navigateToWeatherPage()" id="weather-section" class="p-3 rounded-section standard-height">
@@ -1075,7 +1073,7 @@
                 <div onclick="navigateToBudgetPage()" id="budget-chart-section"
                     class="p-3 rounded-section standard-height">
                     <h5 class="text-center">Budget Overview</h5>
-                    <div class="d-flex align-items-center justify-content-between mt-1">
+                    <div class="d-flex align-items-center justify-content-between mt-4">
                         <div id="budgetContainer" class="budget-summary d-flex">
                             <div class="text-center me-5">
                                 <p class="label">Total Budget</p>
@@ -1107,24 +1105,8 @@
         <div class="row d-flex align-items-stretch">
             <!-- Destination Section -->
             <div class="col-lg-5 col-md-5">
-                <div id="destination-section" class="rounded-section standard-height">
-                    <div class="destination-header d-flex justify-content-between align-items-center">
-                        <h5 style="margin: 0">Destination</h5>
-                        <a href="#" class="see-all-link" onclick="navigateToItineraryBuilder()">
-                            Edit Itinerary <span>→</span>
-                        </a>
-                    </div>
-                    <div class="destination-carousel-container mt-3">
-                        <button class="carousel-button carousel-button-left" onclick="scrollDestinationLeft()">
-                            &#8249;
-                        </button>
-                        <div id="destination-carousel" class="destination-scroll">
-                            <!-- Days will be dynamically inserted here -->
-                        </div>
-                        <button class="carousel-button carousel-button-right" onclick="scrollDestinationRight()">
-                            &#8250;
-                        </button>
-                    </div>
+                <div id="destination-section" class="p-3 rounded-section standard-height">
+                    <h5 class="text-center">Destination</h5>
                 </div>
             </div>
 
@@ -1136,13 +1118,14 @@
                             See all attractions <span>→</span>
                         </a>
                     </div>
-                    <div class="attractions-carousel-container mt-4">
+                    <div class="attractions-carousel-container mt-5">
                         <button class="carousel-button carousel-button-left" onclick="goLeft()">&#8249;</button>
                         <div id="attractionsContainer" class="d-flex" onclick="navigateToAttractionsPage()"></div>
                         <button class="carousel-button carousel-button-right" onclick="goRight()">&#8250;</button>
                     </div>
                 </div>
             </div>
+        </div>
         </div>
 
 
@@ -1765,7 +1748,7 @@
 
             function fetchConversionRate(currencyCode) {
                 const url = "http://data.fixer.io/api/latest";
-                const apiKey = "c7c4fdc72969bb8ff4accc19237b4088";
+                const apiKey = "a7f1d79a2ef9816d80a593fe0340008f";
 
                 // First get fresh values from Firebase
                 const tripId = localStorage.getItem("selectedTripId");
@@ -1786,8 +1769,7 @@
 
                         // Calculate fresh remaining budget
                         return calculateTotalSpending(tripId).then(spending => {
-                            totalSpending = spending;
-                            remainingBudget = totalBudget - totalSpending;
+                            totalSpending = spending;                        
 
                             // Now fetch conversion rate with fresh values
                             return axios.get(url, {
@@ -1805,22 +1787,19 @@
                             // Convert from EUR to target currency (SGD in this case)
                             // Since budget is in EUR, multiply by rate to get SGD
                             const convertedTotalBudget = totalBudget * rate;
-                            const convertedRemainingBudget = remainingBudget * rate;
+                            remainingBudget = convertedTotalBudget - totalSpending;
+                            // const convertedRemainingBudget = remainingBudget * rate;
 
                             // Update displays with converted values
                             document.getElementById("totalBudgetDisplay").textContent =
                                 `${convertedTotalBudget.toFixed(2)} ${currencyCode}`;
                             document.getElementById("remainingBudgetDisplay").textContent =
-                                `${convertedRemainingBudget.toFixed(2)} ${currencyCode}`;
+                                `${remainingBudget.toFixed(2)} ${currencyCode}`;
 
                             // Update conversion rate display
                             console.log(`1 EUR = ${rate.toFixed(2)} ${currencyCode}`);
                             resultElem.innerText = `1 EUR = ${rate.toFixed(2)} ${currencyCode}`;
 
-                            // Log values for debugging
-                            console.log('Original Budget (EUR):', totalBudget);
-                            console.log('Conversion Rate:', rate);
-                            console.log('Converted Budget (SGD):', convertedTotalBudget);
                         } else {
                             console.error("Conversion rate not available.");
                         }

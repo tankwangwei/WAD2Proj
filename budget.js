@@ -484,13 +484,14 @@ function updateDashboard() {
     const convertedBudget = convertAmount(totalBudget, selectedCurrency);
     const convertedSpending = convertAmount(totalSpending, selectedCurrency);
     const convertedRemaining = convertAmount(totalBudget - totalSpending, selectedCurrency);
+    const remaining = convertedBudget - totalSpending
 
     dashboardTotalBudget.textContent = `${convertedBudget} ${selectedCurrency}`;
-    dashboardTotalSpending.textContent = `${convertedSpending} ${selectedCurrency}`;
-    dashboardRemainingBudget.textContent = `${convertedRemaining} ${selectedCurrency}`;
+    dashboardTotalSpending.textContent = `${totalSpending} ${selectedCurrency}`;
+    dashboardRemainingBudget.textContent = `${remaining} ${selectedCurrency}`;
 
     // Change color based on remaining budget
-    dashboardRemainingBudget.style.color = (convertedRemaining < 0) ? '#e74c3c' : '#2ecc71';
+    dashboardRemainingBudget.style.color = (remaining < 0) ? '#e74c3c' : '#2ecc71';
 }
 
 // Event listener for budget form submission
@@ -556,9 +557,9 @@ function updateExpenseChart(filteredExpenses) {
     if (hasExpenses) {
         // Convert each category total to the selected currency and add to chart data
         Object.entries(categoryTotals).forEach(([category, total]) => {
-            const convertedTotal = parseFloat(convertAmount(total, selectedCurrency));
-            labels.push(`${category} - ${convertedTotal} ${selectedCurrency}`);
-            data.push(convertedTotal);
+            // const convertedTotal = parseFloat(convertAmount(total, selectedCurrency));
+            labels.push(`${category} - ${total} ${selectedCurrency}`);
+            data.push(total);
             backgroundColor.push(CATEGORY_COLORS[category]);
         });
     } else {
@@ -772,7 +773,7 @@ let selectedCurrency = 'EUR'; // Default currency
 async function getCurrencyRates() {
     try {
         const response = await axios.get("http://data.fixer.io/api/latest", {
-            params: { access_key: "c7c4fdc72969bb8ff4accc19237b4088" }
+            params: { access_key: "a7f1d79a2ef9816d80a593fe0340008f" }
         });
 
         if (response.data.success) {
@@ -887,8 +888,8 @@ function updateRecentTransactionsTableInCurrency(currency) {
         if (isNaN(amount)) {
             amountCell.textContent = 'Invalid Amount';
         } else {
-            const convertedAmount = convertAmount(amount, currency);
-            amountCell.textContent = `${convertedAmount} ${currency}`;
+            // const convertedAmount = convertAmount(amount, currency);
+            amountCell.textContent = `${amount} ${currency}`;
         }
 
         const actionCell = document.createElement('td');
