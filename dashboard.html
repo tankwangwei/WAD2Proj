@@ -26,6 +26,9 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            background-attachment: fixed;
+            /* This is key for scrolling behavior */
+
         }
 
 
@@ -50,13 +53,159 @@
             z-index: 1;
         }
 
+        .container-fluid .row:nth-of-type(2) .rounded-section {
+            min-height: 400px;
+            height: auto;
+        }
+
+        /* Specific adjustments for the weather section */
+        #weather-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Specific adjustments for the budget section */
+        #budget-chart-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Specific adjustments for the currency section */
+        #currency-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Center the content vertically in all top sections */
+        .standard-height {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Adjust margins between rows */
+        .container-fluid .row {
+            margin-bottom: 5px;
+        }
+
+        /* Make headings more compact */
+        .rounded-section h5 {
+            margin-bottom: 10px;
+        }
+
+        /* Adjust the forecast container spacing */
+        #forecast-container {
+            margin-top: 10px;
+        }
+
+        /* Adjust the budget summary spacing */
+        .budget-summary {
+            margin-top: 10px;
+        }
+
+        /* Adjust the currency result spacing */
+        .result {
+            margin-top: 10px !important;
+        }
+
+        .container-fluid .row:first-of-type .rounded-section {
+            min-height: 120px !important;
+            /* Override the standard-height */
+            height: auto !important;
+            padding: 15px;
+        }
+
         .carousel {
-            position: fixed;
-            top: 0;
-            left: 0;
+            position: relative !important;
+            top: auto;
+            left: auto;
             width: 100%;
-            height: 100%;
-            z-index: -1;
+            height: auto;
+            z-index: auto;
+        }
+
+        /* Create a new class for our destination carousel */
+        .destination-scroll {
+            display: flex;
+            gap: 15px;
+            transition: transform 0.3s ease;
+            padding: 10px 0;
+        }
+
+
+        .destination-carousel-container .carousel-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            color: #333;
+            z-index: 10;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .destination-carousel-container .carousel-button-left {
+            left: 5px;
+            display: flex !important;
+        }
+
+        .destination-carousel-container .carousel-button-right {
+            right: 5px;
+            display: flex !important;
+        }
+
+        .destination-carousel-container .carousel-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .carousel-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .carousel-button-left {
+            left: 5px;
+        }
+
+        .carousel-button-right {
+            right: 5px;
+        }
+
+        #destination-section,
+        .activities-planned {
+            padding: 20px !important;
+        }
+
+        .destination-carousel-container,
+        .attractions-carousel-container {
+            margin-top: 20px;
+        }
+
+        .day-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .day-card li {
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
         }
 
         .carousel-item {
@@ -82,7 +231,7 @@
         }
 
         .rounded-section {
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             padding: 15px;
             background-color: rgba(255, 255, 255, 0.8);
             border-radius: 12px;
@@ -343,11 +492,21 @@
             transform: translateY(-5px);
         }
 
+        .destination-header,
         .attractions-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
+            height: 40px;
+
+        }
+
+        .destination-header h5,
+        .attractions-header h5 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
 
         .attraction-card img {
@@ -631,12 +790,6 @@
             margin-left: 4px;
         }
 
-        .attractions-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
 
         .see-all-link {
             color: #007bff;
@@ -646,6 +799,7 @@
             align-items: center;
             gap: 4px;
             transition: color 0.3s ease;
+            margin: 0;
         }
 
         .see-all-link:hover {
@@ -660,6 +814,77 @@
         /* Standardize height for the Weather, Budget, and Currency sections */
         .standard-height {
             min-height: 150px;
+        }
+
+        .destination-carousel-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            padding: 0 0px;
+        }
+
+        #destination-carousel {
+            display: flex;
+            gap: 15px;
+            transition: transform 0.3s ease;
+            padding: 10px 0;
+        }
+
+        .day-card {
+            flex: 0 0 calc(33.33% - 10px);
+            min-width: calc(33.33% - 10px);
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            margin-right: 10px;
+            padding: 15px;
+            height: 280px;
+            /* Match attraction card height */
+        }
+
+        .carousel-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .standard-height {
+            height: 100%;
+            min-height: 400px;
+        }
+
+        /* Make sure both sections have the same height */
+        .row.align-items-stretch>[class*='col-'] {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .row.align-items-stretch>[class*='col-']>div {
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                background-size: cover;
+                min-height: 100vh;
+            }
+
+            .container-fluid {
+                padding: 10px;
+            }
         }
     </style>
 
@@ -704,11 +929,12 @@
         }
 
         function navigateToItineraryBuilder() {
-            const tripId = localStorage.getItem("tripId"); // Get the current tripId from localStorage
-            const location = localStorage.getItem("location"); // Get the current location from localStorage
+            const tripId = localStorage.getItem("selectedTripId"); // get tripid from here
+            const location = localStorage.getItem("location");
 
             if (!tripId || !location) {
                 console.error("Missing tripId or location. Cannot navigate to Itinerary Builder.");
+                alert("Please select a trip first!");
                 return;
             }
 
@@ -804,8 +1030,7 @@
         <div class="trip-header d-flex align-items-center justify-content-center mb-4">
             <h1 id="tripNameDisplay" class="trip-title" style="display: none;"></h1>
 
-            <!-- Move this div to the far right while keeping it inline with the title/date -->
-            <div class="ms-auto d-flex align-items-center" style="position: absolute; right: 10px;">
+            <div class="ms-auto d-flex align-items-center" style="position: absolute; right: 10px; margin-top: 17px;">
                 <select id="tripDropdown" class="form-select me-2">
                     <option value="">Select a trip</option>
                 </select>
@@ -842,7 +1067,7 @@
                 <div onclick="navigateToBudgetPage()" id="budget-chart-section"
                     class="p-3 rounded-section standard-height">
                     <h5 class="text-center">Budget Overview</h5>
-                    <div class="d-flex align-items-center justify-content-between mt-4">
+                    <div class="d-flex align-items-center justify-content-between mt-1">
                         <div id="budgetContainer" class="budget-summary d-flex">
                             <div class="text-center me-5">
                                 <p class="label">Total Budget</p>
@@ -870,11 +1095,11 @@
         </div>
     </div>
 
-    <div class="container-fluid p-3">
-        <div class="row d-flex align-items-stretch">
+    <div class="container-fluid">
+        <div class="row d-flex align-items-stretch p-3">
             <!-- Destination Section -->
             <div class="col-lg-5 col-md-5">
-                <div id="destination-section" class="p-3 rounded-section standard-height">
+                <div id="destination-section" class="rounded-section standard-height">
                     <div class="destination-header d-flex justify-content-between align-items-center">
                         <h5 style="margin: 0">Destination</h5>
                         <a href="#" class="see-all-link" onclick="navigateToItineraryBuilder()">
@@ -882,15 +1107,13 @@
                         </a>
                     </div>
                     <div class="destination-carousel-container mt-3">
-                        <button class="carousel-button carousel-button-left"
-                            onclick="scrollLeft('destination-carousel')">
+                        <button class="carousel-button carousel-button-left" onclick="scrollDestinationLeft()">
                             &#8249;
                         </button>
-                        <div id="destination-carousel" class="carousel">
-                            <!-- Itinerary days will be dynamically inserted here -->
+                        <div id="destination-carousel" class="destination-scroll">
+                            <!-- Days will be dynamically inserted here -->
                         </div>
-                        <button class="carousel-button carousel-button-right"
-                            onclick="scrollRight('destination-carousel')">
+                        <button class="carousel-button carousel-button-right" onclick="scrollDestinationRight()">
                             &#8250;
                         </button>
                     </div>
@@ -905,7 +1128,7 @@
                             See all attractions <span>→</span>
                         </a>
                     </div>
-                    <div class="attractions-carousel-container mt-5">
+                    <div class="attractions-carousel-container mt-4">
                         <button class="carousel-button carousel-button-left" onclick="goLeft()">&#8249;</button>
                         <div id="attractionsContainer" class="d-flex" onclick="navigateToAttractionsPage()"></div>
                         <button class="carousel-button carousel-button-right" onclick="goRight()">&#8250;</button>
@@ -943,6 +1166,24 @@
                 messagingSenderId: "191549341083",
                 appId: "1:191549341083:web:ad67ea6030d29c8700353e"
             };
+
+            let destinationScrollPosition = 0;
+            const scrollAmount = 320; // for destination scroll
+
+            window.scrollDestinationLeft = function () {
+                const carousel = document.getElementById('destination-carousel');
+                destinationScrollPosition = Math.max(0, destinationScrollPosition - scrollAmount);
+                carousel.style.transform = `translateX(-${destinationScrollPosition}px)`;
+                updateDestinationButtons();
+            }
+
+            window.scrollDestinationRight = function () {
+                const carousel = document.getElementById('destination-carousel');
+                const maxScroll = carousel.scrollWidth - carousel.parentElement.clientWidth + 80;
+                destinationScrollPosition = Math.min(destinationScrollPosition + scrollAmount, maxScroll);
+                carousel.style.transform = `translateX(-${destinationScrollPosition}px)`;
+                updateDestinationButtons();
+            }
 
             // Initialize Firebase
             const app = initializeApp(firebaseConfig);
@@ -1965,6 +2206,39 @@
                     alert("Error: Trip information not found!");
                 }
             }
+
+            function updateDestinationButtons() {
+                const carousel = document.getElementById('destination-carousel');
+                const leftButton = document.querySelector('.destination-carousel-container .carousel-button-left');
+                const rightButton = document.querySelector('.destination-carousel-container .carousel-button-right');
+
+                if (leftButton && rightButton) {
+                    leftButton.style.opacity = destinationScrollPosition <= 0 ? '0.5' : '1';
+                    leftButton.style.cursor = destinationScrollPosition <= 0 ? 'default' : 'pointer';
+
+                    const maxScroll = carousel.scrollWidth - carousel.parentElement.clientWidth + 80;
+                    rightButton.style.opacity = destinationScrollPosition >= maxScroll ? '0.5' : '1';
+                    rightButton.style.cursor = destinationScrollPosition >= maxScroll ? 'default' : 'pointer';
+                }
+            }
+
+
+            document.addEventListener('DOMContentLoaded', function () {
+                // Update the button onclick handlers
+                const leftButton = document.querySelector('.destination-carousel-container .carousel-button-left');
+                const rightButton = document.querySelector('.destination-carousel-container .carousel-button-right');
+
+                if (leftButton) {
+                    leftButton.onclick = scrollDestinationLeft;
+                }
+
+                if (rightButton) {
+                    rightButton.onclick = scrollDestinationRight;
+                }
+
+                // Initialize button states
+                updateDestinationButtons();
+            });
         </script>
 
 </body>
