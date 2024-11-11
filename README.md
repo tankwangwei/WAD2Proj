@@ -14,6 +14,7 @@ A comprehensive travel planning dashboard that integrates real-time updates on w
 ## Take Note
 - If you are using SMU school wifi, do change to 4G/5G to access the website due to domain rules.
 - If you have any antivirus software, do disable it.
+- The base currency is in Euros due to the Fixer API.
 
 ## Tech Stack
 - **Frontend**: HTML, CSS, Javascript, Bootstrap
