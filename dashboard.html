@@ -1765,7 +1765,7 @@
 
             function fetchConversionRate(currencyCode) {
                 const url = "http://data.fixer.io/api/latest";
-                const apiKey = "c7c4fdc72969bb8ff4accc19237b4088";
+                const apiKey = "a7f1d79a2ef9816d80a593fe0340008f";
 
                 // First get fresh values from Firebase
                 const tripId = localStorage.getItem("selectedTripId");
@@ -1788,6 +1788,7 @@
                         return calculateTotalSpending(tripId).then(spending => {
                             totalSpending = spending;
                             remainingBudget = totalBudget - totalSpending;
+                            
 
                             // Now fetch conversion rate with fresh values
                             return axios.get(url, {
