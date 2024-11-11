@@ -12,85 +12,73 @@ const firebaseConfig = {
     appId: "1:191549341083:web:ad67ea6030d29c8700353e"
 };
 
-const app = initializeApp(firebaseConfig)
-const auth = getAuth(app)
-const provider = new GoogleAuthProvider()
-const googleLogin = document.getElementById("google")
-googleLogin.addEventListener("click", function () {
-    signInWithPopup(auth, provider)
-        .then((result) => {
-            // This gives you a Google Access Token. You can use it to access the Google API.
-            const credential = GoogleAuthProvider.credentialFromResult(result);
-            const token = credential.accessToken;
-            // The signed-in user info.
-            const user = result.user;
-            localStorage.setItem("userUID", user.uid); // Store user UID
-            window.location.href = "home.html";
-            // IdP data available using getAdditionalUserInfo(result)
-            // ...
-        }).catch((error) => {
-            // Handle Errors here.
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            // The email of the user's account used.
-            const email = error.customData.email;
-            // The AuthCredential type that was used.
-            const credential = GoogleAuthProvider.credentialFromError(error);
-            // ...
-        });
-})
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-function validateEmail(email) {
-    const re = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
-    return re.test(String(email).toLowerCase());
-}
+// Vue.js Application Instance
+const appVue = Vue.createApp({
+    data() {
+        return {
+            email: '',
+            password: '',
+            errorMessage: ''
+        };
+    },
+    methods: {
+        validateEmail(email) {
+            const re = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+            return re.test(String(email).toLowerCase());
+        },
+        validatePassword(password) {
+            return password.length >= 6;
+        },
+        handleLogin() {
+            this.errorMessage = "";
 
-function validatePassword(password) {
-    return password.length >= 6;
-}
-
-const login = document.getElementById("login");
-login.addEventListener("click", function (event) {
-    event.preventDefault();
-
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    const errorMessageDisplay = document.getElementById("error-message");
-    errorMessageDisplay.innerText = "";
-
-    if (!validateEmail(email)) {
-        errorMessageDisplay.innerText = "Invalid email format.";
-        return;
-    }
-
-    if (!validatePassword(password)) {
-        errorMessageDisplay.innerText = "Password must be at least 6 characters.";
-        return;
-    }
-
-    signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            const user = userCredential.user;
-            localStorage.setItem("userUID", user.uid); // Store user UID
-            window.location.href = "home.html";
-        })
-        .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            if (errorCode === 'auth/invalid-credential') {
-                errorMessageDisplay.innerText = "Invalid username or password. Please try again.";
+            if (!this.validateEmail(this.email)) {
+                this.errorMessage = "Invalid email format.";
+                return;
             }
-            else {
-                errorMessageDisplay.innerText = errorMessage;
+
+            if (!this.validatePassword(this.password)) {
+                this.errorMessage = "Password must be at least 6 characters.";
+                return;
+            }
+
+            signInWithEmailAndPassword(auth, this.email, this.password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    localStorage.setItem("userUID", user.uid);
+                    window.location.href = "home.html";
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    this.errorMessage = errorCode === 'auth/invalid-credential'
+                        ? "Invalid username or password. Please try again."
+                        : error.message;
+                });
+        },
+        handleGoogleLogin() {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    const user = result.user;
+                    localStorage.setItem("userUID", user.uid);
+                    window.location.href = "home.html";
+                })
+                .catch((error) => {
+                    this.errorMessage = error.message;
+                });
+        }
+    },
+    mounted() {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                localStorage.setItem("userId", user.uid);
             }
         });
-});
-
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        localStorage.setItem("userId", user.uid); // Store userId for consistent session
-    } else {
-        // window.location.href = "login.html"; // Redirect if not authenticated
     }
 });
+
+// Mount the Vue instance
+appVue.mount('#app');
