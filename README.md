@@ -12,12 +12,12 @@ A comprehensive travel planning dashboard that integrates real-time updates on w
 - **Find Attractions**
 
 ## Take Note
-If you are using SMU school wifi, do change to 4G/5G to access the website due to domain rules.
-If you have any antivirus software, do disable it.
+- If you are using SMU school wifi, do change to 4G/5G to access the website due to domain rules.
+- If you have any antivirus software, do disable it.
 
 ## Tech Stack
-**Frontend**: HTML, CSS, Javascript, Bootstrap
-**Backend**: Javascript, Firebase
-**API Used**: OpenWeatherMap, Google Maps and Places, Unsplash Image, Fixer, Wiki
+- **Frontend**: HTML, CSS, Javascript, Bootstrap
+- **Backend**: Javascript, Firebase
+- **API Used**: OpenWeatherMap, Google Maps and Places, Unsplash Image, Fixer, Wiki
 
 
