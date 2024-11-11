@@ -1034,7 +1034,8 @@
         <div class="trip-header d-flex align-items-center justify-content-center mb-2">
             <h1 id="tripNameDisplay" class="trip-title" style="display: none;"></h1>
 
-            <div class="ms-auto d-flex align-items-center" style="position: relative; right: 10px; margin-top: 5px; margin-bottom: 5px;">
+            <div class="ms-auto d-flex align-items-center"
+                style="position: relative; right: 10px; margin-top: 5px; margin-bottom: 5px;">
                 <select id="tripDropdown" class="form-select me-2">
                     <option value="">Select a trip</option>
                 </select>
@@ -1370,20 +1371,16 @@
 
                     if (tripDoc.exists()) {
                         const tripData = tripDoc.data();
-                        console.log("Trip data retrieved:", tripData); // Log for verification
+                        console.log("Trip data retrieved:", tripData);
 
                         const location = tripData.location;
-                        const days = tripData.dates ? tripData.dates.length : 7; // Use dates array length as tripDays
+                        const days = tripData.dates ? tripData.dates.length : 7;
                         const dates = tripData.dates || [];
                         const dateRange = dates.length > 0 ? `${dates[0]} to ${dates[dates.length - 1]}` : "Date range not available";
 
-                        // Store the calculated days in localStorage
                         localStorage.setItem("tripDays", days);
-                        console.log("Updated tripDays to:", days); // Confirm days is set correctly
-
                         localStorage.setItem("location", location);
                         updateNavLinks();
-
 
                         // Display trip name and location
                         document.getElementById("tripNameDisplay").textContent = tripData.name || "Your Trip";
@@ -1392,67 +1389,32 @@
                         document.getElementById("weather-location").textContent = location;
                         document.getElementById("attraction-location").textContent = location;
 
-                        // Update the pie chart with the expense data
-                        updatePieChart(await calculateCategoryTotals(tripId)); // Fetch category totals for pie chart
-
-                        await populateDestinationCarousel(); // Update itinerary
-
-                        // Fetch and display updated weather, attractions, and currency based on location
-                        fetchWeatherData(location);
-                        fetchAttractionsForLocation(location);
-                        fetchCurrencyForLocation(location);
+                        // Get budget and expenses
+                        totalBudget = tripData.budget || 0;
                         const expensesRef = collection(db, `users/${auth.currentUser.uid}/trips/${tripId}/expenses`);
                         const querySnapshot = await getDocs(expensesRef);
-                        const currencyCode = await fetchCurrencyByCountry(location);
-
-                        const categoryData = {};
-                        querySnapshot.forEach((doc) => {
-                            const expense = doc.data();
-                            const category = expense.category || 'Miscellaneous';
-                            const amount = parseFloat(expense.amount) || 0;
-                            categoryData[category] = (categoryData[category] || 0) + amount;
-                        });
-
-                        totalBudget = tripData.budget || 0;
-
-                        // Update the displayed budget information
-                        document.getElementById("totalBudgetDisplay").textContent = `$${totalBudget.toFixed(2)}`;
-                        expenses = [];
-                        querySnapshot.forEach((doc) => {
-                            const expense = doc.data();
-                            expenses.push(expense);
-                        });
-
-                        totalSpending = await calculateTotalSpending(tripId); // Function to fetch and sum expenses for the trip
+                        expenses = querySnapshot.docs.map(doc => doc.data());
+                        totalSpending = expenses.reduce((total, expense) => total + (parseFloat(expense.amount) || 0), 0);
                         remainingBudget = totalBudget - totalSpending;
 
-                        document.getElementById("remainingBudgetDisplay").textContent = `$${remainingBudget.toFixed(2)}`;
-
-                        if (totalBudget > 0) {
-                            document.getElementById("totalBudgetDisplay").textContent = `$${totalBudget.toFixed(2)}`;
-
-                            totalSpending = await calculateTotalSpending(tripId);
-                            remainingBudget = totalBudget - totalSpending;
-
-                            document.getElementById("remainingBudgetDisplay").textContent = `$${remainingBudget.toFixed(2)}`;
-                            document.getElementById("budgetContainer").style.display = "block";
-                        } else {
-                            document.getElementById("budgetContainer").style.display = "none";
-                        }
-
+                        // IMPORTANT: Get currency code and fetch conversion rate BEFORE updating displays
+                        const currencyCode = await fetchCurrencyByCountry(location);
                         if (currencyCode) {
-                            totalBudget = tripData.budget || 0;
-                            totalSpending = await calculateTotalSpending(tripId);
-                            remainingBudget = totalBudget - totalSpending;
-
-                            // Update total and remaining budget with currency
-                            document.getElementById("totalBudgetDisplay").textContent = `${totalBudget.toFixed(2)} ${currencyCode}`;
-                            document.getElementById("remainingBudgetDisplay").textContent = `${remainingBudget.toFixed(2)} ${currencyCode}`;
+                            // Fetch conversion rate and update displays
+                            await fetchConversionRate(currencyCode);
                         } else {
-                            console.error("Currency not found for the specified country.");
+                            // Fallback to displaying in original currency (EUR)
+                            document.getElementById("totalBudgetDisplay").textContent = `${totalBudget.toFixed(2)} EUR`;
+                            document.getElementById("remainingBudgetDisplay").textContent = `${remainingBudget.toFixed(2)} EUR`;
                         }
 
-                        updatePieChart(categoryData);
+                        // Update other UI elements
+                        await populateDestinationCarousel();
+                        fetchWeatherData(location);
+                        fetchAttractionsForLocation(location);
+                        updatePieChart(await calculateCategoryTotals(tripId));
+
+                        document.getElementById("budgetContainer").style.display = "block";
                     }
                 } catch (error) {
                     console.error("Error loading trip data:", error);
@@ -1800,31 +1762,73 @@
 
             function fetchConversionRate(currencyCode) {
                 const url = "http://data.fixer.io/api/latest";
-                const apiKey = ""; // Make sure your API key is correct
+                const apiKey = "c7c4fdc72969bb8ff4accc19237b4088";
 
-                axios.get(url, {
-                    params: {
-                        access_key: apiKey,
-                        symbols: currencyCode
-                    }
-                })
+                // First get fresh values from Firebase
+                const tripId = localStorage.getItem("selectedTripId");
+                if (!tripId) {
+                    console.error("No trip selected");
+                    return;
+                }
+
+                getDoc(doc(db, `users/${auth.currentUser.uid}/trips`, tripId))
+                    .then(tripDoc => {
+                        if (!tripDoc.exists()) {
+                            throw new Error("Trip not found");
+                        }
+
+                        const tripData = tripDoc.data();
+                        // Get fresh budget value in EUR
+                        totalBudget = tripData.budget || 0;
+
+                        // Calculate fresh remaining budget
+                        return calculateTotalSpending(tripId).then(spending => {
+                            totalSpending = spending;
+                            remainingBudget = totalBudget - totalSpending;
+
+                            // Now fetch conversion rate with fresh values
+                            return axios.get(url, {
+                                params: {
+                                    access_key: apiKey,
+                                    base: "EUR",  // Explicitly set base currency to EUR
+                                    symbols: currencyCode
+                                }
+                            });
+                        });
+                    })
                     .then(response => {
                         const rate = response.data.rates[currencyCode];
                         if (rate) {
-                            // Adjust the budget to the converted currency
+                            // Convert from EUR to target currency (SGD in this case)
+                            // Since budget is in EUR, multiply by rate to get SGD
                             const convertedTotalBudget = totalBudget * rate;
                             const convertedRemainingBudget = remainingBudget * rate;
 
-                            document.getElementById("totalBudgetDisplay").textContent = `${convertedTotalBudget.toFixed(2)} ${currencyCode}`;
-                            document.getElementById("remainingBudgetDisplay").textContent = `${convertedRemainingBudget.toFixed(2)} ${currencyCode}`;
+                            // Update displays with converted values
+                            document.getElementById("totalBudgetDisplay").textContent =
+                                `${convertedTotalBudget.toFixed(2)} ${currencyCode}`;
+                            document.getElementById("remainingBudgetDisplay").textContent =
+                                `${convertedRemainingBudget.toFixed(2)} ${currencyCode}`;
+
+                            // Update conversion rate display
                             console.log(`1 EUR = ${rate.toFixed(2)} ${currencyCode}`);
-                            resultElem.innerText = `1 EUR = ${rate.toFixed(2)} ${currencyCode}`
+                            resultElem.innerText = `1 EUR = ${rate.toFixed(2)} ${currencyCode}`;
+
+                            // Log values for debugging
+                            console.log('Original Budget (EUR):', totalBudget);
+                            console.log('Conversion Rate:', rate);
+                            console.log('Converted Budget (SGD):', convertedTotalBudget);
                         } else {
                             console.error("Conversion rate not available.");
                         }
                     })
                     .catch(error => {
-                        console.error("Error fetching conversion rate:", error);
+                        console.error("Error in conversion process:", error);
+                        // Fall back to original currency if there's an error
+                        document.getElementById("totalBudgetDisplay").textContent =
+                            `${totalBudget.toFixed(2)} EUR`;
+                        document.getElementById("remainingBudgetDisplay").textContent =
+                            `${remainingBudget.toFixed(2)} EUR`;
                     });
             }
 
