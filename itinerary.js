@@ -708,6 +708,68 @@ async function removeActivity(activityId) {
 
 
 // Event listener removed from calendar dates (for filtering markers)
+// async function displayCalendar(dates) {
+//     const calendar = document.getElementById("calendar");
+
+//     // Clear existing content
+//     while (calendar.firstChild) {
+//         calendar.removeChild(calendar.firstChild);
+//     }
+
+//     for (const date of dates) {
+//         const weatherDataForDate = weatherData[date]; // Use pre-fetched weather data
+
+//         // Create the date container
+//         const dateContainer = document.createElement("div");
+//         dateContainer.classList.add("card", "p-3", "mb-3");
+//         dateContainer.dataset.date = date;
+
+//         // Add drag-and-drop event listeners
+//         dateContainer.addEventListener("dragover", (event) => event.preventDefault());
+//         dateContainer.addEventListener("drop", (event) => handleDrop(event, date));
+
+//         // Add the date as a header
+//         const dateHeader = document.createElement("h6");
+//         dateHeader.textContent = new Date(date).toLocaleDateString();
+//         dateContainer.appendChild(dateHeader);
+
+//         // Add weather details if available
+//         if (weatherDataForDate) {
+//             const weatherDetails = document.createElement("div");
+//             weatherDetails.classList.add("weather-details");
+
+//             const weatherIcon = document.createElement("img");
+//             weatherIcon.src = `http://openweathermap.org/img/wn/${weatherDataForDate.icon}@2x.png`;
+//             weatherIcon.alt = weatherDataForDate.description;
+//             weatherIcon.classList.add("weather-icon");
+
+//             const tempSpan = document.createElement("span");
+//             tempSpan.classList.add("high-low-temp");
+//             tempSpan.textContent = `H: ${weatherDataForDate.highTemp}°C L: ${weatherDataForDate.lowTemp}°C`;
+
+//             weatherDetails.appendChild(weatherIcon);
+//             weatherDetails.appendChild(tempSpan);
+//             dateContainer.appendChild(weatherDetails);
+//         } else {
+//             const noWeather = document.createElement("p");
+//             noWeather.textContent = "No weather data";
+//             dateContainer.appendChild(noWeather);
+//         }
+
+//         // Add the activity dropzone
+//         const dropzone = document.createElement("div");
+//         dropzone.classList.add("activity-dropzone");
+//         dateContainer.appendChild(dropzone);
+
+//         // Append the date container to the calendar
+//         calendar.appendChild(dateContainer);
+//     }
+
+//     // Load itinerary data for each date
+//     loadItinerary();
+// }
+
+
 async function displayCalendar(dates) {
     const calendar = document.getElementById("calendar");
 
@@ -724,41 +786,58 @@ async function displayCalendar(dates) {
         dateContainer.classList.add("card", "p-3", "mb-3");
         dateContainer.dataset.date = date;
 
-        // Add drag-and-drop event listeners
+        // Add drag-and-drop event listeners to the date container
         dateContainer.addEventListener("dragover", (event) => event.preventDefault());
         dateContainer.addEventListener("drop", (event) => handleDrop(event, date));
+
+        // Create a row for the date and weather
+        const dateWeatherRow = document.createElement("div");
+        dateWeatherRow.classList.add("d-flex", "justify-content-between", "align-items-center", "mb-2");
 
         // Add the date as a header
         const dateHeader = document.createElement("h6");
         dateHeader.textContent = new Date(date).toLocaleDateString();
-        dateContainer.appendChild(dateHeader);
+        dateHeader.style.margin = "0"; // Ensure no extra margin
+        dateWeatherRow.appendChild(dateHeader);
 
         // Add weather details if available
         if (weatherDataForDate) {
             const weatherDetails = document.createElement("div");
-            weatherDetails.classList.add("weather-details");
+            weatherDetails.classList.add("weather-details", "d-flex", "align-items-center");
 
             const weatherIcon = document.createElement("img");
             weatherIcon.src = `http://openweathermap.org/img/wn/${weatherDataForDate.icon}@2x.png`;
             weatherIcon.alt = weatherDataForDate.description;
             weatherIcon.classList.add("weather-icon");
+            weatherIcon.style.width = "20px"; // Adjust icon size
+            weatherIcon.style.height = "20px";
+            weatherIcon.style.marginRight = "5px"; // Add spacing between icon and temperature
 
             const tempSpan = document.createElement("span");
             tempSpan.classList.add("high-low-temp");
             tempSpan.textContent = `H: ${weatherDataForDate.highTemp}°C L: ${weatherDataForDate.lowTemp}°C`;
+            tempSpan.style.fontSize = "0.9rem";
+            tempSpan.style.fontWeight = "bold";
 
             weatherDetails.appendChild(weatherIcon);
             weatherDetails.appendChild(tempSpan);
-            dateContainer.appendChild(weatherDetails);
+
+            dateWeatherRow.appendChild(weatherDetails);
         } else {
             const noWeather = document.createElement("p");
             noWeather.textContent = "No weather data";
-            dateContainer.appendChild(noWeather);
+            noWeather.style.margin = "0";
+            dateWeatherRow.appendChild(noWeather);
         }
+
+        // Append the date and weather row to the date container
+        dateContainer.appendChild(dateWeatherRow);
 
         // Add the activity dropzone
         const dropzone = document.createElement("div");
         dropzone.classList.add("activity-dropzone");
+        dropzone.addEventListener("dragover", (event) => event.preventDefault()); // Enable drop
+        dropzone.addEventListener("drop", (event) => handleDrop(event, date)); // Handle drop
         dateContainer.appendChild(dropzone);
 
         // Append the date container to the calendar
