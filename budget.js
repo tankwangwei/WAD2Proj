@@ -114,27 +114,27 @@ async function loadTrips() {
             }
 
             // Set this option as selected if it matches the tripID
-            if (tripToSelect && doc.id === tripToSelect) {
-                option.selected = true;
-                console.log('Found matching trip, setting as selected'); // Debug log
-            }
+            // if (tripToSelect && doc.id === tripToSelect) {
+            //     option.selected = true;
+            //     console.log('Found matching trip, setting as selected'); // Debug log
+            // }
 
             tripSelect.appendChild(option);
         });
 
         // If we have a trip to select, trigger the change event to load the trip data
-        if (tripToSelect) {
-            console.log('Triggering change event for trip selection'); // Debug log
-            currentTripId = tripToSelect;
-            tripSelect.dispatchEvent(new Event('change'));
+        // if (tripToSelect) {
+        //     console.log('Triggering change event for trip selection'); // Debug log
+        //     currentTripId = tripToSelect;
+        //     tripSelect.dispatchEvent(new Event('change'));
 
-            // Load trip data
-            await loadTripData(tripToSelect);
+        //     // Load trip data
+        //     await loadTripData(tripToSelect);
 
-            // Show UI elements
-            expenseCard.style.display = 'block';
-            dashboardSection.style.display = 'block';
-        }
+        //     // Show UI elements
+        //     expenseCard.style.display = 'block';
+        //     dashboardSection.style.display = 'block';
+        // }
     } catch (error) {
         console.error("Error loading trips:", error);
     }
@@ -683,16 +683,16 @@ document.addEventListener('DOMContentLoaded', function () {
             if (tripID) {
                 // Set the dropdown value to the tripID
                 const tripSelect = document.getElementById('trip');
-                tripSelect.value = tripID;
+                // tripSelect.value = tripID;
 
                 // Initialize chart and load trip data
-                currentTripId = tripID;
-                initializeChart();
-                await loadTripData(tripID);
+                // currentTripId = tripID;
+                // initializeChart();
+                // await loadTripData(tripID);
 
                 // Show UI elements
-                expenseCard.style.display = 'block';
-                dashboardSection.style.display = 'block';
+                // expenseCard.style.display = 'block';
+                // dashboardSection.style.display = 'block';
             }
 
             // Add change event handler for trip dropdown
@@ -713,7 +713,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                             // Set budget value
                             totalBudget = Number(tripData.budget) || 0;
-                            document.getElementById('budget').value = totalBudget;
+                            // document.getElementById('budget').value = totalBudget;
 
                             // Set location-based currency if available
                             if (tripData.location) {
@@ -772,7 +772,7 @@ let selectedCurrency = 'EUR'; // Default currency
 async function getCurrencyRates() {
     try {
         const response = await axios.get("http://data.fixer.io/api/latest", {
-            params: { access_key: "6cc8299d2c01611b1f3febb6a65b9172" }
+            params: { access_key: "c7c4fdc72969bb8ff4accc19237b4088" }
         });
 
         if (response.data.success) {
