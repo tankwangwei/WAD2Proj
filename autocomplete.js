@@ -41,7 +41,6 @@ export function searchAttractions(location, callback) {
         if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
             callback(results);
         } else {
-            console.log("No attractions found.");
             callback([]); // Return empty array if no results
         }
     });
@@ -59,7 +58,6 @@ export function searchAttractionsByText(locationText, callback) {
             const locationCoords = results[0].geometry.location;
             searchAttractions(locationCoords, callback); // Use nearby search based on text location
         } else {
-            console.log("No attractions found for text search.");
             callback([]);
         }
     });

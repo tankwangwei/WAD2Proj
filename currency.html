@@ -269,7 +269,7 @@
 
         function getCurrency() {
             let url = "http://data.fixer.io/api/latest";
-            let key = "45818ae685202a973809c1932d8763e2";
+            let key = "430efd260bbac911b95f58030dfa831f";
 
             axios.get(url, {
                 params: {
@@ -278,7 +278,6 @@
             })
                 .then(response => {
                     let data = response.data;
-                    console.log(data);
                     currencyRates = data.rates;
 
                     // Set a clear placeholder option

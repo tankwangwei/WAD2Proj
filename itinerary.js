@@ -107,11 +107,8 @@ async function fetchWeather(lat, lon) {
     };
 
     try {
-        console.log("Fetching weather data with params:", params);
         const response = await axios.get(weatherUrl, { params });
         const data = response.data;
-
-        console.log("Weather data fetched successfully:", data);
 
         weatherData = data.daily.reduce((acc, day) => {
             const date = new Date(day.dt * 1000).toISOString().split("T")[0];
@@ -507,13 +504,11 @@ function highlightMarker(location) {
 }
 
 async function fetchMissingPlace(placeId) {
-    console.log("Fetching place details for placeId:", placeId);
 
     const service = new google.maps.places.PlacesService(map);
 
     service.getDetails({ placeId }, (place, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
-            console.log("Fetched missing place:", place);
 
             // Only add the marker, no need to highlight it
             addMarkers([place]);
@@ -552,7 +547,6 @@ function addMarkers(places) {
         }
     });
 
-    console.log("Markers added:", markers.map((m) => m.title)); // Log all marker titles (place IDs)
 }
 
 function clearMarkers() {
@@ -595,8 +589,6 @@ async function loadSavedActivities() {
         snapshot.forEach((doc) => {
             const activity = doc.data();
             const activityId = doc.id;
-
-            console.log("Saved activity loaded:", { id: activityId, name: activity.name, placeId: activity.placeId });
 
             if (!isActivityInCalendar(activityId)) {
                 const activityEl = createActivityCard(activityId, activity.name, true, "savedActivities");
@@ -670,7 +662,6 @@ function savePlace(placeId, name, event) {
     const activity = { id: placeId, name, placeId };
     addDoc(collection(db, `users/${userId}/trips/${tripId}/activities`), activity)
         .then(() => {
-            console.log(`Place saved: ${name} with placeId: ${placeId}`);
             loadSavedActivities(); // Refresh saved activities
         })
         .catch(error => console.error("Error saving place:", error));
@@ -691,7 +682,6 @@ async function updateActivitiesWithPlaceId() {
             placesService.textSearch(request, async (results, status) => {
                 if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
                     const placeId = results[0].place_id;
-                    console.log(`Found placeId for ${activity.name}: ${placeId}`);
                     await updateDoc(doc.ref, { placeId });
                 } else {
                     console.error(`Failed to fetch placeId for activity: ${activity.name}`);
@@ -711,7 +701,6 @@ async function removeActivity(activityId) {
         // Refresh the Saved Activities section
         loadSavedActivities();
 
-        console.log(`Activity ${activityId} removed successfully.`);
     } catch (error) {
         console.error(`Error removing activity ${activityId}:`, error);
     }
@@ -858,7 +847,6 @@ async function fetchPlaceAndAddMarker(placeId, name) {
     return new Promise((resolve, reject) => {
         service.getDetails({ placeId }, (place, status) => {
             if (status === google.maps.places.PlacesServiceStatus.OK) {
-                console.log(`Fetched details for place: ${place.name}`);
                 addMarkers([place]); // Add marker to the map
                 resolve(place);
             } else {
@@ -1050,112 +1038,3 @@ window.removeActivity = removeActivity;
 window.searchPlaces = searchPlaces;
 window.removeActivityFromDate = removeActivityFromDate;
 
-
-// function drawRoute(markers) {
-//     const waypoints = markers.slice(1, -1).map(marker => ({
-//         location: marker.getPosition(),
-//         stopover: true,
-//     }));
-
-//     const request = {
-//         origin: markers[0].getPosition(),
-//         destination: markers[markers.length - 1].getPosition(),
-//         waypoints: waypoints,
-//         travelMode: google.maps.TravelMode.DRIVING, // Change travel mode as needed
-//     };
-
-//     directionsService.route(request, (result, status) => {
-//         if (status === google.maps.DirectionsStatus.OK) {
-//             directionsRenderer.setDirections(result);
-//             directionsRenderer.setMap(map);
-//         } else {
-//             console.error("Directions request failed:", status);
-//         }
-//     });
-// }
-
-// function clearRoute() {
-//     directionsRenderer.setMap(null);
-// }
-
-// async function filterMarkersByDate(date, activities) {
-//     console.log(`Filtering markers for date: ${date} with activities:`, activities);
-
-//     markers.forEach(marker => marker.setMap(null)); // Clear all existing markers on the map
-
-//     const filteredMarkers = [];
-//     for (const [index, activity] of activities.entries()) {
-//         const { placeId, name, id } = activity;
-
-//         if (!placeId) {
-//             console.warn(`Missing placeId for activity:`, activity);
-//             continue; // Skip activities without a placeId
-//         }
-
-//         let marker = markers.find(marker => marker.title === placeId);
-
-//         if (!marker) {
-//             console.warn(`Marker not found for placeId: ${placeId}, fetching details for activity: ${name}`);
-//             try {
-//                 const place = await fetchPlaceAndAddMarker(placeId, name);
-//                 marker = markers.find(marker => marker.title === place.place_id);
-//             } catch (error) {
-//                 console.error(`Failed to fetch details for placeId: ${placeId}`, error);
-//                 continue;
-//             }
-//         }
-
-//         if (marker) {
-//             marker.setLabel((index + 1).toString()); // Order markers with labels
-//             marker.setMap(map);
-//             filteredMarkers.push(marker);
-//         }
-//     }
-
-//     if (filteredMarkers.length > 1) {
-//         drawRoute(filteredMarkers); // Connect the markers with a route
-//     } else {
-//         clearRoute(); // Clear route if fewer than two markers
-//     }
-// }
-
-// function applyFilters() {
-//     // Get all selected filter buttons
-//     const selectedFilters = Array.from(document.querySelectorAll('.filter-btn.active'))
-//         .map(button => button.getAttribute('data-category'));
-
-//     if (selectedFilters.length === 0) {
-//         // If no filters are selected, display all places
-//         displayPlaces(allPlaces);
-//         addMarkers(allPlaces);
-//         return;
-//     }
-
-//     // Filter places based on selected categories
-//     const filteredPlaces = allPlaces.filter(place =>
-//         selectedFilters.some(filter => (place.types || []).includes(filter))
-//     );
-
-//     // Update the places list and map markers
-//     displayPlaces(filteredPlaces);
-//     addMarkers(filteredPlaces);
-// }
-
-// function clearFilters() {
-//     document.querySelectorAll(".filter-btn").forEach((button) => button.classList.remove("active"));
-//     displayPlaces(allPlaces); // Reset places list
-//     addMarkers(allPlaces);    // Reset markers
-// }
-
-// function toggleFilter(button) {
-//     button.classList.toggle("active");
-// }
-
-// // Add event listeners for filters
-// document.querySelectorAll(".filter-btn").forEach((button) => {
-//     button.addEventListener("click", () => toggleFilter(button));
-// });
-
-// window.applyFilters = applyFilters;
-// window.clearFilters = clearFilters;
-// window.toggleFilter = toggleFilter;

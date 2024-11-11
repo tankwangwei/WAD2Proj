@@ -87,8 +87,6 @@ function initializeTripId() {
     // Use URL tripID if available, otherwise use stored tripID
     currentTripId = urlTripId || storedTripId;
 
-    console.log('Initialized tripID:', currentTripId);
-
     if (!currentTripId) {
         showTripAlert();
         return false;
@@ -107,7 +105,6 @@ function initializeTripId() {
 // Get tripID and location from the URL
 const urlParams = new URLSearchParams(window.location.search);
 const tripID = urlParams.get('tripID');
-console.log('Initial tripID from URL:', tripID, 'Type:', typeof tripID);
 const location = decodeURIComponent(urlParams.get('location'));
 
 // Set the location input field
@@ -160,10 +157,6 @@ function getCurrentTripId() {
     const urlTripId = urlParams.get('tripID');
     const storedTripId = localStorage.getItem("selectedTripId");
 
-    console.log('Trip ID from URL:', urlTripId);
-    console.log('Trip ID from localStorage:', storedTripId);
-    console.log('Using Trip ID:', urlTripId || storedTripId);
-
     return urlTripId || storedTripId;
 }
 
@@ -198,7 +191,6 @@ function displayAttractions(attractions) {
     }
 
     const currentTripId = getCurrentTripId();
-    console.log('Current Trip ID in displayAttractions:', currentTripId);
 
     attractions.forEach(attraction => {
         const attractionCard = document.createElement('div');
@@ -313,8 +305,6 @@ async function fetchAttractionSummary(attractionName, elementId) {
 async function saveActivity(tripID, name, address, lat, lng, imageUrl, iconElement) {
 
     const currentTripId = getCurrentTripId();
-    console.log('Trip ID passed to saveActivity:', tripID);
-    console.log('Current Trip ID from getCurrentTripId:', currentTripId);
 
     if (!currentTripId || currentTripId === "null" || currentTripId === "undefined") {
         checkTripID(currentTripId);
@@ -341,7 +331,6 @@ async function saveActivity(tripID, name, address, lat, lng, imageUrl, iconEleme
             imageUrl: imageUrl,
             savedAt: new Date()
         });
-        console.log("Activity saved with ID:", activityRef.id);
 
         iconElement.querySelector('.plus-icon').style.display = 'none';
         iconElement.querySelector('.checkmark-icon').style.display = 'inline';

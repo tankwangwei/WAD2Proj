@@ -100,8 +100,6 @@ async function loadTrips() {
         const storedTripID = localStorage.getItem("selectedTripId");
         const tripToSelect = urlTripID || storedTripID;
 
-        console.log('TripID to select:', tripToSelect); // Debug log
-
         querySnapshot.forEach((doc) => {
             const tripData = doc.data();
             const option = document.createElement('option');
@@ -113,28 +111,9 @@ async function loadTrips() {
                 option.dataset.country = country;
             }
 
-            // Set this option as selected if it matches the tripID
-            // if (tripToSelect && doc.id === tripToSelect) {
-            //     option.selected = true;
-            //     console.log('Found matching trip, setting as selected'); // Debug log
-            // }
-
             tripSelect.appendChild(option);
         });
 
-        // If we have a trip to select, trigger the change event to load the trip data
-        // if (tripToSelect) {
-        //     console.log('Triggering change event for trip selection'); // Debug log
-        //     currentTripId = tripToSelect;
-        //     tripSelect.dispatchEvent(new Event('change'));
-
-        //     // Load trip data
-        //     await loadTripData(tripToSelect);
-
-        //     // Show UI elements
-        //     expenseCard.style.display = 'block';
-        //     dashboardSection.style.display = 'block';
-        // }
     } catch (error) {
         console.error("Error loading trips:", error);
     }
@@ -237,7 +216,6 @@ function initializeChart() {
             }
         });
 
-        console.log('Chart initialized with improved styling');
     } catch (error) {
         console.error('Error initializing chart:', error);
     }
@@ -246,7 +224,6 @@ function initializeChart() {
 
 // Function to load trip budget and expenses
 async function loadTripData(tripId) {
-    console.log('Loading trip data for ID:', tripId);
     try {
         if (!userUID) {
             const user = auth.currentUser;
@@ -258,7 +235,6 @@ async function loadTripData(tripId) {
 
         // Ensure currency rates are available
         if (!currencyRates || Object.keys(currencyRates).length === 0) {
-            console.log('Currency rates not loaded, initializing with EUR only');
             currencyRates = { "EUR": 1 };
             selectedCurrency = "EUR";
         }
@@ -269,7 +245,6 @@ async function loadTripData(tripId) {
 
         if (tripDoc.exists()) {
             const tripData = tripDoc.data();
-            console.log('Retrieved trip data:', tripData);
 
             totalBudget = tripData.budget || 0;
             document.getElementById('budget').value = totalBudget;
@@ -292,7 +267,6 @@ async function loadTripData(tripId) {
         totalSpending = 0;
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            console.log('Expenses snapshot received:', snapshot.size, 'documents');
 
             // Clear existing expenses
             expenses.length = 0;
@@ -317,9 +291,6 @@ async function loadTripData(tripId) {
 
             // Sort expenses by date (most recent first)
             expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            console.log('Updated expenses array:', expenses);
-            console.log('Total spending:', totalSpending);
 
             // Update all UI elements
             updateDashboard();
@@ -416,16 +387,6 @@ expenseForm.addEventListener('submit', async function (event) {
     const category = document.getElementById('category').value;
     const description = document.getElementById('description').value;
 
-    // Debug logs
-    console.log('Form Data:', {
-        amount,
-        date,
-        category,
-        description
-    });
-    console.log('Valid categories:', Object.values(EXPENSE_CATEGORIES));
-    console.log('Is valid category:', Object.values(EXPENSE_CATEGORIES).includes(category));
-
     // Additional validation
     if (isNaN(amount) || amount <= 0) {
         alert('Please enter a valid amount');
@@ -447,8 +408,6 @@ expenseForm.addEventListener('submit', async function (event) {
             tripId: currentTripId
         };
 
-        console.log('Saving expense with data:', expenseData);
-
         if (isEditMode && currentEditIndex !== null) {
             const expenseId = expenses[currentEditIndex].id;
             await updateDoc(
@@ -463,7 +422,6 @@ expenseForm.addEventListener('submit', async function (event) {
                 collection(db, `users/${userUID}/trips/${currentTripId}/expenses`),
                 expenseData
             );
-            console.log('Expense saved with ID:', docRef.id);
         }
 
         // Reset form without page reload
@@ -596,22 +554,18 @@ function updateExpenseChart(filteredExpenses) {
 
 // Date Range Filtering for Chart
 function getFilteredExpenses() {
-    console.log('Getting filtered expenses. Current expenses:', expenses);
     const selectedRange = dateRange.value;
-    console.log('Selected date range:', selectedRange);
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const filteredExpenses = expenses.filter(expense => {
         if (!expense.date) {
-            console.log('Expense missing date:', expense);
             return false;
         }
 
         const expenseDate = new Date(expense.date);
         if (isNaN(expenseDate.getTime())) {
-            console.log('Invalid date for expense:', expense);
             return false;
         }
 
@@ -641,11 +595,9 @@ function getFilteredExpenses() {
                 shouldInclude = true;
         }
 
-        console.log('Expense:', expense, 'Included:', shouldInclude);
         return shouldInclude;
     });
 
-    console.log('Filtered expenses result:', filteredExpenses);
     return filteredExpenses;
 }
 
@@ -774,12 +726,11 @@ let selectedCurrency = 'EUR'; // Default currency
 async function getCurrencyRates() {
     try {
         const response = await axios.get("http://data.fixer.io/api/latest", {
-            params: { access_key: "45818ae685202a973809c1932d8763e2" }
+            params: { access_key: "430efd260bbac911b95f58030dfa831f" }
         });
 
         if (response.data.success) {
             currencyRates = response.data.rates;
-            console.log("Currency rates fetched successfully");
 
             // Populate currency select dropdown
             const currencySelect = document.getElementById("currency");
@@ -849,7 +800,6 @@ function handleCurrencyError() {
 function convertAmount(amount, currency) {
     // If rates aren't loaded yet or currency is not specified, return original amount
     if (!currencyRates || !currency || !currencyRates[currency]) {
-        console.log('Currency rates not ready, returning original amount:', amount);
         return amount.toFixed(2);
     }
 

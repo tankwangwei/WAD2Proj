@@ -38,7 +38,6 @@ async function createUserDocument(userId, email) {
       createdAt: new Date(),
       // Add any other initial user data you want to store
     });
-    console.log("User document created in Firestore");
   } catch (error) {
     console.error("Error creating user document:", error);
     throw error;

@@ -1233,7 +1233,6 @@
                 // }
 
                 if (location) {
-                    console.log("Location:", location);
                     document.getElementById("weather-location").textContent = location;
                     document.getElementById("attraction-location").textContent = location;
                     fetchWeatherData(location);
@@ -1305,8 +1304,6 @@
                     }
                 });
 
-                console.log("Checking for showBudgetModal flag:", localStorage.getItem("showBudgetModal"));
-
                 if (localStorage.getItem("showBudgetModal") === "true") {
                     const budgetModalElement = document.getElementById("budgetPromptModal");
 
@@ -1374,7 +1371,6 @@
 
                     if (tripDoc.exists()) {
                         const tripData = tripDoc.data();
-                        console.log("Trip data retrieved:", tripData);
 
                         const location = tripData.location;
                         const days = tripData.dates ? tripData.dates.length : 7;
@@ -1494,7 +1490,6 @@
             // Auth state change listener
             onAuthStateChanged(auth, (user) => {
                 if (user) {
-                    console.log("User is signed in:", user.uid);
                     loadTrips(); // Load trips for the authenticated user
                 } else {
                     console.warn("No user signed in, redirecting to login.");
@@ -1765,7 +1760,7 @@
 
             function fetchConversionRate(currencyCode) {
                 const url = "http://data.fixer.io/api/latest";
-                const apiKey = "45818ae685202a973809c1932d8763e2";
+                const apiKey = "430efd260bbac911b95f58030dfa831f";
 
                 // First get fresh values from Firebase
                 const tripId = localStorage.getItem("selectedTripId");
@@ -1814,7 +1809,6 @@
                                 `${remainingBudget.toFixed(2)} ${currencyCode}`;
 
                             // Update conversion rate display
-                            console.log(`1 EUR = ${rate.toFixed(2)} ${currencyCode}`);
                             resultElem.innerText = `1 EUR = ${rate.toFixed(2)} ${currencyCode}`;
 
                         } else {
@@ -1972,7 +1966,6 @@
             window.goLeft = function () {
                 if (currentPage > 0) {
                     currentPage--;
-                    console.log("Navigated left, current page:", currentPage);
                     updateVisibleCards(document.getElementById('attractionsContainer').children.length);
                 }
             }
@@ -1983,7 +1976,6 @@
 
                 if (currentPage < maxPage) {
                     currentPage++;
-                    console.log("Navigated right, current page:", currentPage);
                     updateVisibleCards(totalCards);
                 }
             }
@@ -2111,7 +2103,6 @@
 
             // Function to fetch and set the cover photo as background image
             function fetchCoverPhoto(location) {
-                console.log("Fetching photo for:", location); // Debugging
                 const unsplashUrl = `https://api.unsplash.com/search/photos?query=${location}&client_id=si0ikrNV-cDKP406cBzHlljJmq6GWhlkdAXeho1tzDU`;
 
                 axios.get(unsplashUrl)
@@ -2123,7 +2114,6 @@
                             document.body.style.backgroundSize = "cover";
                             document.body.style.backgroundPosition = "center";
                             document.body.style.backgroundRepeat = "no-repeat";
-                            console.log("Background image set to:", coverPhotoUrl); // Debugging
                         } else {
                             console.error("No photos found for this location.");
                         }

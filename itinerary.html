@@ -533,7 +533,6 @@
         });
 
         function fetchCoverPhoto(location) {
-            console.log("Fetching photo for:", location); // Debugging
             const unsplashUrl = `https://api.unsplash.com/search/photos?query=${location}&client_id=si0ikrNV-cDKP406cBzHlljJmq6GWhlkdAXeho1tzDU`;
 
             axios.get(unsplashUrl)
@@ -546,7 +545,6 @@
                         document.body.style.backgroundPosition = "center";
                         document.body.style.backgroundRepeat = "no-repeat";
                         document.body.style.backgroundAttachment = "fixed";
-                        console.log("Background image set to:", coverPhotoUrl); // Debugging
                     } else {
                         console.error("No photos found for this location.");
                     }
