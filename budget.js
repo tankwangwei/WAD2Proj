@@ -772,53 +772,38 @@ let selectedCurrency = 'EUR'; // Default currency
 // Fetch and populate currency options
 async function getCurrencyRates() {
     try {
-        const response = await axios.get("http://data.fixer.io/api/latest", {
-            params: { access_key: "a7f1d79a2ef9816d80a593fe0340008f" }
+        const response = await axios.get("https://data.fixer.io/api/latest", {
+            params: { access_key: "33fca48c8f4d19573139c26a4c34ab00" }
         });
 
         if (response.data.success) {
             currencyRates = response.data.rates;
             console.log("Currency rates fetched successfully");
 
-            // Populate currency select dropdown
+            // Populate both currency select dropdowns
             const currencySelect = document.getElementById("currency");
-            currencySelect.innerText = ''; // Clear previous options
+            const expenseCurrencySelect = document.getElementById("expenseCurrency");
 
-            // Add EUR as default option
-            const defaultOption = document.createElement("option");
-            defaultOption.value = "EUR";
-            defaultOption.innerText = "EUR";
-            currencySelect.appendChild(defaultOption);
+            // Clear previous options
+            currencySelect.innerHTML = '<option value="">Select Currency</option>';
+            expenseCurrencySelect.innerHTML = '<option value="">Select Currency</option>';
 
-            // Add remaining currencies
+            // Populate dropdowns with currency options
             Object.keys(currencyRates).sort().forEach(key => {
-                if (key !== "EUR") { // Skip EUR as it's already added
-                    const option = document.createElement("option");
-                    option.value = key;
-                    option.innerText = key;
-                    currencySelect.appendChild(option);
-                }
+                const option = document.createElement("option");
+                option.value = key;
+                option.innerText = key;
+                currencySelect.appendChild(option.cloneNode(true));
+                expenseCurrencySelect.appendChild(option.cloneNode(true));
             });
-
-            // Set initial currency
-            selectedCurrency = "EUR";
-            currencySelect.value = "EUR";
-
-            // Update UI with new rates
-            updateDashboard();
-            if (expenses.length > 0) {
-                updateExpenseChart(getFilteredExpenses());
-                updateRecentTransactionsTableInCurrency(selectedCurrency);
-            }
         } else {
             console.error("Failed to fetch currency rates:", response.data.error);
-            handleCurrencyError();
         }
     } catch (error) {
         console.error("Error fetching currency rates:", error);
-        handleCurrencyError();
     }
 }
+
 
 
 function handleCurrencyError() {
@@ -1140,9 +1125,3 @@ const countryToCurrencyMap = {
     "Zambia": "ZMW",
     "Zimbabwe": "ZWL"
 };
-
-
-
-
-
-
