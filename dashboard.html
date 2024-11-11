@@ -1769,9 +1769,7 @@
 
                         // Calculate fresh remaining budget
                         return calculateTotalSpending(tripId).then(spending => {
-                            totalSpending = spending;
-                            remainingBudget = totalBudget - totalSpending;
-                            
+                            totalSpending = spending;                        
 
                             // Now fetch conversion rate with fresh values
                             return axios.get(url, {
@@ -1789,22 +1787,19 @@
                             // Convert from EUR to target currency (SGD in this case)
                             // Since budget is in EUR, multiply by rate to get SGD
                             const convertedTotalBudget = totalBudget * rate;
-                            const convertedRemainingBudget = remainingBudget * rate;
+                            remainingBudget = convertedTotalBudget - totalSpending;
+                            // const convertedRemainingBudget = remainingBudget * rate;
 
                             // Update displays with converted values
                             document.getElementById("totalBudgetDisplay").textContent =
                                 `${convertedTotalBudget.toFixed(2)} ${currencyCode}`;
                             document.getElementById("remainingBudgetDisplay").textContent =
-                                `${convertedRemainingBudget.toFixed(2)} ${currencyCode}`;
+                                `${remainingBudget.toFixed(2)} ${currencyCode}`;
 
                             // Update conversion rate display
                             console.log(`1 EUR = ${rate.toFixed(2)} ${currencyCode}`);
                             resultElem.innerText = `1 EUR = ${rate.toFixed(2)} ${currencyCode}`;
 
-                            // Log values for debugging
-                            console.log('Original Budget (EUR):', totalBudget);
-                            console.log('Conversion Rate:', rate);
-                            console.log('Converted Budget (SGD):', convertedTotalBudget);
                         } else {
                             console.error("Conversion rate not available.");
                         }
