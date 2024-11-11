@@ -107,18 +107,18 @@ async function loadTrips() {
             const option = document.createElement('option');
             option.value = doc.id;
             option.innerText = tripData.name || 'Unnamed Trip';
-            
+
             if (tripData.location) {
                 const country = tripData.location.split(',').pop().trim();
                 option.dataset.country = country;
             }
-            
+
             // Set this option as selected if it matches the tripID
             if (tripToSelect && doc.id === tripToSelect) {
                 option.selected = true;
                 console.log('Found matching trip, setting as selected'); // Debug log
             }
-            
+
             tripSelect.appendChild(option);
         });
 
@@ -127,10 +127,10 @@ async function loadTrips() {
             console.log('Triggering change event for trip selection'); // Debug log
             currentTripId = tripToSelect;
             tripSelect.dispatchEvent(new Event('change'));
-            
+
             // Load trip data
             await loadTripData(tripToSelect);
-            
+
             // Show UI elements
             expenseCard.style.display = 'block';
             dashboardSection.style.display = 'block';
@@ -354,10 +354,8 @@ function updateRecentTransactionsTable() {
         const amountCell = document.createElement('td');
         amountCell.textContent = `$${expense.amount.toFixed(2)}`;
 
-        // Action buttons (Edit and Delete) with spacing
         const actionCell = document.createElement('td');
-        actionCell.style.display = 'flex';  // Use flex display for spacing
-        actionCell.style.gap = '10px';      // Add 10px space between buttons
+        actionCell.className = 'action-cell'; // Ensure the class is added
 
         const editBtn = document.createElement('button');
         editBtn.textContent = 'Edit';
@@ -367,6 +365,7 @@ function updateRecentTransactionsTable() {
         deleteBtn.textContent = 'Delete';
         deleteBtn.classList.add('delete-btn');
 
+        // Append buttons to action cell
         actionCell.appendChild(editBtn);
         actionCell.appendChild(deleteBtn);
 
@@ -677,20 +676,20 @@ document.addEventListener('DOMContentLoaded', function () {
         if (user) {
             userUID = user.uid;
             await loadTrips();  // Wait for trips to load
-            
+
             // Get URL parameters for initial load
             const { tripID } = getUrlParams();
-            
+
             if (tripID) {
                 // Set the dropdown value to the tripID
                 const tripSelect = document.getElementById('trip');
                 tripSelect.value = tripID;
-                
+
                 // Initialize chart and load trip data
                 currentTripId = tripID;
                 initializeChart();
                 await loadTripData(tripID);
-                
+
                 // Show UI elements
                 expenseCard.style.display = 'block';
                 dashboardSection.style.display = 'block';
@@ -700,10 +699,10 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('trip').addEventListener('change', async function (e) {
                 const selectedTripId = e.target.value;
                 const selectedOption = e.target.options[e.target.selectedIndex];
-                
+
                 if (selectedTripId) {
                     currentTripId = selectedTripId;
-                    
+
                     // Get trip data and update everything
                     try {
                         const tripRef = doc(db, `users/${userUID}/trips`, selectedTripId);
@@ -711,7 +710,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         if (tripDoc.exists()) {
                             const tripData = tripDoc.data();
-                            
+
                             // Set budget value
                             totalBudget = Number(tripData.budget) || 0;
                             document.getElementById('budget').value = totalBudget;
@@ -742,7 +741,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                             // Update all UI elements
                             updateDashboard();
-                            
+
                         } else {
                             console.log("No trip found with ID:", selectedTripId);
                         }

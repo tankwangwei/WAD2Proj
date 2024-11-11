@@ -289,6 +289,140 @@
             .navbar-collapse {
                 background-color: transparent !important;
             }
+
+            .card {
+                width: 100%;
+            }
+
+            .form-container {
+                flex-direction: column;
+            }
+
+            .navbar-collapse {
+                text-align: center;
+            }
+
+            .navbar-nav .nav-link {
+                display: block;
+                width: 100%;
+                padding: 10px;
+            }
+        }
+
+        .overview {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            flex-wrap: wrap;
+            /* Allow items to wrap on small screens */
+        }
+
+        .overview div {
+            flex: 1;
+            padding: 10px;
+            min-width: 100px;
+            /* Ensure elements don't shrink too small */
+        }
+
+        @media (max-width: 600px) {
+            .overview div h2 {
+                font-size: 1.5rem;
+                /* Adjust font size for smaller screens */
+            }
+
+            .overview div p {
+                font-size: 1rem;
+            }
+        }
+
+        .transaction-history th,
+        .transaction-history td {
+            text-align: center;
+            vertical-align: middle;
+            /* Center text vertically */
+        }
+
+        .transaction-history .actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                padding: 10px;
+                margin: 10px 0;
+            }
+        }
+
+        .overview div {
+            min-height: 100px;
+        }
+
+        @media (max-width: 600px) {
+
+            .edit-btn,
+            .delete-btn {
+                font-size: 12px;
+                min-width: 60px;
+                padding: 6px 10px;
+            }
+        }
+
+        td.action-cell {
+            min-width: 100px;
+            /* Adjust as needed */
+        }
+
+        /* Action Cell and Buttons */
+        .action-cell {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Style for Edit and Delete buttons */
+        .edit-btn,
+        .delete-btn {
+            padding: 8px 12px;
+            font-size: 14px;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            min-width: 70px;
+            /* Set minimum width to prevent too-small buttons */
+            max-width: 100px;
+            /* Set maximum width to avoid overflow */
+            box-sizing: border-box;
+        }
+
+        .edit-btn {
+            background-color: #3498db;
+            /* Blue */
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            /* Red */
+        }
+
+        @media (max-width: 400px) {
+            .action-cell {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 5px;
+            }
+
+            .edit-btn,
+            .delete-btn {
+                width: 100%;
+                box-sizing: border-box;
+                padding: 8px;
+                font-size: 14px;
+            }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
