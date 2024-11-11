@@ -46,6 +46,8 @@
 
         .row {
             margin-bottom: -15px;
+            margin-left: 0;
+            margin-right: 0;
         }
 
         .container-fluid {
@@ -586,18 +588,20 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            z-index: 2;
-            width: 40px;
-            height: 40px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            display: flex;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: flex !important;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
             border: none;
-            transition: background 0.3s ease;
+            color: #333;
+            z-index: 10;
+            font-size: 20px;
+            transition: background-color 0.3s ease;
         }
 
         .carousel-button:hover {
@@ -1018,7 +1022,7 @@
 </nav>
 
 <body>
-    <div class="container-fluid mt-5">
+    <div class="container-fluid px-3 mt-5">
         <div class="trip-details text-center">
             <h1 id="tripCountryDisplay" class="trip-country text-white"></h1>
             <h6 class="trip-date-range text-white">
@@ -1027,10 +1031,10 @@
             </h6>
         </div>
 
-        <div class="trip-header d-flex align-items-center justify-content-center mb-4">
+        <div class="trip-header d-flex align-items-center justify-content-center mb-2">
             <h1 id="tripNameDisplay" class="trip-title" style="display: none;"></h1>
 
-            <div class="ms-auto d-flex align-items-center" style="position: absolute; right: 10px; margin-top: 17px;">
+            <div class="ms-auto d-flex align-items-center" style="position: relative; right: 10px; margin-top: 5px; margin-bottom: 5px;">
                 <select id="tripDropdown" class="form-select me-2">
                     <option value="">Select a trip</option>
                 </select>
@@ -1041,8 +1045,8 @@
         </div>
     </div>
 
-    <div class="container-fluid p-3">
-        <div class="row d-flex align-items-stretch">
+    <div class="container-fluid px-3 mt-1">
+        <div class="row d-flex align-items-stretch mt-3">
             <!-- Weather Section -->
             <div class="col-lg-4 col-md-4">
                 <div onclick="navigateToWeatherPage()" id="weather-section" class="p-3 rounded-section standard-height">
@@ -1095,8 +1099,8 @@
         </div>
     </div>
 
-    <div class="container-fluid">
-        <div class="row d-flex align-items-stretch p-3">
+    <div class="container-fluid p-3">
+        <div class="row d-flex align-items-stretch">
             <!-- Destination Section -->
             <div class="col-lg-5 col-md-5">
                 <div id="destination-section" class="rounded-section standard-height">
