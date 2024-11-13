@@ -726,7 +726,7 @@ let selectedCurrency = 'EUR'; // Default currency
 async function getCurrencyRates() {
     try {
         const response = await axios.get("http://data.fixer.io/api/latest", {
-            params: { access_key: "430efd260bbac911b95f58030dfa831f" }
+            params: { access_key: "7c10ad0c56e444217de5b23a733277bf" }
         });
 
         if (response.data.success) {

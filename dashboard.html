@@ -1760,7 +1760,7 @@
 
             function fetchConversionRate(currencyCode) {
                 const url = "http://data.fixer.io/api/latest";
-                const apiKey = "430efd260bbac911b95f58030dfa831f";
+                const apiKey = "7c10ad0c56e444217de5b23a733277bf";
 
                 // First get fresh values from Firebase
                 const tripId = localStorage.getItem("selectedTripId");
@@ -1828,7 +1828,7 @@
 
             function fetchWeatherData(location) {
                 const geoUrl = "http://api.openweathermap.org/geo/1.0/direct";
-                const apiKey = "4e1a69304c74566a0ebcf18acbafbc18";
+                const apiKey = "a4ab09f5d4573bbd4b5318a5292eae23";
 
                 axios.get(geoUrl, { params: { q: location, appid: apiKey } })
                     .then(response => {
@@ -1846,7 +1846,7 @@
 
             function fetchAttractionsForLocation(location) {
                 const geoUrl = "http://api.openweathermap.org/geo/1.0/direct";
-                const apiKey = "4e1a69304c74566a0ebcf18acbafbc18";
+                const apiKey = "a4ab09f5d4573bbd4b5318a5292eae23";
 
                 axios.get(geoUrl, { params: { q: location, appid: apiKey } })
                     .then(response => {
@@ -2067,7 +2067,7 @@
             });
             function getWeatherForecast(lat, lon) {
                 const weatherUrl = "https://api.openweathermap.org/data/3.0/onecall";
-                const apiKey = "4e1a69304c74566a0ebcf18acbafbc18";
+                const apiKey = "a4ab09f5d4573bbd4b5318a5292eae23";
 
                 axios.get(weatherUrl, {
                     params: { lat, lon, appid: apiKey, units: "metric", exclude: "minutely,hourly" }
