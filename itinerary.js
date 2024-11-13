@@ -91,7 +91,7 @@ async function initItinerary() {
 // Fetch weather data
 async function fetchWeather(lat, lon) {
     const weatherUrl = "https://api.openweathermap.org/data/3.0/onecall";
-    const apiKey = "4e1a69304c74566a0ebcf18acbafbc18";
+    const apiKey = "e96244c2bbb9cc797e757eb8c68887a7";
 
     if (!lat || !lon) {
         console.error("Latitude or Longitude is missing. Cannot fetch weather data.");
